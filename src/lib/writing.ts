@@ -38,12 +38,3 @@ export function formatDate(date: string) {
 		timeZone: 'UTC',
 	})
 }
-
-// "Sep 29": the year lives in the group heading of the list.
-export function formatShortDate(date: string) {
-	return new Date(date).toLocaleDateString('en-US', {
-		month: 'short',
-		day: 'numeric',
-		timeZone: 'UTC',
-	})
-}

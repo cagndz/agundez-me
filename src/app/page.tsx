@@ -7,9 +7,10 @@ export default async function Home() {
 	return (
 		<div className='orchestration'>
 			<h1 className='font-medium tracking-tight'>Carlos Agúndez</h1>
-			<p className='text-muted'>Design engineer.</p>
+			<p className='text-muted'>Design engineer</p>
 			<p className='mt-8'>
-				I’m learning to build interfaces that feel right.{' '}
+				Interested in design, interaction and the small details that make an
+				interface feel right.{' '}
 				<a
 					href='mailto:carlos@agundez.me'
 					className='underline decoration-border underline-offset-4 transition-colors duration-150 ease-out-strong hover:decoration-accent'
