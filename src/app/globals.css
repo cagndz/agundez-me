@@ -71,6 +71,11 @@ h3 {
 	border-radius: 2px;
 }
 
+[data-theme='lab'] :focus-visible {
+	outline-color: var(--foreground);
+	outline-offset: -2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.orchestration > * {
 		animation: none;
