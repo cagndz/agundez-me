@@ -9,6 +9,13 @@
 	--accent: #ff6000;
 }
 
+[data-theme='lab'] {
+	--background: #ececea;
+	--foreground: #111111;
+	--muted: #5f5f5d;
+	--border: #cfcfcc;
+}
+
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
