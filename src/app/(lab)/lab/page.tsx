@@ -1,4 +1,5 @@
 import LabGrid from './lab-grid'
+import { items } from '@/lab/items'
 
 export default function LabPage() {
 	return (
@@ -14,7 +15,7 @@ export default function LabPage() {
 				</span>
 			</div>
 			<div className='mt-8'>
-				<LabGrid />
+				<LabGrid items={items} />
 			</div>
 		</>
 	)
