@@ -8,9 +8,15 @@ export default function LabGrid({ items }: { items: LabItem[] }) {
 				<Link
 					key={item.id}
 					href={`/lab/${item.slug}`}
-					className='flex aspect-square flex-col justify-between border-r border-b border-border p-4 font-mono text-sm uppercase'
+					className='group flex aspect-square flex-col justify-between border-r border-b border-border p-4 font-mono text-sm uppercase transition-colors duration-100 ease-out-strong active:bg-foreground/5'
 				>
-					<span>{item.id}</span>
+					<span className='flex items-center gap-2'>
+						<span>{item.id}</span>
+						<span
+							className='size-2 rounded-full bg-accent opacity-0 transition-[opacity,translate] duration-150 ease-out-strong group-hover:opacity-100 group-focus-visible:opacity-100 motion-safe:-translate-x-2 motion-safe:group-hover:translate-x-0 motion-safe:group-focus-visible:translate-x-0 group-hover:duration-200 group-focus-visible:duration-200'
+							aria-hidden='true'
+						/>
+					</span>
 					<span className='text-muted'>{item.title}</span>
 				</Link>
 			))}
