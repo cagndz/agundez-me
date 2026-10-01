@@ -1,7 +1,11 @@
 import LabGrid from './lab-grid'
+import LabModal from './lab-modal'
 import { items } from '@/lab/items'
 
-export default function LabPage() {
+export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
+	const { c } = await searchParams
+	const selected = items.find((item) => item.slug === c)
+
 	return (
 		<>
 			<h1 className='font-mono text-sm uppercase tracking-widest'>Lab / 000</h1>
@@ -17,6 +21,7 @@ export default function LabPage() {
 			<div className='mt-8'>
 				<LabGrid items={items} />
 			</div>
+			{selected && <LabModal title={selected.title}>{selected.slug}</LabModal>}
 		</>
 	)
 }

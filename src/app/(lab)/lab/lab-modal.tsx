@@ -15,14 +15,18 @@ export default function LabModal({
 	return (
 		<Dialog.Root open={true} onOpenChange={(open) => !open && router.back()}>
 			<Dialog.Portal>
-				<Dialog.Backdrop className='fixed inset-0 bg-foreground/20' />
+				<Dialog.Backdrop className='fixed inset-0 bg-foreground/10 backdrop-blur-sm' />
 				<Dialog.Popup
 					data-theme='lab'
-					className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-4 text-foreground'
+					className='fixed inset-3 md:inset-12 m-auto max-w-5xl max-h-[calc(100dvh-1.5rem)] md:max-h-[calc(100dvh-6rem)] h-144 rounded-xs border border-border bg-background p-4 text-foreground overflow-y-auto flex flex-col'
 				>
-					<Dialog.Title>{title}</Dialog.Title>
-					<Dialog.Close>Close</Dialog.Close>
-					{children}
+					<div className='flex items-center justify-between'>
+						<Dialog.Title>{title}</Dialog.Title>
+						<Dialog.Close className='text-sm text-muted hover:text-foreground'>
+							Close
+						</Dialog.Close>
+					</div>
+					<div className='mt-4 flex-1 min-h-0 overflow-y-auto'>{children}</div>
 				</Dialog.Popup>
 			</Dialog.Portal>
 		</Dialog.Root>
