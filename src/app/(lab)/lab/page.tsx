@@ -21,7 +21,7 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 			<div className='mt-8'>
 				<LabGrid items={items} />
 			</div>
-			{selected && <LabModal title={selected.title}>{selected.slug}</LabModal>}
+			<LabModal item={selected} />
 		</>
 	)
 }
