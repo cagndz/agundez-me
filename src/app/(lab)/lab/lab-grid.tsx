@@ -8,8 +8,9 @@ export default function LabGrid({ items }: { items: LabItem[] }) {
 				<Link
 					key={item.id}
 					href={`/lab?c=${item.slug}`}
+					data-lab-cell={item.slug}
 					scroll={false}
-					className='group flex aspect-square flex-col justify-between border-r border-b border-border p-4 font-mono text-sm uppercase transition-colors duration-100 ease-out-strong active:bg-foreground/5'
+					className='group flex aspect-square flex-col justify-between border-r border-b border-border p-4 font-mono text-sm uppercase transition-colors duration-100 ease-out-strong active:bg-foreground/1'
 				>
 					<span className='flex items-center gap-2'>
 						<span>{item.id}</span>
