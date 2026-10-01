@@ -16,6 +16,17 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 
 	const shown = item ?? lastItem
 
+	// ¿Se abrió el modal navegando dentro de la app (hay historial nuestro)?
+	// Si la página cargó ya con ?c=, no hay transición cerrado → abierto.
+	const open = item !== undefined
+	const [prevOpen, setPrevOpen] = useState(open)
+	const [openedInApp, setOpenedInApp] = useState(false)
+
+	if (open !== prevOpen) {
+		setPrevOpen(open)
+		setOpenedInApp(open)
+	}
+
 	const slug = item?.slug
 	const popupRef = useRef<HTMLDivElement | null>(null)
 
@@ -37,8 +48,12 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 
 	return (
 		<Dialog.Root
-			open={item !== undefined}
-			onOpenChange={(open) => !open && router.back()}
+			open={open}
+			onOpenChange={(nextOpen) => {
+				if (nextOpen) return
+				if (openedInApp) router.back()
+				else router.replace('/lab', { scroll: false })
+			}}
 		>
 			<Dialog.Portal>
 				<Dialog.Backdrop className='fixed inset-0 bg-foreground/10 backdrop-blur-sm transition-opacity duration-300 ease-out-quart data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-250' />
