@@ -5,6 +5,7 @@ import { Dialog } from '@base-ui/react/dialog'
 import type { LabItem } from '@/lab/items'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { applyOrigin, applyOriginWithoutTransition } from '@/lab/origin'
+import { demos } from '@/lab/registry'
 
 export default function LabModal({ item }: { item: LabItem | undefined }) {
 	const router = useRouter()
@@ -15,6 +16,7 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 	}
 
 	const shown = item ?? lastItem
+	const Demo = shown ? demos[shown.slug] : undefined
 
 	// ¿Se abrió el modal navegando dentro de la app (hay historial nuestro)?
 	// Si la página cargó ya con ?c=, no hay transición cerrado → abierto.
@@ -90,7 +92,15 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 							</svg>
 						</Dialog.Close>
 					</div>
-					<div className='mt-4 flex-1 min-h-0 overflow-y-auto' />
+					<div className='mt-4 flex-1 flex items-center justify-center min-h-0 overflow-y-auto'>
+						{Demo ? (
+							<Demo />
+						) : (
+							<span className='uppercase tracking-widest text-muted font-mono text-sm'>
+								No demo yet
+							</span>
+						)}
+					</div>
 				</Dialog.Popup>
 			</Dialog.Portal>
 		</Dialog.Root>
