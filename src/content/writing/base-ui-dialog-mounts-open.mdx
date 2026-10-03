@@ -1,0 +1,75 @@
+export const meta = {
+	title: "Why my Base UI dialog wasn't animating",
+	date: '2026-10-02',
+	summary:
+		'A Base UI dialog that mounts already open skips its enter animation. Why it happens and how I fixed it.',
+}
+
+Tested with Base UI 1.8.0, October 2026.
+
+The [lab](/lab) is the part of this site where I keep small component experiments. Click a cell and a modal grows out of it. Close it and it shrinks back into the same cell.
+
+The first version didn't animate at all. It just appeared.
+
+## The setup
+
+The modal is a Base UI `Dialog`. Base UI marks the popup with `data-starting-style` when it opens and `data-ending-style` when it closes, and you write the transitions in CSS. Mine looked right: opacity and scale, with an ease-out curve.
+
+Nothing moved. The classes were fine, and the popup still showed up instantly.
+
+## What was happening
+
+The lab keeps the clicked cell in the URL (`?c=whatever-component`). The page reads it and passes the matching component to the modal, or `undefined` when no cell is selected. I rendered the dialog only when there was one:
+
+```tsx
+function LabModal({ selectedComponent }) {
+	return (
+		<>
+			{selectedComponent && (
+				<Dialog.Root open>
+					<Dialog.Popup>…</Dialog.Popup>
+				</Dialog.Root>
+			)}
+		</>
+	)
+}
+```
+
+When `selectedComponent` appears, the dialog is created with `open` already `true`. It was never closed, so it never goes from closed to open, and `data-starting-style` is never applied. There is nothing to transition from.
+
+In Base UI's source this is a flag called `animateInitialOpen` (in `internals/useTransitionStatus.js`). It's off by default, and as far as I can tell `Dialog` doesn't expose it in 1.8.0. I couldn't find any of this in the docs, so I'm not sure it's meant to be a rule. Treat it as how it behaves today.
+
+Closing fails for the same reason, seen from the other side. When `selectedComponent` goes away, React removes the dialog in that same render. It never gets to see `open` become `false`, so there is no `data-ending-style` and no time to play an exit.
+
+You can try both below. Slow motion is on so you can see what happens.
+
+<ModalDemo />
+
+## The fix
+
+Keep the dialog always mounted and drive it with `open`:
+
+```tsx
+<Dialog.Root open={selectedComponent !== undefined}>
+```
+
+Now `open` really does change from `false` to `true`, and Base UI can run both transitions.
+
+One more problem. When the modal closes, `selectedComponent` becomes `undefined`, and the content disappears while the popup is still fading out. So I keep the last selected component around and render from that:
+
+```tsx
+const [lastComponent, setLastComponent] = useState(selectedComponent)
+
+if (
+	selectedComponent &&
+	selectedComponent.slug !== lastComponent?.slug
+) {
+	setLastComponent(selectedComponent)
+}
+
+const shownComponent = selectedComponent ?? lastComponent
+```
+
+That `setLastComponent` during render looks wrong, but it is a documented React pattern: [storing information from previous renders](https://react.dev/reference/react/useState#storing-information-from-previous-renders). The `if` is what keeps it from looping. I compare by `slug` and not by object, so it only updates when the selected component really changes.
+
+`open` still depends on the real `selectedComponent`, and only the content depends on `shownComponent`.
