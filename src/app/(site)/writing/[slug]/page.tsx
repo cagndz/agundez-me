@@ -27,12 +27,17 @@ export default async function Post({ params }: Props) {
 					href='/'
 					className='group inline-flex items-center gap-1.5 whitespace-nowrap text-muted transition-colors duration-150 ease-out-strong hover:text-foreground lg:sticky lg:top-24'
 				>
-					<span
-						aria-hidden
-						className='transition-transform duration-150 ease-out-strong motion-safe:group-hover:-translate-x-0.5'
+					<svg
+						aria-hidden='true'
+						viewBox='0 0 16 16'
+						className='size-3.5 transition-transform duration-150 ease-out-strong motion-safe:group-hover:-translate-x-0.5'
+						fill='none'
+						stroke='currentColor'
+						strokeWidth='1.5'
+						strokeLinecap='square'
 					>
-						←
-					</span>
+						<path d='M14 8 H3 M7 4 L3 8 L7 12' />
+					</svg>
 					Home
 				</Link>
 			</div>

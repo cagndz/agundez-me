@@ -20,9 +20,12 @@ export function PostList({ posts }: { posts: Item[] }) {
 					<li key={slug}>
 						<Link
 							href={`/writing/${slug}`}
-							className='block py-3 transition-opacity duration-150 ease-out-strong group-hover/list:opacity-40 hover:opacity-100!'
+							className='flex gap-4 py-3 transition-opacity duration-150 ease-out-strong group-hover/list:opacity-40 hover:opacity-100!'
 						>
-							{meta.title}
+							<span className='w-10 shrink-0 text-muted tabular-nums'>
+								{meta.date.slice(0, 4)}
+							</span>
+							<span>{meta.title}</span>
 						</Link>
 					</li>
 				))}
