@@ -1,6 +1,7 @@
-import { readdir } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import type { ComponentType } from 'react'
+import { slugify } from './slugify'
 
 export type PostMeta = { title: string; date: string; summary: string }
 
@@ -37,4 +38,28 @@ export function formatDate(date: string) {
 		day: 'numeric',
 		timeZone: 'UTC',
 	})
+}
+
+export type Heading = { id: string; text: string }
+
+// Reads the `## ` lines of the post source, skipping fenced code blocks.
+export async function getHeadings(slug: string): Promise<Heading[]> {
+	const source = await readFile(path.join(dir, `${slug}.mdx`), 'utf8')
+	const headings: Heading[] = []
+	let inFence = false
+	for (const line of source.split('\n')) {
+		if (line.trimStart().startsWith('```')) inFence = !inFence
+		if (inFence) continue
+		const match = /^## (.+)$/.exec(line)
+		if (match) {
+			// Plain text, as the rendered heading would give it: no code ticks,
+			// emphasis marks or link syntax.
+			const text = match[1]
+				.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+				.replace(/[`*_]/g, '')
+				.trim()
+			headings.push({ id: slugify(text), text })
+		}
+	}
+	return headings
 }

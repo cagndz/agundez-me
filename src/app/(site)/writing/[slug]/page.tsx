@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { formatDate, getPost, getSlugs } from '@/lib/writing'
+import { PostToc } from '@/components/post-toc'
+import { formatDate, getHeadings, getPost, getSlugs } from '@/lib/writing'
 
 export const dynamicParams = false
 
@@ -19,27 +20,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Post({ params }: Props) {
 	const { slug } = await params
 	const { default: Content, meta } = await getPost(slug)
+	const headings = await getHeadings(slug)
 
 	return (
 		<>
-			<div className='lg:absolute lg:inset-y-0 lg:right-full lg:mr-12 lg:w-max'>
-				<Link
-					href='/'
-					className='group inline-flex items-center gap-1.5 whitespace-nowrap text-muted transition-colors duration-150 ease-out-strong hover:text-foreground lg:sticky lg:top-24'
-				>
-					<svg
-						aria-hidden='true'
-						viewBox='0 0 16 16'
-						className='size-3.5 transition-transform duration-150 ease-out-strong motion-safe:group-hover:-translate-x-0.5'
-						fill='none'
-						stroke='currentColor'
-						strokeWidth='1.5'
-						strokeLinecap='square'
+			<div className='lg:fixed lg:top-24 lg:left-8'>
+				<div className='flex flex-col gap-10'>
+					<Link
+						href='/'
+						className='group inline-flex items-center gap-1.5 self-start whitespace-nowrap text-muted transition-colors duration-150 ease-out-strong hover:text-foreground'
 					>
-						<path d='M14 8 H3 M7 4 L3 8 L7 12' />
-					</svg>
-					Home
-				</Link>
+						<svg
+							aria-hidden='true'
+							viewBox='0 0 16 16'
+							className='size-3.5 transition-transform duration-150 ease-out-strong motion-safe:group-hover:-translate-x-0.5'
+							fill='none'
+							stroke='currentColor'
+							strokeWidth='1.5'
+							strokeLinecap='square'
+						>
+							<path d='M14 8 H3 M7 4 L3 8 L7 12' />
+						</svg>
+						Home
+					</Link>
+					{headings.length >= 3 && <PostToc headings={headings} />}
+				</div>
 			</div>
 			<header className='mt-10 lg:mt-0'>
 				<h1 className='font-medium tracking-tight'>{meta.title}</h1>

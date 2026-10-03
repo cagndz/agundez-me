@@ -1,10 +1,17 @@
 import type { MDXComponents } from "mdx/types";
 import { ModalDemo } from "@/components/modal-demo";
+import { slugify, textOf } from "@/lib/slugify";
 
 const components: MDXComponents = {
   ModalDemo,
-  h2: (props) => (
-    <h2 className="mt-12 mb-3 font-medium tracking-tight" {...props} />
+  h2: ({ children, ...props }) => (
+    <h2
+      id={slugify(textOf(children))}
+      className="mt-12 mb-3 scroll-mt-24 font-medium tracking-tight"
+      {...props}
+    >
+      {children}
+    </h2>
   ),
   p: (props) => <p className="mt-5 leading-7" {...props} />,
   a: ({ href, ...props }) => {
