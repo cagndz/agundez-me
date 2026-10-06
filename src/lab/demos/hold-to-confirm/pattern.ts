@@ -59,12 +59,12 @@ function createRandom(seed: number) {
 }
 
 // For every dot, when it lights up along the hold: 0 (first) to 1 (last).
-export function buildOrder() {
-	const random = createRandom(SEED)
+export function buildOrder(noise = NOISE, seed = SEED) {
+	const random = createRandom(seed)
 	const scored = Array.from({ length: TOTAL }, (_, i) => {
 		const column = Math.floor(i / ROWS)
 		const bias = column / (COLS - 1)
-		return { i, score: (1 - NOISE) * bias + NOISE * random() }
+		return { i, score: (1 - noise) * bias + noise * random() }
 	})
 	scored.sort((a, b) => a.score - b.score)
 	const order = new Array<number>(TOTAL)
@@ -75,3 +75,6 @@ export function buildOrder() {
 }
 
 export const ORDER = buildOrder()
+
+// When each dot falls at the end: pure random (noise = 1), different seed from the fill.
+export const FALL_ORDER = buildOrder(1, 3)
