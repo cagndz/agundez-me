@@ -176,43 +176,53 @@ export default function HoldToConfirm() {
 	const ink = status === 'confirmed' ? INK_CONFIRMED : INK_IDLE
 
 	return (
-		<motion.button
-			type='button'
-			aria-label={status === 'confirmed' ? 'Confirmed' : 'Hold to confirm'}
-			onTapStart={() => start()}
-			onTap={() => release()}
-			onTapCancel={() => release()}
-			whileTap={
-				status === 'confirmed'
-					? undefined
-					: {
-							scale: 0.97,
-							transition: { duration: PRESS_DURATION, ease: EASE_OUT },
-						}
-			}
-			transition={{ duration: RELEASE_DURATION, ease: EASE_OUT }}
-			style={{ opacity: buttonOpacity }}
-			className='bg-background rounded-xs border border-border p-0.75'
-		>
-			<motion.div
-				aria-hidden
-				className='grid grid-flow-col overflow-hidden'
-				style={{
-					gridTemplateRows: `repeat(${ROWS}, ${CELL}px)`,
-					gridTemplateColumns: `repeat(${COLS}, ${CELL}px)`,
-					gap: GAP,
-				}}
+		<>
+			<motion.button
+				type='button'
+				aria-label='Hold to confirm'
+				aria-disabled={status === 'confirmed'}
+				// Long-press on touch devices opens the context menu: block it
+				onContextMenu={(event) => event.preventDefault()}
+				onTapStart={() => start()}
+				onTap={() => release()}
+				onTapCancel={() => release()}
+				whileTap={
+					// No scale while confirmed (nothing to press) or with reduced motion
+					status === 'confirmed' || reducedMotion
+						? undefined
+						: {
+								scale: 0.97,
+								transition: { duration: PRESS_DURATION, ease: EASE_OUT },
+							}
+				}
+				transition={{ duration: RELEASE_DURATION, ease: EASE_OUT }}
+				style={{ opacity: buttonOpacity }}
+				className='bg-background rounded-xs border border-border p-0.75 touch-none select-none [-webkit-touch-callout:none] [-webkit-tap-highlight-color:transparent]'
 			>
-				{Array.from({ length: TOTAL }, (_, i) => (
-					<Cell
-						key={i}
-						index={i}
-						progress={progress}
-						fall={fall}
-						ink={ink[i]}
-					/>
-				))}
-			</motion.div>
-		</motion.button>
+				<motion.div
+					aria-hidden
+					className='grid grid-flow-col overflow-hidden'
+					style={{
+						gridTemplateRows: `repeat(${ROWS}, ${CELL}px)`,
+						gridTemplateColumns: `repeat(${COLS}, ${CELL}px)`,
+						gap: GAP,
+					}}
+				>
+					{Array.from({ length: TOTAL }, (_, i) => (
+						<Cell
+							key={i}
+							index={i}
+							progress={progress}
+							fall={fall}
+							ink={ink[i]}
+						/>
+					))}
+				</motion.div>
+			</motion.button>
+			{/* Screen readers: announces the result. The button's own label never changes. */}
+			<span role='status' className='sr-only'>
+				{status === 'confirmed' ? 'Confirmed' : ''}
+			</span>
+		</>
 	)
 }
