@@ -6,7 +6,6 @@ import type { LabItem } from '@/lab/items'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { applyOrigin, applyOriginWithoutTransition } from '@/lab/origin'
 import { demos } from '@/lab/registry'
-import Link from 'next/link'
 
 export default function LabModal({ item }: { item: LabItem | undefined }) {
 	const router = useRouter()
@@ -102,26 +101,6 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 							</span>
 						)}
 					</div>
-					{shown && (
-						<Link
-							href={`/lab/${shown.slug}`}
-							aria-label={`View details of ${shown.title}`}
-							className='group text-xs font-mono uppercase tracking-widest text-muted hover:text-foreground transition-[color,scale] duration-150 ease-out-quart self-end flex items-center gap-1 px-2 py-1 -mr-2 -mb-1 active:scale-98'
-						>
-							Details
-							<svg
-								aria-hidden='true'
-								viewBox='0 0 16 16'
-								className='size-3 transition-transform duration-150 ease-out-quart group-hover:translate-x-0.5 group-focus-visible:translate-x-0.5'
-								fill='none'
-								stroke='currentColor'
-								strokeWidth='1.5'
-								strokeLinecap='square'
-							>
-								<path d='M2 8 H13 M9 4 L13 8 L9 12' />
-							</svg>
-						</Link>
-					)}
 				</Dialog.Popup>
 			</Dialog.Portal>
 		</Dialog.Root>
