@@ -6,6 +6,7 @@ import type { LabItem } from '@/lab/items'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { applyOrigin, applyOriginWithoutTransition } from '@/lab/origin'
 import { demos } from '@/lab/registry'
+import './lab-modal.css'
 
 export default function LabModal({ item }: { item: LabItem | undefined }) {
 	const router = useRouter()
@@ -58,15 +59,18 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 			}}
 		>
 			<Dialog.Portal>
-				<Dialog.Backdrop className='fixed inset-0 bg-foreground/10 backdrop-blur-sm transition-opacity duration-300 ease-out-quart data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-250' />
+				<Dialog.Backdrop className='fixed inset-0 bg-foreground/10 backdrop-blur-sm transition-opacity duration-320 ease-out-strong data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-220' />
 				<Dialog.Popup
 					ref={setPopup}
 					data-theme='lab'
 					tabIndex={-1}
 					initialFocus={popupRef}
-					className='focus-visible:outline-none! fixed inset-0 m-auto w-[min(64rem,calc(100vw-3rem))] h-[min(36rem,calc(100dvh-3rem))] flex flex-col md:flex-row rounded-xs border border-border bg-background text-foreground transition-[opacity,scale,translate] duration-350 ease-out-quart data-starting-style:opacity-0 data-ending-style:opacity-0 motion-safe:data-starting-style:translate-x-(--origin-x) motion-safe:data-starting-style:translate-y-(--origin-y) motion-safe:data-starting-style:scale-(--origin-s) motion-safe:data-ending-style:translate-x-(--origin-x) motion-safe:data-ending-style:translate-y-(--origin-y) motion-safe:data-ending-style:scale-(--origin-s) data-ending-style:duration-290 data-ending-style:ease-out-cubic'
+					className='lab-popup focus-visible:outline-none! fixed inset-0 m-auto flex h-fit w-fit flex-col gap-3 text-foreground md:flex-row'
 				>
-					<div className='flex min-h-0 flex-1 items-center justify-center p-4'>
+					<div
+						data-lab-stage
+						className='lab-stage flex size-(--stage) items-center justify-center rounded-xs border border-border bg-background p-4'
+					>
 						{Demo ? (
 							<Demo />
 						) : (
@@ -75,7 +79,7 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 							</span>
 						)}
 					</div>
-					<aside className='flex shrink-0 flex-col gap-6 border-t border-border p-4 md:w-72 md:border-t-0 md:border-l'>
+					<aside className='lab-aside flex w-(--stage) flex-col gap-6 overflow-y-auto rounded-xs border border-border bg-background p-4 max-md:max-h-[calc(100dvh-3rem-var(--stage)-0.75rem)] md:w-72'>
 						<div className='flex items-start justify-between'>
 							<div className='flex flex-col gap-1'>
 								<span className='font-mono text-xs uppercase tracking-widest text-muted tabular-nums'>

@@ -1,0 +1,129 @@
+/*
+ * Movimiento de la modal del lab.
+ *
+ * Estructura (ver lab-modal.tsx):
+ *   .lab-popup   contenedor invisible, solo existe para agrupar y para que Base UI sepa cuándo desmontar
+ *   ├─ .lab-stage   la tarjeta con el demo: es lo único que nace de la celda y vuelve a ella
+ *   └─ .lab-aside   la tarjeta con la ficha: aparece aparte, no viaja
+ *
+ * Variables que escribe origin.ts en el popup (se heredan a las tarjetas):
+ *   --origin-x / --origin-y   cuánto hay que desplazar el escenario para que quede sobre la celda
+ *   --origin-s                escala para que mida lo mismo que la celda
+ *   --origin-duration         duración del viaje, más larga cuanto más lejos está la celda
+ */
+
+.lab-popup {
+	/* Arranque suave. Un ease-out puro sale disparado en el primer fotograma,
+	   y en una celda lejana eso se siente como un tirón. */
+	--lab-glide: cubic-bezier(0.2, 0, 0, 1);
+	/* Misma curva que --ease-out-strong de globals.css: para lo que responde rápido (fundidos) */
+	--lab-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+	--lab-enter: var(--origin-duration, 380ms);
+	/* La salida es más corta que la entrada: responde a una acción del usuario */
+	--lab-exit: calc(var(--origin-duration, 380ms) * 0.7);
+
+	/* Lado del escenario (cuadrado, como las celdas) */
+	--stage: min(calc(100vw - 3rem), 45dvh);
+}
+
+@media (min-width: 768px) {
+	.lab-popup {
+		/* 18rem del panel + 0.75rem de hueco + 3rem de margen */
+		--stage: min(36rem, calc(100dvh - 3rem), calc(100vw - 21.75rem));
+	}
+}
+
+/* ── Popup ────────────────────────────────────────────────
+   Base UI desmonta el popup cuando terminan SUS animaciones, y no mira las de
+   las tarjetas de dentro. Así que el popup tiene una propia, invisible, que dura
+   lo mismo que la salida del escenario: visibility pasa a hidden al final. */
+.lab-popup[data-ending-style] {
+	visibility: hidden;
+	transition: visibility var(--lab-exit) linear;
+}
+
+/* ── Escenario ────────────────────────────────────────────
+   Entrada: viaja desde la celda. Los fundidos son rápidos para que se vea
+   el viaje entero, no solo la llegada. */
+.lab-stage {
+	position: relative;
+	z-index: 1; /* por encima del panel, que sale de detrás */
+	transition:
+		translate var(--lab-enter) var(--lab-glide),
+		scale var(--lab-enter) var(--lab-glide),
+		opacity 160ms var(--lab-out);
+}
+
+.lab-popup[data-starting-style] .lab-stage,
+.lab-popup[data-ending-style] .lab-stage {
+	translate: var(--origin-x, 0px) var(--origin-y, 0px);
+	scale: var(--origin-s, 0.95);
+	opacity: 0;
+}
+
+/* Salida: vuelve a la celda y se apaga al final del viaje (retraso del 40 %), no al principio.
+   Si la opacidad cayera a la vez, la modal sería invisible antes de llegar. */
+.lab-popup[data-ending-style] .lab-stage {
+	transition:
+		translate var(--lab-exit) var(--lab-glide),
+		scale var(--lab-exit) var(--lab-glide),
+		opacity calc(var(--lab-exit) * 0.45) linear calc(var(--lab-exit) * 0.4);
+}
+
+/* ── Panel ────────────────────────────────────────────────
+   No viaja: en la celda no hay panel. Aparece con un pequeño desplazamiento
+   desde detrás del escenario, cuando éste ya va de camino (retraso del 30 %). */
+.lab-aside {
+	transition:
+		opacity 240ms var(--lab-out) calc(var(--lab-enter) * 0.3),
+		translate 360ms var(--lab-out) calc(var(--lab-enter) * 0.3);
+}
+
+.lab-popup[data-starting-style] .lab-aside,
+.lab-popup[data-ending-style] .lab-aside {
+	opacity: 0;
+	translate: -1.5rem 0;
+}
+
+/* Al cerrar solo se apaga, rápido y sin retraso */
+.lab-popup[data-ending-style] .lab-aside {
+	translate: -0.75rem 0;
+	transition:
+		opacity 120ms linear,
+		translate 160ms var(--lab-out);
+}
+
+/* Apilado (móvil): el panel está debajo del escenario, sale hacia abajo */
+@media (max-width: 767px) {
+	.lab-popup[data-starting-style] .lab-aside,
+	.lab-popup[data-ending-style] .lab-aside {
+		translate: 0 -1.5rem;
+	}
+	.lab-popup[data-ending-style] .lab-aside {
+		translate: 0 -0.75rem;
+	}
+}
+
+/* ── Sin transición ───────────────────────────────────────
+   origin.ts lo usa al abrir: fija el estado inicial sin animarlo. */
+.lab-popup[data-no-transition],
+.lab-popup[data-no-transition] * {
+	transition: none !important;
+}
+
+/* ── Reduced motion: solo fundidos, nada se desplaza ni se escala ── */
+@media (prefers-reduced-motion: reduce) {
+	.lab-popup[data-starting-style] .lab-stage,
+	.lab-popup[data-ending-style] .lab-stage {
+		translate: none;
+		scale: none;
+	}
+	.lab-popup[data-starting-style] .lab-aside,
+	.lab-popup[data-ending-style] .lab-aside {
+		translate: none;
+	}
+	.lab-popup[data-ending-style] {
+		transition-duration: 200ms;
+	}
+}
