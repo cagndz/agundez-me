@@ -5,7 +5,7 @@ export interface LabItem {
 }
 
 export const items: LabItem[] = [
-	{ id: '001', slug: 'empty-001', title: 'MAGNETIC BUTTON' },
+	{ id: '001', slug: 'hold-to-confirm', title: 'hold to confirm' },
 	{ id: '002', slug: 'empty-002', title: 'Empty' },
 	{ id: '003', slug: 'empty-003', title: 'Empty' },
 	{ id: '004', slug: 'empty-004', title: 'Empty' },
