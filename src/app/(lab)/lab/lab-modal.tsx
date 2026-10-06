@@ -64,35 +64,9 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 					data-theme='lab'
 					tabIndex={-1}
 					initialFocus={popupRef}
-					className='focus-visible:outline-none! fixed inset-0 m-auto size-[min(80rem,75dvh,calc(100vw-3rem))] flex flex-col rounded-xs border border-border bg-background p-4 text-foreground transition-[opacity,scale,translate] duration-350 ease-out-quart data-starting-style:opacity-0 data-ending-style:opacity-0 motion-safe:data-starting-style:translate-x-(--origin-x) motion-safe:data-starting-style:translate-y-(--origin-y) motion-safe:data-starting-style:scale-(--origin-s) motion-safe:data-ending-style:translate-x-(--origin-x) motion-safe:data-ending-style:translate-y-(--origin-y) motion-safe:data-ending-style:scale-(--origin-s) data-ending-style:duration-290 data-ending-style:ease-out-cubic'
+					className='focus-visible:outline-none! fixed inset-0 m-auto w-[min(64rem,calc(100vw-3rem))] h-[min(36rem,calc(100dvh-3rem))] flex flex-col md:flex-row rounded-xs border border-border bg-background text-foreground transition-[opacity,scale,translate] duration-350 ease-out-quart data-starting-style:opacity-0 data-ending-style:opacity-0 motion-safe:data-starting-style:translate-x-(--origin-x) motion-safe:data-starting-style:translate-y-(--origin-y) motion-safe:data-starting-style:scale-(--origin-s) motion-safe:data-ending-style:translate-x-(--origin-x) motion-safe:data-ending-style:translate-y-(--origin-y) motion-safe:data-ending-style:scale-(--origin-s) data-ending-style:duration-290 data-ending-style:ease-out-cubic'
 				>
-					<div className='flex items-start justify-between'>
-						<div className='flex flex-col gap-1'>
-							<span className='font-mono text-xs uppercase tracking-widest text-muted tabular-nums'>
-								{shown?.id}
-							</span>
-							<Dialog.Title className='font-mono text-sm uppercase tracking-widest'>
-								{shown?.title}
-							</Dialog.Title>
-						</div>
-						<Dialog.Close
-							aria-label='Close'
-							className='-mr-2 -mt-2 flex size-8 items-center justify-center rounded-xs text-muted transition-colors duration-150 ease-out-quart hover:text-foreground active:scale-95'
-						>
-							<svg
-								aria-hidden='true'
-								viewBox='0 0 16 16'
-								className='size-4'
-								fill='none'
-								stroke='currentColor'
-								strokeWidth='1.5'
-								strokeLinecap='square'
-							>
-								<path d='M3 3 L13 13 M13 3 L3 13' />
-							</svg>
-						</Dialog.Close>
-					</div>
-					<div className='mt-4 flex-1 flex items-center justify-center min-h-0 overflow-y-auto'>
+					<div className='flex min-h-0 flex-1 items-center justify-center p-4'>
 						{Demo ? (
 							<Demo />
 						) : (
@@ -101,6 +75,54 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 							</span>
 						)}
 					</div>
+					<aside className='flex shrink-0 flex-col gap-6 border-t border-border p-4 md:w-72 md:border-t-0 md:border-l'>
+						<div className='flex items-start justify-between'>
+							<div className='flex flex-col gap-1'>
+								<span className='font-mono text-xs uppercase tracking-widest text-muted tabular-nums'>
+									{shown?.id}
+								</span>
+								<Dialog.Title className='font-mono text-sm uppercase tracking-widest'>
+									{shown?.title}
+								</Dialog.Title>
+							</div>
+							<Dialog.Close
+								aria-label='Close'
+								className='-mr-2 -mt-2 flex size-8 items-center justify-center rounded-xs text-muted transition-colors duration-150 ease-out-quart hover:text-foreground active:scale-95'
+							>
+								<svg
+									aria-hidden='true'
+									viewBox='0 0 16 16'
+									className='size-4'
+									fill='none'
+									stroke='currentColor'
+									strokeWidth='1.5'
+									strokeLinecap='square'
+								>
+									<path d='M3 3 L13 13 M13 3 L3 13' />
+								</svg>
+							</Dialog.Close>
+						</div>
+						{shown?.summary && (
+							<Dialog.Description className='font-mono text-xs leading-relaxed text-muted'>
+								{shown.summary}
+							</Dialog.Description>
+						)}
+						{shown?.specs && (
+							<dl className='mt-auto border-t border-border font-mono text-xs'>
+								{shown.specs.map((spec) => (
+									<div
+										key={spec.label}
+										className='grid grid-cols-[5rem_1fr] gap-2 border-b border-border py-2'
+									>
+										<dt className='uppercase tracking-widest text-muted'>
+											{spec.label}
+										</dt>
+										<dd>{spec.value}</dd>
+									</div>
+								))}
+							</dl>
+						)}
+					</aside>
 				</Dialog.Popup>
 			</Dialog.Portal>
 		</Dialog.Root>
