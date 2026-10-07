@@ -26,7 +26,7 @@ export const items: LabItem[] = [
 			{ label: 'A11y', value: 'Enter · live region · reduced motion' },
 		],
 	},
-	{ id: '002', slug: 'empty-002', title: 'Empty' },
+	{ id: '002', slug: 'dial', title: 'Dial' },
 	{ id: '003', slug: 'empty-003', title: 'Empty' },
 	{ id: '004', slug: 'empty-004', title: 'Empty' },
 	{ id: '005', slug: 'empty-005', title: 'Empty' },
