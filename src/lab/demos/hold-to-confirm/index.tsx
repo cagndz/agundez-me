@@ -21,7 +21,7 @@ const HOLD_DURATION = 1.2
 const RELEASE_DURATION = 0.25
 const PRESS_DURATION = 0.2
 // How long the filled button stays before it falls (ms)
-const CONFIRMED_DURATION = 700
+const CONFIRMED_DURATION = 250
 
 // How long the fall at the end lasts (the details of each dot's fall are in draw.ts)
 const FALL_DURATION = 0.7
