@@ -7,7 +7,13 @@ import {
 	useTransform,
 	useReducedMotion,
 } from 'motion/react'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from 'react'
 import { INK_IDLE, INK_CONFIRMED } from './pattern'
 import { WIDTH, HEIGHT, createPalette, drawDots, type Palette } from './draw'
 
@@ -20,8 +26,9 @@ const CONFIRMED_DURATION = 700
 
 // How long the fall at the end lasts (the details of each dot's fall are in draw.ts)
 const FALL_DURATION = 0.7
-// The button's own border/background start fading at this point of the fall (0 to 1)
-const CHROME_FADE_START = 0.2
+// The button's border/background fade out between these two points of the fall (0 to 1)
+const CHROME_FADE_START = 0
+const CHROME_FADE_END = 0.7
 // Fade back in after the reset, so the idle dots don't pop in
 const FADE_IN_DURATION = 0.3
 
@@ -32,11 +39,12 @@ export default function HoldToConfirm() {
 	const progress = useMotionValue(0)
 	const fall = useMotionValue(0)
 	const baseOpacity = useMotionValue(1)
-	// The border and background fade out together with the last dots, and fade back in on reset
-	const buttonOpacity = useTransform(() => {
-		const fadeOut = (fall.get() - CHROME_FADE_START) / (1 - CHROME_FADE_START)
-		return baseOpacity.get() * (1 - Math.min(1, Math.max(0, fadeOut)))
-	})
+	// Border and background fade out during the fall. On reset the whole button fades back in (baseOpacity)
+	const chromeOpacity = useTransform(
+		fall,
+		[CHROME_FADE_START, CHROME_FADE_END],
+		[1, 0],
+	)
 	const reducedMotion = useReducedMotion()
 	const controlsRef = useRef<ReturnType<typeof animate> | null>(null)
 	const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -159,13 +167,19 @@ export default function HoldToConfirm() {
 							}
 				}
 				transition={{ duration: RELEASE_DURATION, ease: EASE_OUT }}
-				style={{ opacity: buttonOpacity }}
-				className='bg-background rounded-xs border border-border p-0.75 touch-none select-none [-webkit-touch-callout:none] [-webkit-tap-highlight-color:transparent]'
+				style={{ opacity: baseOpacity }}
+				className='relative rounded-xs p-0.75 touch-none select-none [-webkit-touch-callout:none] [-webkit-tap-highlight-color:transparent]'
 			>
+				{/* Border and background as their own layer, so they fade without touching the dots */}
+				<motion.span
+					aria-hidden
+					style={{ opacity: chromeOpacity }}
+					className='absolute inset-0 rounded-xs border border-border bg-background'
+				/>
 				<canvas
 					ref={canvasRef}
 					aria-hidden
-					className='block'
+					className='relative block'
 					style={{ width: WIDTH, height: HEIGHT }}
 				/>
 			</motion.button>
