@@ -7,13 +7,13 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 	const selected = items.find((item) => item.slug === c)
 
 	return (
-		<>
+		<div className='lab-scope'>
 			<h1 className='font-mono text-sm uppercase tracking-widest'>Lab / 000</h1>
 			<p className='mt-2 font-mono text-xs uppercase tracking-widest text-muted'>
 				Components, states, motion
 			</p>
 			<div className='mt-8 flex items-center gap-2 border-t border-border pt-4'>
-				<span className='size-2 rounded-full bg-accent' />
+				<span className='signal-dot block size-2 rounded-full bg-accent' />
 				<span className='font-mono text-xs uppercase tracking-widest'>
 					Signal
 				</span>
@@ -22,6 +22,6 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 				<LabGrid items={items} />
 			</div>
 			<LabModal item={selected} />
-		</>
+		</div>
 	)
 }

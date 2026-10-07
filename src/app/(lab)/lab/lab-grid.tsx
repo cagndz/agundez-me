@@ -10,6 +10,7 @@ export default function LabGrid({ items }: { items: LabItem[] }) {
 				return (
 					<div
 						key={item.id}
+						data-lab-item
 						className='group relative aspect-square border-r border-b border-border p-4 font-mono text-sm uppercase transition-colors duration-100 ease-out-strong'
 					>
 						<Link

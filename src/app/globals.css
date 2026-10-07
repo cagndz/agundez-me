@@ -93,3 +93,28 @@ h3 {
 		animation: none;
 	}
 }
+
+/* Signal dot: hard LED-style blink between full and dim */
+@keyframes signal-blink {
+	60% {
+		opacity: var(--signal-dim);
+	}
+}
+
+.signal-dot {
+	--signal-dim: 0.3;
+	animation: signal-blink 1.6s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.signal-dot {
+		animation: none;
+	}
+}
+
+/* Over a cell the LED stays dim, no blinking */
+.lab-scope:has([data-lab-item]:hover, [data-lab-cell]:focus-visible)
+	.signal-dot {
+	animation: none;
+	opacity: var(--signal-dim);
+}
