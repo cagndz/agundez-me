@@ -18,8 +18,6 @@ export const GLYPHS: Record<string, string[]> = {
 	O: ['.XXX.', 'X...X', 'X...X', 'X...X', 'X...X', 'X...X', '.XXX.'],
 	L: ['X....', 'X....', 'X....', 'X....', 'X....', 'X....', 'XXXXX'],
 	D: ['XXXX.', 'X...X', 'X...X', 'X...X', 'X...X', 'X...X', 'XXXX.'],
-	N: ['X...X', 'XX..X', 'X.X.X', 'X.X.X', 'X..XX', 'X...X', 'X...X'],
-	E: ['XXXXX', 'X....', 'X....', 'XXXX.', 'X....', 'X....', 'XXXXX'],
 }
 
 // Turns a word into a list of TOTAL booleans: true = this dot is part of a letter.
@@ -44,8 +42,8 @@ export function buildInk(word: string) {
 	return ink
 }
 
-export const INK_IDLE = buildInk('HOLD')
-export const INK_CONFIRMED = buildInk('DONE')
+// The label. Its dots stay dark; the fill ends in the same color and swallows them.
+export const INK = buildInk('HOLD')
 
 // Small seeded random number generator (mulberry32).
 function createRandom(seed: number) {

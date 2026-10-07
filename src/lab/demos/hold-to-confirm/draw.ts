@@ -1,5 +1,5 @@
 import { cubicBezier } from 'motion/react'
-import { COLS, ROWS, TOTAL, SOFTNESS, ORDER, FALL_ORDER } from './pattern'
+import { COLS, ROWS, TOTAL, SOFTNESS, ORDER, FALL_ORDER, INK } from './pattern'
 
 // Each dot is CELL px wide with GAP px between dots (logical px, the canvas scales them for retina).
 const CELL = 4
@@ -11,10 +11,6 @@ const TAU = Math.PI * 2
 // Size of the whole dot field
 export const WIDTH = COLS * PITCH - GAP
 export const HEIGHT = ROWS * PITCH - GAP
-
-// Color of a lit dot. Slightly darker than --accent (#ff6000) so the fill
-// reaches 3:1 against the lab background, and still 5:1 against the dark letters.
-const LIT_COLOR = '#e8590c'
 
 // Fall at the end. Each dot falls for FALL_WINDOW of the whole fall, starting at a random moment.
 const FALL_WINDOW = 0.45
@@ -47,9 +43,7 @@ type RGB = [number, number, number]
 function parseHex(hex: string): RGB {
 	const clean = hex.trim().replace('#', '')
 	const full =
-		clean.length === 3
-			? [...clean].map((char) => char + char).join('')
-			: clean
+		clean.length === 3 ? [...clean].map((char) => char + char).join('') : clean
 	return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16)) as RGB
 }
 
@@ -73,7 +67,6 @@ function buildRamp(off: RGB, lit: RGB): string[] {
 
 export interface Palette {
 	ramp: string[]
-	ink: string
 }
 
 // Reads the theme colors (--foreground / --background) from the element once.
@@ -81,12 +74,10 @@ export function createPalette(element: Element): Palette {
 	const style = getComputedStyle(element)
 	const foreground = parseHex(style.getPropertyValue('--foreground'))
 	const background = parseHex(style.getPropertyValue('--background'))
-	// "Off" dot = 15% of the foreground over the background (same as the old CSS color-mix)
+	// "Off" dot = 15% of the foreground over the background (same as the old CSS color-mix).
+	// A filled dot ends in the foreground color, the same as the letters.
 	const off = mix(background, foreground, 0.15)
-	return {
-		ramp: buildRamp(off, parseHex(LIT_COLOR)),
-		ink: `rgb(${foreground.join(', ')})`,
-	}
+	return { ramp: buildRamp(off, foreground) }
 }
 
 // ── Drawing ────────────────────────────────────────────────────────────
@@ -97,7 +88,6 @@ export function drawDots(
 	ctx: CanvasRenderingContext2D,
 	progress: number,
 	fall: number,
-	ink: boolean[],
 	palette: Palette,
 ) {
 	ctx.clearRect(0, 0, WIDTH, HEIGHT)
@@ -106,7 +96,6 @@ export function drawDots(
 	// Only the half-lit ones (a small fraction at any moment) are painted one by one.
 	const off = new Path2D()
 	const lit = new Path2D()
-	const dark = new Path2D()
 
 	for (let i = 0; i < TOTAL; i++) {
 		const x = CENTER_X[i]
@@ -116,13 +105,13 @@ export function drawDots(
 		// Already gone: nothing to draw
 		if (fallT >= 1) continue
 
-		// Letter dots stay dark: the fill never paints over them
-		const fillT = ink[i] ? 0 : clamp01((progress - FILL_START[i]) / SOFTNESS)
+		// Letter dots are always fully dark: the fill ends in the same color, so it swallows them
+		const fillT = INK[i] ? 1 : clamp01((progress - FILL_START[i]) / SOFTNESS)
 
 		if (fallT > 0) {
 			// Falling: own position and opacity, so one by one
 			ctx.globalAlpha = 1 - fallT
-			ctx.fillStyle = ink[i] ? palette.ink : palette.ramp[Math.round(fillT * 255)]
+			ctx.fillStyle = palette.ramp[Math.round(fillT * 255)]
 			ctx.beginPath()
 			ctx.arc(x, y + EASE_IN_GRAVITY(fallT) * FALL_DISTANCE, RADIUS, 0, TAU)
 			ctx.fill()
@@ -130,7 +119,7 @@ export function drawDots(
 			continue
 		}
 
-		const batch = ink[i] ? dark : fillT === 0 ? off : fillT === 1 ? lit : null
+		const batch = fillT === 0 ? off : fillT === 1 ? lit : null
 		if (batch) {
 			batch.moveTo(x + RADIUS, y)
 			batch.arc(x, y, RADIUS, 0, TAU)
@@ -146,6 +135,4 @@ export function drawDots(
 	ctx.fill(off)
 	ctx.fillStyle = palette.ramp[255]
 	ctx.fill(lit)
-	ctx.fillStyle = palette.ink
-	ctx.fill(dark)
 }

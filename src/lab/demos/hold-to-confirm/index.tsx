@@ -14,14 +14,13 @@ import {
 	useRef,
 	useState,
 } from 'react'
-import { INK_IDLE, INK_CONFIRMED } from './pattern'
 import { WIDTH, HEIGHT, createPalette, drawDots, type Palette } from './draw'
 
 // Durations in seconds
 const HOLD_DURATION = 1.2
 const RELEASE_DURATION = 0.25
 const PRESS_DURATION = 0.2
-// How long "DONE" stays on screen before the button resets (ms)
+// How long the filled button stays before it falls (ms)
 const CONFIRMED_DURATION = 700
 
 // How long the fall at the end lasts (the details of each dot's fall are in draw.ts)
@@ -52,7 +51,6 @@ export default function HoldToConfirm() {
 
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 	const paletteRef = useRef<Palette | null>(null)
-	const inkRef = useRef(INK_IDLE)
 
 	// Paints the current frame. Only reads refs and MotionValues, so it never changes.
 	const render = useCallback(() => {
@@ -62,7 +60,7 @@ export default function HoldToConfirm() {
 		if (!canvas || !palette || !ctx) return
 		const scale = canvas.width / WIDTH
 		ctx.setTransform(scale, 0, 0, scale, 0, 0)
-		drawDots(ctx, progress.get(), fall.get(), inkRef.current, palette)
+		drawDots(ctx, progress.get(), fall.get(), palette)
 	}, [progress, fall])
 
 	// Whenever the fill or the fall moves, paint again
@@ -137,14 +135,6 @@ export default function HoldToConfirm() {
 			ease: EASE_OUT,
 		})
 	}
-
-	const ink = status === 'confirmed' ? INK_CONFIRMED : INK_IDLE
-
-	// HOLD ↔ DONE: new letters, paint again
-	useLayoutEffect(() => {
-		inkRef.current = ink
-		render()
-	}, [ink, render])
 
 	return (
 		<>
