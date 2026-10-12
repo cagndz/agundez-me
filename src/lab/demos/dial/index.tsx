@@ -2,7 +2,13 @@
 
 import { useState } from 'react'
 import { motion, useMotionValue, useMotionValueEvent } from 'motion/react'
-import { INITIAL, INITIAL_OFFSET_PX, TRAVEL } from './constants'
+import {
+	INITIAL,
+	INITIAL_OFFSET_PX,
+	PX_PER_UNIT,
+	TRAVEL,
+	BAND_WIDTH,
+} from './constants'
 import { pixelToUnit } from './utils'
 
 export default function Dial() {
@@ -19,8 +25,12 @@ export default function Dial() {
 
 			<div className='relative overflow-hidden w-80 h-16 border border-border'>
 				<motion.div
-					className='absolute left-1/2 inset-y-0 font-mono bg-foreground'
-					style={{ x, width: TRAVEL }}
+					className='absolute left-1/2 inset-y-0 font-mono'
+					style={{
+						x,
+						width: BAND_WIDTH,
+						backgroundImage: `repeating-linear-gradient(90deg, var(--color-foreground) 0 1px, transparent 1px ${PX_PER_UNIT}px)`,
+					}}
 					drag='x'
 					dragConstraints={{ left: -TRAVEL, right: 0 }}
 					dragElastic={0.25}
