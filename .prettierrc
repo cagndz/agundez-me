@@ -2,5 +2,11 @@
 	"singleQuote": true,
 	"jsxSingleQuote": true,
 	"semi": false,
-	"useTabs": true
+	"useTabs": true,
+	"overrides": [
+		{
+			"files": ["*.json", "*.md", "*.mdx", "*.yml", "*.yaml"],
+			"options": { "useTabs": false }
+		}
+	]
 }
