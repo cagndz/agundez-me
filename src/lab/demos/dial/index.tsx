@@ -14,16 +14,19 @@ export default function Dial() {
 	})
 
 	return (
-		<div className='relative overflow-hidden w-80 h-16 border border-border'>
+		<div className='flex flex-col items-center gap-7'>
 			<span>{value}</span>
-			<motion.div
-				className='absolute left-1/2 h-full font-mono bg-foreground'
-				style={{ x, width: TRAVEL }}
-				drag='x'
-				dragConstraints={{ left: -TRAVEL, right: 0 }}
-				dragElastic={0.25}
-			/>
-			<div className='left-1/2 -translate-x-1/2 absolute h-full w-0.5 bg-accent pointer-events-none' />
+
+			<div className='relative overflow-hidden w-80 h-16 border border-border'>
+				<motion.div
+					className='absolute left-1/2 inset-y-0 font-mono bg-foreground'
+					style={{ x, width: TRAVEL }}
+					drag='x'
+					dragConstraints={{ left: -TRAVEL, right: 0 }}
+					dragElastic={0.25}
+				/>
+				<div className='left-1/2 -translate-x-1/2 absolute inset-y-0 w-0.5 bg-accent pointer-events-none' />
+			</div>
 		</div>
 	)
 }
