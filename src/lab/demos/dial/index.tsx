@@ -9,7 +9,7 @@ import {
 	TRAVEL,
 	BAND_WIDTH,
 } from './constants'
-import { pixelToUnit } from './utils'
+import { pixelToUnit, snapToTick } from './utils'
 
 export default function Dial() {
 	const x = useMotionValue(INITIAL_OFFSET_PX)
@@ -34,6 +34,9 @@ export default function Dial() {
 					drag='x'
 					dragConstraints={{ left: -TRAVEL, right: 0 }}
 					dragElastic={0.25}
+					dragTransition={{
+						modifyTarget: snapToTick,
+					}}
 				/>
 				<div className='left-1/2 -translate-x-1/2 absolute inset-y-0 w-0.5 bg-accent pointer-events-none' />
 			</div>
