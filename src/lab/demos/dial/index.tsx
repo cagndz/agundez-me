@@ -23,9 +23,9 @@ export default function Dial() {
 		<div className='flex flex-col items-center gap-7'>
 			<span>{value}</span>
 
-			<div className='relative overflow-hidden w-80 h-16 border border-border'>
+			<div className='relative h-16 w-80 overflow-hidden border border-border'>
 				<motion.div
-					className='absolute left-1/2 inset-y-0 font-mono'
+					className='absolute inset-y-0 left-1/2 font-mono'
 					style={{
 						x,
 						width: BAND_WIDTH,
@@ -40,7 +40,7 @@ export default function Dial() {
 						timeConstant: 300,
 					}}
 				/>
-				<div className='left-1/2 -translate-x-1/2 absolute inset-y-0 w-0.5 bg-accent pointer-events-none' />
+				<div className='pointer-events-none absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-accent' />
 			</div>
 		</div>
 	)
