@@ -36,6 +36,8 @@ export default function Dial() {
 					dragElastic={0.25}
 					dragTransition={{
 						modifyTarget: snapToTick,
+						power: 0.2,
+						timeConstant: 300,
 					}}
 				/>
 				<div className='left-1/2 -translate-x-1/2 absolute inset-y-0 w-0.5 bg-accent pointer-events-none' />
