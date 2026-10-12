@@ -158,7 +158,7 @@ export default function HoldToConfirm() {
 				}
 				transition={{ duration: RELEASE_DURATION, ease: EASE_OUT }}
 				style={{ opacity: baseOpacity }}
-				className='relative rounded-xs p-0.75 touch-none select-none [-webkit-touch-callout:none] [-webkit-tap-highlight-color:transparent] cursor-pointer aria-disabled:cursor-default'
+				className='relative cursor-pointer touch-none rounded-xs p-0.75 select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] aria-disabled:cursor-default'
 			>
 				{/* Border and background as their own layer, so they fade without touching the dots */}
 				<motion.span

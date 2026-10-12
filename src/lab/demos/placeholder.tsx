@@ -13,7 +13,7 @@ export default function Placeholder() {
 			<button
 				onClick={handleClick}
 				type='button'
-				className='border border-border p-2 rounded-xs tabular-nums hover:bg-foreground/5 transition-colors duration-150 ease-out-quart'
+				className='rounded-xs border border-border p-2 tabular-nums transition-colors duration-150 ease-out-quart hover:bg-foreground/5'
 			>
 				Count +1
 			</button>

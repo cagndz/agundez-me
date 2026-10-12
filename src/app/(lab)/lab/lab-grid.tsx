@@ -22,7 +22,7 @@ export default function LabGrid({ items }: { items: LabItem[] }) {
 						/>
 						<span className='flex items-center gap-2'>
 							<span
-								className='size-2 rounded-full bg-accent opacity-0 transition-[opacity,translate] duration-150 ease-out-strong group-hover:opacity-100 group-has-[a:focus-visible]:opacity-100 motion-safe:-translate-x-2 motion-safe:group-hover:translate-x-0 motion-safe:group-has-[a:focus-visible]:translate-x-0 group-hover:duration-200 group-has-[a:focus-visible]:duration-200'
+								className='size-2 rounded-full bg-accent opacity-0 transition-[opacity,translate] duration-150 ease-out-strong group-hover:opacity-100 group-hover:duration-200 group-has-[a:focus-visible]:opacity-100 group-has-[a:focus-visible]:duration-200 motion-safe:-translate-x-2 motion-safe:group-hover:translate-x-0 motion-safe:group-has-[a:focus-visible]:translate-x-0'
 								aria-hidden='true'
 							/>
 							<span>{item.id}</span>

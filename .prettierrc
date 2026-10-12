@@ -3,6 +3,8 @@
 	"jsxSingleQuote": true,
 	"semi": false,
 	"useTabs": true,
+	"plugins": ["prettier-plugin-tailwindcss"],
+	"tailwindStylesheet": "./src/app/globals.css",
 	"overrides": [
 		{
 			"files": ["*.json", "*.md", "*.mdx", "*.yml", "*.yaml"],
