@@ -1,8 +1,8 @@
 export const meta = {
-	title: "Why my Base UI dialog wasn't animating",
-	date: '2026-10-02',
-	summary:
-		'A Base UI dialog that mounts already open skips its enter animation. Why it happens and how I fixed it.',
+  title: "Why my Base UI dialog wasn't animating",
+  date: '2026-10-02',
+  summary:
+    'A Base UI dialog that mounts already open skips its enter animation. Why it happens and how I fixed it.',
 }
 
 Tested with Base UI 1.8.0, October 2026.
@@ -23,15 +23,15 @@ The lab keeps the clicked cell in the URL (`?c=whatever-component`). The page re
 
 ```tsx
 function LabModal({ selectedComponent }) {
-	return (
-		<>
-			{selectedComponent && (
-				<Dialog.Root open>
-					<Dialog.Popup>…</Dialog.Popup>
-				</Dialog.Root>
-			)}
-		</>
-	)
+  return (
+    <>
+      {selectedComponent && (
+        <Dialog.Root open>
+          <Dialog.Popup>…</Dialog.Popup>
+        </Dialog.Root>
+      )}
+    </>
+  )
 }
 ```
 
@@ -60,11 +60,8 @@ One more problem. When the modal closes, `selectedComponent` becomes `undefined`
 ```tsx
 const [lastComponent, setLastComponent] = useState(selectedComponent)
 
-if (
-	selectedComponent &&
-	selectedComponent.slug !== lastComponent?.slug
-) {
-	setLastComponent(selectedComponent)
+if (selectedComponent && selectedComponent.slug !== lastComponent?.slug) {
+  setLastComponent(selectedComponent)
 }
 
 const shownComponent = selectedComponent ?? lastComponent

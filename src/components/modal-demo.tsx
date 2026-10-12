@@ -40,12 +40,12 @@ function DemoDialog({
 		<Dialog.Root open={open} onOpenChange={onOpenChange}>
 			<Dialog.Portal>
 				<Dialog.Backdrop
-					className={`fixed inset-0 bg-foreground/10 transition-opacity ease-out-quart data-starting-style:opacity-0 data-ending-style:opacity-0 ${speed}`}
+					className={`fixed inset-0 bg-foreground/10 transition-opacity ease-out-quart data-ending-style:opacity-0 data-starting-style:opacity-0 ${speed}`}
 				/>
 				<Dialog.Popup
-					className={`fixed inset-0 m-auto h-fit w-[min(24rem,calc(100vw-3rem))] rounded-xs border border-border bg-background p-4 text-foreground transition-[opacity,scale] ease-out-quart data-starting-style:opacity-0 data-ending-style:opacity-0 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95 ${speed}`}
+					className={`fixed inset-0 m-auto h-fit w-[min(24rem,calc(100vw-3rem))] rounded-xs border border-border bg-background p-4 text-foreground transition-[opacity,scale] ease-out-quart data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:scale-95 motion-safe:data-starting-style:scale-95 ${speed}`}
 				>
-					<Dialog.Title className='font-mono text-xs uppercase tracking-widest'>
+					<Dialog.Title className='font-mono text-xs tracking-widest uppercase'>
 						Modal
 					</Dialog.Title>
 					<Dialog.Description className='mt-2 text-sm text-muted'>
@@ -81,7 +81,7 @@ export function ModalDemo() {
 						type='button'
 						aria-pressed={mode === value}
 						onClick={() => setMode(value)}
-						className='rounded-xs px-3 py-1.5 font-mono text-xs uppercase tracking-widest transition-colors duration-150 ease-out-quart not-aria-pressed:text-muted not-aria-pressed:hover:text-foreground aria-pressed:bg-foreground aria-pressed:text-background'
+						className='rounded-xs px-3 py-1.5 font-mono text-xs tracking-widest uppercase transition-colors duration-150 ease-out-quart not-aria-pressed:text-muted not-aria-pressed:hover:text-foreground aria-pressed:bg-foreground aria-pressed:text-background'
 					>
 						{MODES[value].label}
 					</button>
@@ -96,7 +96,7 @@ export function ModalDemo() {
 				<button
 					type='button'
 					onClick={() => setOpen(true)}
-					className='rounded-xs bg-foreground px-4 py-2 font-mono text-xs uppercase tracking-widest text-background transition-[opacity,scale] duration-150 ease-out-quart hover:opacity-85 active:scale-98'
+					className='rounded-xs bg-foreground px-4 py-2 font-mono text-xs tracking-widest text-background uppercase transition-[opacity,scale] duration-150 ease-out-quart hover:opacity-85 active:scale-98'
 				>
 					Open modal
 				</button>

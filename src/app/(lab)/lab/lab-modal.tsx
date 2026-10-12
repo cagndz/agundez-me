@@ -59,13 +59,13 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 			}}
 		>
 			<Dialog.Portal>
-				<Dialog.Backdrop className='fixed inset-0 bg-foreground/10 backdrop-blur-sm transition-opacity duration-320 ease-out-strong data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-220' />
+				<Dialog.Backdrop className='fixed inset-0 bg-foreground/10 backdrop-blur-sm transition-opacity duration-320 ease-out-strong data-ending-style:opacity-0 data-ending-style:duration-220 data-starting-style:opacity-0' />
 				<Dialog.Popup
 					ref={setPopup}
 					data-theme='lab'
 					tabIndex={-1}
 					initialFocus={popupRef}
-					className='lab-popup focus-visible:outline-none! fixed inset-0 m-auto flex h-fit w-fit flex-col gap-3 text-foreground md:flex-row'
+					className='lab-popup fixed inset-0 m-auto flex h-fit w-fit flex-col gap-3 text-foreground focus-visible:outline-none! md:flex-row'
 				>
 					<div
 						data-lab-stage
@@ -74,7 +74,7 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 						{Demo ? (
 							<Demo />
 						) : (
-							<span className='uppercase tracking-widest text-muted font-mono text-sm'>
+							<span className='font-mono text-sm tracking-widest text-muted uppercase'>
 								No demo yet
 							</span>
 						)}
@@ -82,16 +82,16 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 					<aside className='lab-aside flex w-(--stage) flex-col gap-6 overflow-y-auto rounded-xs border border-border bg-background p-4 max-md:max-h-[calc(100dvh-3rem-var(--stage)-0.75rem)] md:w-72'>
 						<div className='flex items-start justify-between'>
 							<div className='flex flex-col gap-1'>
-								<span className='font-mono text-xs uppercase tracking-widest text-muted tabular-nums'>
+								<span className='font-mono text-xs tracking-widest text-muted uppercase tabular-nums'>
 									{shown?.id}
 								</span>
-								<Dialog.Title className='font-mono text-sm uppercase tracking-widest'>
+								<Dialog.Title className='font-mono text-sm tracking-widest uppercase'>
 									{shown?.title}
 								</Dialog.Title>
 							</div>
 							<Dialog.Close
 								aria-label='Close'
-								className='-mr-2 -mt-2 flex size-8 items-center justify-center rounded-xs text-muted transition-colors duration-150 ease-out-quart hover:text-foreground active:scale-95'
+								className='-mt-2 -mr-2 flex size-8 items-center justify-center rounded-xs text-muted transition-colors duration-150 ease-out-quart hover:text-foreground active:scale-95'
 							>
 								<svg
 									aria-hidden='true'
@@ -118,7 +118,7 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 										key={spec.label}
 										className='grid grid-cols-[5rem_1fr] gap-2 border-b border-border py-2'
 									>
-										<dt className='uppercase tracking-widest text-muted'>
+										<dt className='tracking-widest text-muted uppercase'>
 											{spec.label}
 										</dt>
 										<dd>{spec.value}</dd>
