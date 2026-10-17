@@ -7,7 +7,7 @@ export type Project = {
 export const projects: Project[] = [
 	{
 		name: 'Menubar Player',
-		description: 'An audio player for Youtube that lives in the macOS menu bar',
+		description: 'An audio player for YouTube that lives in the macOS menu bar',
 		href: 'https://github.com/cagndz/menubar-player',
 	},
 	{
