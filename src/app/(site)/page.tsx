@@ -1,11 +1,12 @@
 import { PostList } from '@/components/post-list'
 import { getAllPosts } from '@/lib/writing'
+import { RevealOnce } from '@/components/reveal-once'
 
 export default async function Home() {
 	const posts = await getAllPosts()
 
 	return (
-		<div className='orchestration'>
+		<RevealOnce>
 			<h1 className='font-medium tracking-tight'>Carlos Agúndez</h1>
 			<p className='text-muted'>Design engineer</p>
 			<p className='mt-8'>
@@ -22,6 +23,6 @@ export default async function Home() {
 			<div className='mt-16'>
 				<PostList posts={posts} />
 			</div>
-		</div>
+		</RevealOnce>
 	)
 }
