@@ -1,4 +1,10 @@
+import { notFound } from 'next/navigation'
+
 export default function LabLayout({ children }: LayoutProps<'/lab'>) {
+	if (process.env.VERCEL_ENV === 'production') {
+		notFound()
+	}
+
 	return (
 		<div
 			data-theme='lab'
