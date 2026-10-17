@@ -1,5 +1,5 @@
 import { projects } from '@/content/projects'
-import { ArrowUpRight } from './icons/arrow-up-right'
+import { LinkArrow } from './link-arrow'
 
 export function ProjectList() {
 	return (
@@ -7,23 +7,21 @@ export function ProjectList() {
 			<h2 id='projects-heading' className='mb-3 text-muted'>
 				Projects
 			</h2>
-			<ul className='group/list divide-y divide-border border-t border-border'>
+			<ul className='divide-y divide-border border-t border-border'>
 				{projects.map(({ name, description, href }) => (
 					<li key={name}>
 						<a
 							href={href}
 							target='_blank'
 							rel='noopener noreferrer'
-							className='group/link flex py-3 transition-opacity duration-150 ease-out-strong group-hover/list:opacity-40 hover:opacity-100!'
+							className='group/link flex items-start justify-between gap-4 py-3'
 						>
-							<div className='flex flex-col gap-1'>
-								<span className='flex items-center gap-1.5'>
-									{name}
-									<ArrowUpRight className='size-3.5 shrink-0 transition-transform duration-150 ease-out-strong motion-safe:group-hover/link:translate-x-0.5 motion-safe:group-hover/link:-translate-y-0.5' />
-									<span className='sr-only'>(opens in a new tab)</span>
-								</span>
+							<span>
+								<span className='block'>{name}</span>
 								<span className='block text-muted'>{description}</span>
-							</div>
+								<span className='sr-only'>(opens in a new tab)</span>
+							</span>
+							<LinkArrow external />
 						</a>
 					</li>
 				))}
