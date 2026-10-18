@@ -14,7 +14,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: { default: 'Carlos Agúndez', template: '%s · Carlos Agúndez' },
-	description: 'Design engineer',
+	description:
+		'Design engineer based in Spain. Interfaces, prototypes and notes on the details.',
+	metadataBase: new URL('https://agundez.me'),
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
