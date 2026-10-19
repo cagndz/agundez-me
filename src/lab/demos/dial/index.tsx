@@ -11,7 +11,7 @@ import {
 } from './constants'
 import { pixelToUnit, snapToTick } from './utils'
 
-export default function Dial() {
+export function Dial() {
 	const x = useMotionValue(INITIAL_OFFSET_PX)
 	const [value, setValue] = useState(INITIAL)
 
