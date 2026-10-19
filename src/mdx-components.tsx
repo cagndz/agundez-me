@@ -39,7 +39,7 @@ const components: MDXComponents = {
 	),
 	pre: (props) => (
 		<pre
-			className='mt-5 overflow-x-auto rounded-xs p-4 font-mono text-sm leading-6'
+			className='mt-5 scrollbar-thin overflow-x-auto overscroll-x-contain rounded-xs p-4 font-mono text-sm leading-6'
 			{...props}
 		/>
 	),

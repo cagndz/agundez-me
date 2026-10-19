@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
 const withMDX = createMDX({
 	options: {
 		// Turbopack needs plugins by name (string) with serializable options.
-		rehypePlugins: [['rehype-pretty-code', { theme: 'vitesse-light' }]],
+		rehypePlugins: [['rehype-pretty-code', { theme: 'github-light-default' }]],
 	},
 })
 
