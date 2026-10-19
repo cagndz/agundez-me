@@ -1,5 +1,5 @@
-import LabGrid from './lab-grid'
-import LabModal from './lab-modal'
+import { LabGrid } from './lab-grid'
+import { LabModal } from './lab-modal'
 import { items } from '@/lab/items'
 
 export default async function LabPage({ searchParams }: PageProps<'/lab'>) {

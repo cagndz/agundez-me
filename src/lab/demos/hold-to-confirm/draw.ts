@@ -65,7 +65,7 @@ function buildRamp(off: RGB, lit: RGB): string[] {
 	})
 }
 
-export interface Palette {
+export type Palette = {
 	ramp: string[]
 }
 

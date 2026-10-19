@@ -1,21 +1,21 @@
-export function getCellRect(slug: string): DOMRect | null {
+function getCellRect(slug: string): DOMRect | null {
 	const cell = document.querySelector(`[data-lab-cell="${slug}"]`)
 	if (!cell) return null
 	return cell.getBoundingClientRect()
 }
 
-// Duración del viaje (ms): base + un poco más por cada px de distancia.
-// Una celda cercana se cruza en ~300 ms; una lejana, en ~450 ms.
+// Travel duration (ms): a base plus a little more for every px of distance.
+// A nearby cell is crossed in ~300 ms, a far one in ~450 ms.
 const DURATION_BASE = 280
 const DURATION_PER_PX = 0.35
 const DURATION_MAX = 520
 
 /**
- * Escribe en el popup las variables CSS que describen el estado "ausente" del
- * escenario (la tarjeta del demo): desplazado y escalado hasta coincidir con la
- * celda de origen, más la duración del viaje.
- * Las variables se heredan, así que las lee .lab-stage (ver lab-modal.css).
- * Si no hay celda, deja un efecto genérico desde el centro.
+ * Writes on the popup the CSS variables for the stage's "away" state (the card
+ * with the demo): moved and scaled until it matches the origin cell, plus the
+ * travel duration.
+ * The variables are inherited, so .lab-stage reads them (see lab-modal.css).
+ * Without a cell, it falls back to a generic effect from the center.
  */
 export function applyOrigin(popup: HTMLElement, slug: string | undefined) {
 	const stage = popup.querySelector<HTMLElement>('[data-lab-stage]')
@@ -29,8 +29,8 @@ export function applyOrigin(popup: HTMLElement, slug: string | undefined) {
 		return
 	}
 
-	// El popup no tiene transform, así que su rect es el de reposo.
-	// offsetLeft/offsetTop/offsetWidth del escenario tampoco incluyen su transform.
+	// The popup has no transform, so its rect is its resting one.
+	// The stage's offsetLeft/offsetTop/offsetWidth don't include its transform either.
 	const popupRect = popup.getBoundingClientRect()
 	const stageCenterX = popupRect.left + stage.offsetLeft + stage.offsetWidth / 2
 	const stageCenterY = popupRect.top + stage.offsetTop + stage.offsetHeight / 2
@@ -52,12 +52,12 @@ export function applyOrigin(popup: HTMLElement, slug: string | undefined) {
 }
 
 /**
- * Igual que applyOrigin, pero sin que el navegador anime el cambio.
- * Se usa al abrir: leer medidas fuerza al navegador a calcular estilos, y si
- * eso ocurre antes de que existan las variables, anima desde "none" hacia el
- * estado inicial (al revés). Con las transiciones apagadas (data-no-transition,
- * ver lab-modal.css), el estado inicial se fija sin animar y la transición real
- * arranca desde él.
+ * Same as applyOrigin, but the browser doesn't animate the change.
+ * Used on open: reading layout forces the browser to compute styles, and if
+ * that happens before the variables exist, it animates from "none" to the
+ * starting state (backwards). With transitions off (data-no-transition, see
+ * lab-modal.css) the starting state is set without animating, and the real
+ * transition starts from it.
  */
 export function applyOriginWithoutTransition(
 	popup: HTMLElement,
@@ -65,6 +65,6 @@ export function applyOriginWithoutTransition(
 ) {
 	popup.setAttribute('data-no-transition', '')
 	applyOrigin(popup, slug)
-	void popup.offsetWidth // fuerza el cálculo de estilos con las variables ya puestas
+	void popup.offsetWidth // force style calculation with the variables already set
 	popup.removeAttribute('data-no-transition')
 }

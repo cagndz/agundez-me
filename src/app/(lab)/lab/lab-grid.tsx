@@ -2,7 +2,7 @@ import type { LabItem } from '@/lab/items'
 import Link from 'next/link'
 import { demos } from '@/lab/registry'
 
-export default function LabGrid({ items }: { items: LabItem[] }) {
+export function LabGrid({ items }: { items: LabItem[] }) {
 	return (
 		<div className='grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] border-t border-l border-border'>
 			{items.map((item) => {
@@ -11,7 +11,7 @@ export default function LabGrid({ items }: { items: LabItem[] }) {
 					<div
 						key={item.id}
 						data-lab-item
-						className='group relative aspect-square border-r border-b border-border p-4 font-mono text-sm uppercase transition-colors duration-100 ease-out-strong'
+						className='group relative aspect-square border-r border-b border-border p-4 font-mono text-sm uppercase'
 					>
 						<Link
 							href={`/lab?c=${item.slug}`}
