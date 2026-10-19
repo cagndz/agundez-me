@@ -10,7 +10,7 @@ export default function NotFound() {
 				Nothing here, but the rest of the site is still around.
 			</p>
 			<p className='mt-8'>
-				<Link href='/' className='link'>
+				<Link href='/' className='touch-target link'>
 					Back to home
 				</Link>
 			</p>

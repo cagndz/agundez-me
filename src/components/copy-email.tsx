@@ -29,7 +29,7 @@ export function CopyEmail() {
 				type='button'
 				onClick={handleClick}
 				aria-label='Copy email address'
-				className='inline-grid cursor-pointer p-0 text-left link'
+				className='touch-target inline-grid cursor-pointer p-0 text-left link'
 			>
 				<span className={`${base} ${copied ? hidden : ''}`}>Email</span>
 				<span className={`${base} ${copied ? '' : hidden}`}>Copied</span>

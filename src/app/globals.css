@@ -54,6 +54,13 @@
 		background: color-mix(in oklab, var(--accent) 25%, transparent);
 	}
 
+	/* The ring color is set on every element, not only on focus. Otherwise
+	   transition-colors (which includes outline-color) fades the ring in from
+	   the text color for a few frames. */
+	* {
+		outline-color: var(--accent);
+	}
+
 	:focus-visible {
 		outline: 2px solid var(--accent);
 		outline-offset: 3px;
@@ -81,6 +88,21 @@
 
 /* Thin, quiet scrollbar for areas that scroll sideways (code blocks).
    The thumb is the muted text color at 40%, the track stays invisible. */
+/* Bigger tap area on touch screens, without changing the layout: an invisible
+   box 12px above and below, 8px to each side. For standalone links only; inside
+   running text it would overlap the lines around it. */
+@utility touch-target {
+	position: relative;
+
+	@media (pointer: coarse) {
+		&::after {
+			content: '';
+			position: absolute;
+			inset: -12px -8px;
+		}
+	}
+}
+
 @utility scrollbar-thin {
 	scrollbar-width: thin;
 	scrollbar-color: color-mix(in oklab, var(--color-muted) 40%, transparent)
