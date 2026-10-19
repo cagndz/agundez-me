@@ -7,12 +7,12 @@ type Mode = 'conditional' | 'mounted'
 
 const MODES = {
 	conditional: {
-		label: 'Conditional render',
+		label: 'Conditional',
 		code: '{open && <Dialog.Root open>…</Dialog.Root>}',
 		result: 'It is born open and removed at once: no enter, no exit.',
 	},
 	mounted: {
-		label: 'Always mounted',
+		label: 'Mounted',
 		code: '<Dialog.Root open={open}>…</Dialog.Root>',
 		result: 'It sees the open prop change, so it can fade in and out.',
 	},
