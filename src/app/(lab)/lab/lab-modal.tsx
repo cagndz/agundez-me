@@ -6,9 +6,10 @@ import type { LabItem } from '@/lab/items'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { applyOrigin, applyOriginWithoutTransition } from '@/lab/origin'
 import { demos } from '@/lab/registry'
+import { XMark } from '@/components/icons/x-mark'
 import './lab-modal.css'
 
-export default function LabModal({ item }: { item: LabItem | undefined }) {
+export function LabModal({ item }: { item: LabItem | undefined }) {
 	const router = useRouter()
 	const [lastItem, setLastItem] = useState(item)
 
@@ -19,8 +20,9 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 	const shown = item ?? lastItem
 	const Demo = shown ? demos[shown.slug] : undefined
 
-	// ¿Se abrió el modal navegando dentro de la app (hay historial nuestro)?
-	// Si la página cargó ya con ?c=, no hay transición cerrado → abierto.
+	// Was the modal opened by navigating inside the app (so there is history to
+	// go back to)? If the page loaded with ?c= already set, it never went from
+	// closed to open.
 	const open = item !== undefined
 	const [prevOpen, setPrevOpen] = useState(open)
 	const [openedInApp, setOpenedInApp] = useState(false)
@@ -33,7 +35,7 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 	const slug = item?.slug
 	const popupRef = useRef<HTMLDivElement | null>(null)
 
-	// Al montarse el popup (al abrir), fijamos desde dónde nace.
+	// When the popup mounts (on open), set where it grows from.
 	const setPopup = useCallback(
 		(el: HTMLDivElement | null) => {
 			popupRef.current = el
@@ -42,7 +44,7 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 		[slug],
 	)
 
-	// Al cerrar, medimos de nuevo: la celda pudo moverse (resize) desde que se abrió.
+	// On close, measure again: the cell may have moved (resize) since it opened.
 	useLayoutEffect(() => {
 		if (item === undefined && lastItem && popupRef.current) {
 			applyOrigin(popupRef.current, lastItem.slug)
@@ -93,17 +95,7 @@ export default function LabModal({ item }: { item: LabItem | undefined }) {
 								aria-label='Close'
 								className='-mt-2 -mr-2 flex size-8 items-center justify-center rounded-xs text-muted transition-colors duration-150 ease-out-quart hover:text-foreground active:scale-95'
 							>
-								<svg
-									aria-hidden='true'
-									viewBox='0 0 16 16'
-									className='size-4'
-									fill='none'
-									stroke='currentColor'
-									strokeWidth='1.5'
-									strokeLinecap='square'
-								>
-									<path d='M3 3 L13 13 M13 3 L3 13' />
-								</svg>
+								<XMark className='size-4' />
 							</Dialog.Close>
 						</div>
 						{shown?.summary && (

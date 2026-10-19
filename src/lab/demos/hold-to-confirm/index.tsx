@@ -34,7 +34,7 @@ const FADE_IN_DURATION = 0.3
 // ease-out-strong, same curve as --ease-out-strong in globals.css
 const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1]
 
-export default function HoldToConfirm() {
+export function HoldToConfirm() {
 	const progress = useMotionValue(0)
 	const fall = useMotionValue(0)
 	const baseOpacity = useMotionValue(1)

@@ -1,9 +1,9 @@
-export interface LabSpec {
+export type LabSpec = {
 	label: string
 	value: string
 }
 
-export interface LabItem {
+export type LabItem = {
 	id: string
 	slug: string
 	title: string
