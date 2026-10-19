@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { ArrowLeft } from '@/components/icons/arrow-left'
 import { PostToc } from '@/components/post-toc'
 import { formatDate, getHeadings, getPost, getSlugs } from '@/lib/writing'
 
@@ -9,15 +10,15 @@ export async function generateStaticParams() {
 	return (await getSlugs()).map((slug) => ({ slug }))
 }
 
-type Props = { params: Promise<{ slug: string }> }
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+	params,
+}: PageProps<'/writing/[slug]'>): Promise<Metadata> {
 	const { slug } = await params
 	const { meta } = await getPost(slug)
 	return { title: meta.title, description: meta.summary }
 }
 
-export default async function Post({ params }: Props) {
+export default async function Post({ params }: PageProps<'/writing/[slug]'>) {
 	const { slug } = await params
 	const { default: Content, meta } = await getPost(slug)
 	const headings = await getHeadings(slug)
@@ -30,17 +31,7 @@ export default async function Post({ params }: Props) {
 						href='/'
 						className='group inline-flex items-center gap-1.5 self-start whitespace-nowrap text-muted transition-colors duration-150 ease-out-strong hover:text-foreground'
 					>
-						<svg
-							aria-hidden='true'
-							viewBox='0 0 16 16'
-							className='size-3.5 transition-transform duration-150 ease-out-strong motion-safe:group-hover:-translate-x-0.5'
-							fill='none'
-							stroke='currentColor'
-							strokeWidth='1.5'
-							strokeLinecap='square'
-						>
-							<path d='M14 8 H3 M7 4 L3 8 L7 12' />
-						</svg>
+						<ArrowLeft className='size-3.5 transition-transform duration-150 ease-out-strong motion-safe:group-hover:-translate-x-0.5' />
 						Home
 					</Link>
 					{headings.length >= 3 && <PostToc headings={headings} />}

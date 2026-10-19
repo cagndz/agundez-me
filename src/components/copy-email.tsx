@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
-
-const EMAIL = 'carlos@agundez.me'
+import { useRef, useState } from 'react'
+import { EMAIL } from '@/content/contact'
 
 export function CopyEmail() {
 	const [copied, setCopied] = useState(false)
@@ -32,16 +31,8 @@ export function CopyEmail() {
 				aria-label='Copy email address'
 				className='inline-grid cursor-pointer p-0 text-left link'
 			>
-				<span
-					className={`col-start-1 row-start-1 ${base} ${copied ? hidden : ''}`}
-				>
-					Email
-				</span>
-				<span
-					className={`col-start-1 row-start-1 ${base} ${copied ? '' : hidden}`}
-				>
-					Copied
-				</span>
+				<span className={`${base} ${copied ? hidden : ''}`}>Email</span>
+				<span className={`${base} ${copied ? '' : hidden}`}>Copied</span>
 			</button>
 			<span className='sr-only' aria-live='polite'>
 				{copied ? 'Email copied' : ''}

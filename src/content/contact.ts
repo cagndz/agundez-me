@@ -1,3 +1,5 @@
+export const EMAIL = 'carlos@agundez.me'
+
 type ContactLink = {
 	label: string
 	href: string
