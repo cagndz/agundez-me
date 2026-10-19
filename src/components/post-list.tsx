@@ -21,9 +21,16 @@ export function PostList({ posts }: { posts: Item[] }) {
 					<li key={slug}>
 						<Link
 							href={`/writing/${slug}`}
-							className='group/link flex items-start justify-between gap-4 py-3'
+							className='group/link flex items-start gap-4 py-3'
 						>
-							<span>{meta.title}</span>
+							{/* ISO date, so the first 4 characters are the year */}
+							<time
+								dateTime={meta.date}
+								className='w-10 shrink-0 text-muted tabular-nums'
+							>
+								{meta.date.slice(0, 4)}
+							</time>
+							<span className='flex-1'>{meta.title}</span>
 							<LinkArrow />
 						</Link>
 					</li>
