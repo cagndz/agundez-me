@@ -10,10 +10,7 @@ export default function NotFound() {
 				Nothing here, but the rest of the site is still around.
 			</p>
 			<p className='mt-8'>
-				<Link
-					href='/'
-					className='underline decoration-border underline-offset-4 transition-colors duration-150 ease-out-strong hover:decoration-accent'
-				>
+				<Link href='/' className='link'>
 					Back to home
 				</Link>
 			</p>

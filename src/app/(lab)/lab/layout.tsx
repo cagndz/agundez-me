@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import './lab.css'
 
 export default function LabLayout({ children }: LayoutProps<'/lab'>) {
 	if (process.env.VERCEL_ENV === 'production') {

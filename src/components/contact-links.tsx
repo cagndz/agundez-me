@@ -13,7 +13,7 @@ export function ContactLinks() {
 						href={href}
 						target='_blank'
 						rel='noopener noreferrer'
-						className='underline decoration-border underline-offset-4 transition-colors duration-150 ease-out-strong hover:decoration-accent'
+						className='link'
 					>
 						{label}
 					</a>

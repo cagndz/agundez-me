@@ -1,21 +1,5 @@
 @import 'tailwindcss';
 
-:root {
-	color-scheme: light;
-	--background: #faf9f7;
-	--foreground: #1a1917;
-	--muted: #6b6862;
-	--border: #e7e4de;
-	--accent: #ff6000;
-}
-
-[data-theme='lab'] {
-	--background: #ececea;
-	--foreground: #111111;
-	--muted: #5f5f5d;
-	--border: #cfcfcc;
-}
-
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -32,89 +16,92 @@
 	--ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
-html {
-	scrollbar-gutter: stable;
-}
+/* Base styles live in a layer so Tailwind utilities can always override them.
+   Unlayered CSS beats every layer, whatever its specificity. */
+@layer base {
+	:root {
+		color-scheme: light;
+		--background: #faf9f7;
+		--foreground: #1a1917;
+		--muted: #6b6862;
+		--border: #e7e4de;
+		--accent: #ff6000;
+	}
 
-@media (prefers-reduced-motion: no-preference) {
 	html {
-		scroll-behavior: smooth;
+		scrollbar-gutter: stable;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		html {
+			scroll-behavior: smooth;
+		}
+	}
+
+	body {
+		background: var(--background);
+		color: var(--foreground);
+		text-wrap: pretty;
+	}
+
+	h1,
+	h2,
+	h3 {
+		text-wrap: balance;
+	}
+
+	::selection {
+		background: color-mix(in oklab, var(--accent) 25%, transparent);
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 3px;
+		border-radius: 2px;
 	}
 }
 
-body {
-	background: var(--background);
-	color: var(--foreground);
-	text-wrap: pretty;
-}
+/* Underlined text link: the line turns accent on hover.
+   Same (hover: hover) guard as Tailwind's hover: variant, so a tap on a touch
+   screen doesn't leave the link stuck in its hover color. */
+@utility link {
+	text-decoration-line: underline;
+	text-decoration-color: var(--color-border);
+	text-underline-offset: 4px;
+	transition-property: text-decoration-color;
+	transition-duration: 150ms;
+	transition-timing-function: var(--ease-out-strong);
 
-h1,
-h2,
-h3 {
-	text-wrap: balance;
-}
-
-@keyframes reveal {
-	from {
-		opacity: 0;
-		transform: translateY(2px);
-		filter: blur(2px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-		filter: blur(0);
+	@media (hover: hover) {
+		&:hover {
+			text-decoration-color: var(--color-accent);
+		}
 	}
 }
 
-.orchestration > * {
-	animation: reveal 500ms ease;
-	animation-delay: calc(sibling-index() * 100ms);
-	animation-fill-mode: both;
-}
+@layer components {
+	@keyframes reveal {
+		from {
+			opacity: 0;
+			transform: translateY(2px);
+			filter: blur(2px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+			filter: blur(0);
+		}
+	}
 
-::selection {
-	background: color-mix(in oklab, var(--accent) 25%, transparent);
-}
-
-:focus-visible {
-	outline: 2px solid var(--accent);
-	outline-offset: 3px;
-	border-radius: 2px;
-}
-
-[data-theme='lab'] :focus-visible {
-	outline-color: var(--foreground);
-	outline-offset: -2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
 	.orchestration > * {
-		animation: none;
+		animation: reveal 500ms ease;
+		animation-delay: calc(sibling-index() * 100ms);
+		animation-fill-mode: both;
 	}
-}
 
-/* Signal dot: hard LED-style blink between full and dim */
-@keyframes signal-blink {
-	60% {
-		opacity: var(--signal-dim);
+	@media (prefers-reduced-motion: reduce) {
+		.orchestration > * {
+			animation: none;
+		}
 	}
-}
-
-.signal-dot {
-	--signal-dim: 0.3;
-	animation: signal-blink 1.6s steps(1) infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.signal-dot {
-		animation: none;
-	}
-}
-
-/* Over a cell the LED stays dim, no blinking */
-.lab-scope:has([data-lab-item]:hover, [data-lab-cell]:focus-visible)
-	.signal-dot {
-	animation: none;
-	opacity: var(--signal-dim);
 }
