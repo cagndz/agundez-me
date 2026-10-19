@@ -8,6 +8,8 @@ import {
 	PX_PER_UNIT,
 	TRAVEL,
 	BAND_WIDTH,
+	RADIUS,
+	WHEEL_TOP,
 } from './constants'
 import { pixelToUnit, snapToTick } from './utils'
 
@@ -23,7 +25,11 @@ export function Dial() {
 		<div className='flex flex-col items-center gap-7'>
 			<span>{value}</span>
 
-			<div className='relative h-16 w-80 overflow-hidden border border-border'>
+			<div className='relative h-23 w-80 overflow-hidden border border-border'>
+				<div
+					className='absolute left-1/2 -translate-x-1/2 rounded-full border border-border'
+					style={{ width: RADIUS * 2, height: RADIUS * 2, top: WHEEL_TOP }}
+				/>
 				<motion.div
 					className='absolute inset-y-0 left-1/2 font-mono'
 					style={{
