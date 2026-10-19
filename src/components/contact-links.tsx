@@ -13,7 +13,7 @@ export function ContactLinks() {
 						href={href}
 						target='_blank'
 						rel='noopener noreferrer'
-						className='link'
+						className='touch-target link'
 					>
 						{label}
 					</a>

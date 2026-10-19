@@ -29,7 +29,7 @@ export default async function Post({ params }: PageProps<'/writing/[slug]'>) {
 				<div className='flex flex-col gap-10'>
 					<Link
 						href='/'
-						className='group inline-flex items-center gap-1.5 self-start whitespace-nowrap text-muted transition-colors duration-150 ease-out-strong hover:text-foreground'
+						className='group touch-target inline-flex items-center gap-1.5 self-start whitespace-nowrap text-muted transition-colors duration-150 ease-out-strong hover:text-foreground'
 					>
 						<ArrowLeft className='size-3.5 transition-transform duration-150 ease-out-strong motion-safe:group-hover:-translate-x-0.5' />
 						Home

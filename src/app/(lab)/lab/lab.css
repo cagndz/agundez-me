@@ -8,6 +8,13 @@
 		--border: #cfcfcc;
 	}
 
+	/* Same as globals.css: the ring color lives on every element, so it never
+	   transitions in from another color. */
+	[data-theme='lab'],
+	[data-theme='lab'] * {
+		outline-color: var(--foreground);
+	}
+
 	[data-theme='lab'] :focus-visible {
 		outline-color: var(--foreground);
 		outline-offset: -2px;
