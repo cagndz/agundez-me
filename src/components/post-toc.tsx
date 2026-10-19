@@ -110,7 +110,7 @@ export function PostToc({ headings }: { headings: Heading[] }) {
 					aria-hidden='true'
 					initial={false}
 					animate={{ opacity: activeId ? 1 : 0 }}
-					transition={{ opacity: { duration: 0.15 } }}
+					transition={{ opacity: { duration: 0.15, ease: [0.23, 1, 0.32, 1] } }}
 					style={{
 						y,
 						width: DOT,
