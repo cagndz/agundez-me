@@ -1,7 +1,13 @@
 'use client'
 
 import { motion, useReducedMotion, useSpring } from 'motion/react'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+	useEffect,
+	useEffectEvent,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from 'react'
 import type { Heading } from '@/lib/writing'
 
 // A heading counts as "read" once it is this far from the top. It sits just
@@ -23,26 +29,26 @@ export function PostToc({ headings }: { headings: Heading[] }) {
 	const placedRef = useRef(false)
 	const y = useSpring(0, { stiffness: 420, damping: 34, mass: 0.7 })
 
-	function placeDot(jump: boolean) {
+	// An Effect Event: always reads the latest activeId and reduceMotion, but
+	// is not a dependency, so effects re-run only for the reasons they list.
+	const placeDot = useEffectEvent((jump: boolean) => {
 		const item = activeId ? itemRefs.current[activeId] : null
 		if (!item) return
 		const target = item.offsetTop + item.offsetHeight / 2 - DOT / 2
 		if (jump || reduceMotion || !placedRef.current) y.jump(target)
 		else y.set(target)
 		placedRef.current = true
-	}
+	})
 
 	useLayoutEffect(() => {
 		placeDot(false)
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activeId])
 
 	useEffect(() => {
 		const onResize = () => placeDot(true)
 		window.addEventListener('resize', onResize)
 		return () => window.removeEventListener('resize', onResize)
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [activeId])
+	}, [])
 
 	useEffect(() => {
 		let frame = 0
