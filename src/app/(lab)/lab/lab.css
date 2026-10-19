@@ -1,0 +1,42 @@
+/* Lab-only styles, loaded by the lab layout so the public site never ships them. */
+
+@layer base {
+	[data-theme='lab'] {
+		--background: #ececea;
+		--foreground: #111111;
+		--muted: #5f5f5d;
+		--border: #cfcfcc;
+	}
+
+	[data-theme='lab'] :focus-visible {
+		outline-color: var(--foreground);
+		outline-offset: -2px;
+	}
+}
+
+@layer components {
+	/* Signal dot: hard LED-style blink between full and dim */
+	@keyframes signal-blink {
+		60% {
+			opacity: var(--signal-dim);
+		}
+	}
+
+	.signal-dot {
+		--signal-dim: 0.3;
+		animation: signal-blink 1.6s steps(1) infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.signal-dot {
+			animation: none;
+		}
+	}
+
+	/* Over a cell the LED stays dim, no blinking */
+	.lab-scope:has([data-lab-item]:hover, [data-lab-cell]:focus-visible)
+		.signal-dot {
+		animation: none;
+		opacity: var(--signal-dim);
+	}
+}
