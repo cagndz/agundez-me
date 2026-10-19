@@ -60,7 +60,10 @@ One more problem. When the modal closes, `selectedComponent` becomes `undefined`
 ```tsx
 const [lastComponent, setLastComponent] = useState(selectedComponent)
 
-if (selectedComponent && selectedComponent.slug !== lastComponent?.slug) {
+if (
+  selectedComponent &&
+  selectedComponent.slug !== lastComponent?.slug
+) {
   setLastComponent(selectedComponent)
 }
 
