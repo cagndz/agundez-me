@@ -1,20 +1,28 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, useMotionValue, useMotionValueEvent } from 'motion/react'
+import {
+	motion,
+	useMotionValue,
+	useMotionValueEvent,
+	useTransform,
+} from 'motion/react'
 import {
 	INITIAL,
 	INITIAL_OFFSET_PX,
-	PX_PER_UNIT,
 	TRAVEL,
 	BAND_WIDTH,
 	RADIUS,
 	WHEEL_TOP,
+	DEGREES_PER_UNIT,
+	UNITS,
+	MIN,
 } from './constants'
-import { pixelToUnit, snapToTick } from './utils'
+import { pixelToDegrees, pixelToUnit, snapToTick } from './utils'
 
 export function Dial() {
 	const x = useMotionValue(INITIAL_OFFSET_PX)
+	const rotateDial = useTransform(x, pixelToDegrees)
 	const [value, setValue] = useState(INITIAL)
 
 	useMotionValueEvent(x, 'change', (latest) => {
@@ -26,16 +34,31 @@ export function Dial() {
 			<span>{value}</span>
 
 			<div className='relative h-23 w-80 overflow-hidden border border-border'>
-				<div
+				<motion.div
 					className='absolute left-1/2 -translate-x-1/2 rounded-full border border-border'
-					style={{ width: RADIUS * 2, height: RADIUS * 2, top: WHEEL_TOP }}
-				/>
+					style={{
+						width: RADIUS * 2,
+						height: RADIUS * 2,
+						top: WHEEL_TOP,
+						rotate: rotateDial,
+					}}
+				>
+					{UNITS.map((unit) => (
+						<div
+							key={unit}
+							className='absolute top-0 left-1/2 h-8.5 w-px -translate-x-1/2 bg-foreground'
+							style={{
+								transformOrigin: `50% ${RADIUS}px`,
+								rotate: `${(unit - MIN) * DEGREES_PER_UNIT}deg`,
+							}}
+						/>
+					))}
+				</motion.div>
 				<motion.div
 					className='absolute inset-y-0 left-1/2 font-mono'
 					style={{
 						x,
 						width: BAND_WIDTH,
-						backgroundImage: `repeating-linear-gradient(90deg, var(--color-foreground) 0 1px, transparent 1px ${PX_PER_UNIT}px)`,
 					}}
 					drag='x'
 					dragConstraints={{ left: -TRAVEL, right: 0 }}
