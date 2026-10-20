@@ -30,3 +30,11 @@ export function getTickType(unit: number): TickType {
 export function getProximity(distance: number): number {
 	return Math.exp(-(distance * distance) / (2 * SIGMA * SIGMA))
 }
+
+export function getDigits(value: number): [number, number, number] {
+	return [
+		Math.floor(value / 100) % 10,
+		Math.floor(value / 10) % 10,
+		Math.floor(value / 1) % 10,
+	]
+}

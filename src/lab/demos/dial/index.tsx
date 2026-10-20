@@ -24,6 +24,7 @@ import {
 	snapToTick,
 } from './utils'
 import { Tick } from './tick'
+import { Readout } from './readout'
 
 export function Dial() {
 	const x = useMotionValue(INITIAL_OFFSET_PX)
@@ -38,7 +39,7 @@ export function Dial() {
 
 	return (
 		<div className='flex flex-col items-center gap-7'>
-			<span>{value}</span>
+			<Readout value={value} />
 			<div className='relative h-23 w-80 overflow-hidden border border-border'>
 				<div className='absolute inset-0 mask-[linear-gradient(90deg,transparent,#000_22%,#000_78%,transparent)]'>
 					<motion.div
