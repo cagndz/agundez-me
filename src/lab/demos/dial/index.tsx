@@ -39,7 +39,7 @@ export function Dial() {
 
 			<div className='relative h-23 w-80 overflow-hidden border border-border'>
 				<motion.div
-					className='absolute left-1/2 -translate-x-1/2 rounded-full border border-border'
+					className='absolute left-1/2 -translate-x-1/2 rounded-full'
 					style={{
 						width: RADIUS * 2,
 						height: RADIUS * 2,
@@ -86,7 +86,7 @@ export function Dial() {
 					onPointerDown={(e) => dragControls.start(e)}
 					className='absolute inset-0 touch-pan-y'
 				/>
-				<div className='pointer-events-none absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-accent' />
+				<div className='pointer-events-none absolute top-[47px] left-1/2 h-2.25 w-3 -translate-x-1/2 bg-accent [clip-path:polygon(50%_0%,0%_100%,100%_100%)]' />
 			</div>
 		</div>
 	)
