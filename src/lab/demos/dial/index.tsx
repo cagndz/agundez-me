@@ -67,7 +67,7 @@ export function Dial() {
 		<div
 			role='group'
 			aria-label='Dial'
-			className='flex flex-col items-center'
+			className='flex flex-col items-center select-none'
 			style={{ gap: READOUT_GAP }}
 		>
 			<Readout value={value} isDragging={isDragging} />
@@ -121,7 +121,7 @@ export function Dial() {
 				<div
 					aria-hidden
 					onPointerDown={(e) => dragControls.start(e)}
-					className='absolute inset-0 touch-pan-y'
+					className='absolute inset-0 cursor-grab touch-pan-y active:cursor-grabbing'
 				/>
 				<div
 					aria-hidden
