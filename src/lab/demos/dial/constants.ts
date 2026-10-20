@@ -1,3 +1,5 @@
+import { TickType } from './types'
+
 export const MIN = 0
 export const MAX = 100
 export const INITIAL = 50
@@ -9,3 +11,8 @@ export const RADIUS = 300
 export const WHEEL_TOP = 40
 export const DEGREES_PER_UNIT = 2.4
 export const UNITS = Array.from({ length: MAX - MIN + 1 }, (_, i) => MIN + i)
+export const TICK_HEIGHTS: Record<TickType, number> = {
+	major: 22,
+	mid: 15,
+	minor: 9,
+}

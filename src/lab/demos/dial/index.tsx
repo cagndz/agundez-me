@@ -18,8 +18,9 @@ import {
 	DEGREES_PER_UNIT,
 	UNITS,
 	MIN,
+	TICK_HEIGHTS,
 } from './constants'
-import { pixelToDegrees, pixelToUnit, snapToTick } from './utils'
+import { getTickType, pixelToDegrees, pixelToUnit, snapToTick } from './utils'
 
 export function Dial() {
 	const x = useMotionValue(INITIAL_OFFSET_PX)
@@ -45,16 +46,21 @@ export function Dial() {
 						rotate: rotateDial,
 					}}
 				>
-					{UNITS.map((unit) => (
-						<div
-							key={unit}
-							className='absolute top-0 left-1/2 h-8.5 w-px -translate-x-1/2 bg-foreground'
-							style={{
-								transformOrigin: `50% ${RADIUS}px`,
-								rotate: `${(unit - MIN) * DEGREES_PER_UNIT}deg`,
-							}}
-						/>
-					))}
+					{UNITS.map((unit) => {
+						const tickType = getTickType(unit)
+						const height = TICK_HEIGHTS[tickType]
+						return (
+							<div
+								key={unit}
+								className='absolute top-0 left-1/2 w-px -translate-x-1/2 bg-foreground'
+								style={{
+									transformOrigin: `50% ${RADIUS}px`,
+									rotate: `${(unit - MIN) * DEGREES_PER_UNIT}deg`,
+									height,
+								}}
+							/>
+						)
+					})}
 				</motion.div>
 				<motion.div
 					className='absolute inset-y-0 left-1/2 font-mono'
