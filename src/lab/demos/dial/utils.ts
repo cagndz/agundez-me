@@ -4,6 +4,8 @@ import {
 	MIN,
 	PX_PER_UNIT,
 	RELEASE_POWER,
+	RUBBER_RANGE,
+	RUBBER_STIFFNESS,
 	SIGMA,
 	TRAVEL,
 } from './constants'
@@ -50,4 +52,19 @@ export function getDigits(value: number): [number, number, number] {
 export function getReleaseTarget(pixel: number, velocity: number): number {
 	const thrown = pixel + velocity * RELEASE_POWER
 	return Math.max(-TRAVEL, Math.min(0, snapToTick(thrown)))
+}
+
+// How far the dial really moves for a given overshoot beyond an end.
+function rubberBand(overshoot: number): number {
+	return (
+		(1 - 1 / ((overshoot * RUBBER_STIFFNESS) / RUBBER_RANGE + 1)) * RUBBER_RANGE
+	)
+}
+
+// Free finger offset in, displayed offset out: unchanged inside [-TRAVEL, 0],
+// compressed progressively outside it.
+export function applyRubberBand(pixel: number): number {
+	if (pixel > 0) return rubberBand(pixel)
+	if (pixel < -TRAVEL) return -TRAVEL - rubberBand(-TRAVEL - pixel)
+	return pixel
 }

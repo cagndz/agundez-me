@@ -19,6 +19,7 @@ import {
 	MARKER_WIDTH,
 	READOUT_GAP,
 	RELEASE_SPRING,
+	RETURN_SPRING,
 	TRAVEL,
 	BAND_WIDTH,
 	RADIUS,
@@ -28,6 +29,7 @@ import {
 	UNITS,
 } from './constants'
 import {
+	applyRubberBand,
 	pixelToDegrees,
 	pixelToPosition,
 	getReleaseTarget,
@@ -38,8 +40,10 @@ import { Readout } from './readout'
 
 export function Dial() {
 	const x = useMotionValue(INITIAL_OFFSET_PX)
-	const rotateDial = useTransform(x, pixelToDegrees)
-	const position = useTransform(x, pixelToPosition)
+	// x follows the finger freely; the wheel and ticks read it through the rubber band.
+	const displayX = useTransform(x, applyRubberBand)
+	const rotateDial = useTransform(displayX, pixelToDegrees)
+	const position = useTransform(displayX, pixelToPosition)
 	const [value, setValue] = useState(INITIAL)
 	const [isDragging, setIsDragging] = useState(false)
 	const dragControls = useDragControls()
@@ -48,6 +52,7 @@ export function Dial() {
 	function handleDragEnd(_event: PointerEvent, info: PanInfo) {
 		setIsDragging(false)
 
+		const isOverscrolled = x.get() > 0 || x.get() < -TRAVEL
 		const target = getReleaseTarget(x.get(), info.velocity.x)
 
 		if (reduceMotion) {
@@ -56,7 +61,10 @@ export function Dial() {
 		}
 
 		// Start the spring with the finger's own velocity so the hand-off is seamless.
-		animate(x, target, { ...RELEASE_SPRING, velocity: info.velocity.x })
+		animate(x, target, {
+			...(isOverscrolled ? RETURN_SPRING : RELEASE_SPRING),
+			velocity: info.velocity.x,
+		})
 	}
 
 	useMotionValueEvent(x, 'change', (latest) => {
@@ -110,8 +118,6 @@ export function Dial() {
 						width: BAND_WIDTH,
 					}}
 					drag='x'
-					dragConstraints={{ left: -TRAVEL, right: 0 }}
-					dragElastic={0.25}
 					dragMomentum={false}
 					dragListener={false}
 					dragControls={dragControls}

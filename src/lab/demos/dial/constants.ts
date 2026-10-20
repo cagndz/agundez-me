@@ -63,3 +63,15 @@ export const RELEASE_SPRING = {
 	stiffness: 120,
 	damping: 15.8,
 } as const
+// Rubber band past the ends: the dial gives easily at first and ever harder later,
+// approaching RUBBER_RANGE px without ever reaching it (Apple's overscroll curve).
+export const RUBBER_STIFFNESS = 0.55
+export const RUBBER_RANGE = scaled(200)
+// Coming back from past an end must not overshoot into the range: critically
+// damped (ratio 1), so damping = 2 * sqrt(stiffness).
+export const RETURN_STIFFNESS = 170
+export const RETURN_SPRING = {
+	type: 'spring',
+	stiffness: RETURN_STIFFNESS,
+	damping: 2 * Math.sqrt(RETURN_STIFFNESS),
+} as const
