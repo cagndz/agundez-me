@@ -38,33 +38,35 @@ export function Dial() {
 			<span>{value}</span>
 
 			<div className='relative h-23 w-80 overflow-hidden border border-border'>
-				<motion.div
-					className='absolute left-1/2 -translate-x-1/2 rounded-full'
-					style={{
-						width: RADIUS * 2,
-						height: RADIUS * 2,
-						top: WHEEL_TOP,
-						rotate: rotateDial,
-					}}
-				>
-					{UNITS.map((unit) => {
-						const tickType = getTickType(unit)
-						const height = TICK_HEIGHTS[tickType]
-						const isActive = value === unit
+				<div className='absolute inset-0 mask-[linear-gradient(90deg,transparent,#000_22%,#000_78%,transparent)]'>
+					<motion.div
+						className='absolute left-1/2 -translate-x-1/2 rounded-full'
+						style={{
+							width: RADIUS * 2,
+							height: RADIUS * 2,
+							top: WHEEL_TOP,
+							rotate: rotateDial,
+						}}
+					>
+						{UNITS.map((unit) => {
+							const tickType = getTickType(unit)
+							const height = TICK_HEIGHTS[tickType]
+							const isActive = value === unit
 
-						return (
-							<div
-								key={unit}
-								className={`absolute bottom-full left-1/2 w-px -translate-x-1/2 ${isActive ? 'bg-accent' : 'bg-foreground'}`}
-								style={{
-									transformOrigin: `50% ${RADIUS + height}px`,
-									rotate: `${(unit - MIN) * DEGREES_PER_UNIT}deg`,
-									height,
-								}}
-							/>
-						)
-					})}
-				</motion.div>
+							return (
+								<div
+									key={unit}
+									className={`absolute bottom-full left-1/2 w-px -translate-x-1/2 ${isActive ? 'bg-accent' : 'bg-foreground'}`}
+									style={{
+										transformOrigin: `50% ${RADIUS + height}px`,
+										rotate: `${(unit - MIN) * DEGREES_PER_UNIT}deg`,
+										height,
+									}}
+								/>
+							)
+						})}
+					</motion.div>
+				</div>
 				<motion.div
 					className='absolute inset-y-0 left-1/2 font-mono'
 					style={{
