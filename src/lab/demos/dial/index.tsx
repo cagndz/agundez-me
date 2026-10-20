@@ -6,6 +6,7 @@ import {
 	useDragControls,
 	useMotionValue,
 	useMotionValueEvent,
+	useReducedMotion,
 	useTransform,
 } from 'motion/react'
 import {
@@ -33,16 +34,29 @@ export function Dial() {
 	const [value, setValue] = useState(INITIAL)
 	const [isDragging, setIsDragging] = useState(false)
 	const dragControls = useDragControls()
+	const reduceMotion = useReducedMotion()
+
+	// With reduced motion the dial still snaps to a tick, but it doesn't coast.
+	const dragTransition = reduceMotion
+		? { modifyTarget: snapToTick, power: 0, timeConstant: 1 }
+		: { modifyTarget: snapToTick, power: 0.2, timeConstant: 300 }
 
 	useMotionValueEvent(x, 'change', (latest) => {
 		setValue(pixelToUnit(latest))
 	})
 
 	return (
-		<div className='flex flex-col items-center gap-7'>
+		<div
+			role='group'
+			aria-label='Dial'
+			className='flex flex-col items-center gap-7'
+		>
 			<Readout value={value} isDragging={isDragging} />
 			<div className='relative h-23 w-80 overflow-hidden border border-border'>
-				<div className='absolute inset-0 mask-[linear-gradient(90deg,transparent,#000_22%,#000_78%,transparent)]'>
+				<div
+					aria-hidden
+					className='absolute inset-0 mask-[linear-gradient(90deg,transparent,#000_22%,#000_78%,transparent)]'
+				>
 					<motion.div
 						className='absolute left-1/2 -translate-x-1/2 rounded-full'
 						style={{
@@ -67,6 +81,7 @@ export function Dial() {
 					</motion.div>
 				</div>
 				<motion.div
+					aria-hidden
 					className='absolute inset-y-0 left-1/2 font-mono'
 					style={{
 						x,
@@ -75,21 +90,21 @@ export function Dial() {
 					drag='x'
 					dragConstraints={{ left: -TRAVEL, right: 0 }}
 					dragElastic={0.25}
-					dragTransition={{
-						modifyTarget: snapToTick,
-						power: 0.2,
-						timeConstant: 300,
-					}}
+					dragTransition={dragTransition}
 					dragListener={false}
 					dragControls={dragControls}
 					onDragStart={() => setIsDragging(true)}
 					onDragEnd={() => setIsDragging(false)}
 				/>
 				<div
+					aria-hidden
 					onPointerDown={(e) => dragControls.start(e)}
 					className='absolute inset-0 touch-pan-y'
 				/>
-				<div className='pointer-events-none absolute top-[47px] left-1/2 h-2.25 w-3 -translate-x-1/2 bg-accent [clip-path:polygon(50%_0%,0%_100%,100%_100%)]' />
+				<div
+					aria-hidden
+					className='pointer-events-none absolute top-[47px] left-1/2 h-2.25 w-3 -translate-x-1/2 bg-accent [clip-path:polygon(50%_0%,0%_100%,100%_100%)]'
+				/>
 			</div>
 		</div>
 	)

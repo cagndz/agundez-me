@@ -15,16 +15,19 @@ export function Readout({ value, isDragging }: ReadoutProps) {
 
 	return (
 		<div className='flex items-end'>
-			{getDigits(value).map((digit, i) => (
-				<DigitColumn
-					key={i}
-					digit={digit}
-					instant={isDragging || reduceMotion === true}
-					delay={(DIGIT_COUNT - 1 - i) * ROLL_STAGGER}
-					isDimmed={value < 10 ** (2 - i) && i < 2}
-				/>
-			))}
-			<span className='ml-2 pb-2 text-sm text-muted'>%</span>
+			<span className='sr-only'>{value}%</span>
+			<div aria-hidden className='flex items-end'>
+				{getDigits(value).map((digit, i) => (
+					<DigitColumn
+						key={i}
+						digit={digit}
+						instant={isDragging || reduceMotion === true}
+						delay={(DIGIT_COUNT - 1 - i) * ROLL_STAGGER}
+						isDimmed={value < 10 ** (2 - i) && i < 2}
+					/>
+				))}
+				<span className='ml-2 pb-2 text-sm text-muted'>%</span>
+			</div>
 		</div>
 	)
 }
