@@ -1,4 +1,4 @@
-import { DEGREES_PER_UNIT, MAX, MIN, PX_PER_UNIT } from './constants'
+import { DEGREES_PER_UNIT, MAX, MIN, PX_PER_UNIT, SIGMA } from './constants'
 import type { TickType } from './types'
 
 export function pixelToPosition(pixel: number): number {
@@ -25,4 +25,8 @@ export function getTickType(unit: number): TickType {
 	} else {
 		return 'minor'
 	}
+}
+
+export function getProximity(distance: number): number {
+	return Math.exp(-(distance * distance) / (2 * SIGMA * SIGMA))
 }
