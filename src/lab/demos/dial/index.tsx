@@ -50,10 +50,12 @@ export function Dial() {
 					{UNITS.map((unit) => {
 						const tickType = getTickType(unit)
 						const height = TICK_HEIGHTS[tickType]
+						const isActive = value === unit
+
 						return (
 							<div
 								key={unit}
-								className='absolute bottom-full left-1/2 w-px -translate-x-1/2 bg-foreground'
+								className={`absolute bottom-full left-1/2 w-px -translate-x-1/2 ${isActive ? 'bg-accent' : 'bg-foreground'}`}
 								style={{
 									transformOrigin: `50% ${RADIUS + height}px`,
 									rotate: `${(unit - MIN) * DEGREES_PER_UNIT}deg`,
