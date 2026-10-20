@@ -17,12 +17,18 @@ import {
 	WHEEL_TOP,
 	UNITS,
 } from './constants'
-import { pixelToDegrees, pixelToUnit, snapToTick } from './utils'
+import {
+	pixelToDegrees,
+	pixelToPosition,
+	pixelToUnit,
+	snapToTick,
+} from './utils'
 import { Tick } from './tick'
 
 export function Dial() {
 	const x = useMotionValue(INITIAL_OFFSET_PX)
 	const rotateDial = useTransform(x, pixelToDegrees)
+	const position = useTransform(x, pixelToPosition)
 	const [value, setValue] = useState(INITIAL)
 	const dragControls = useDragControls()
 
@@ -33,7 +39,6 @@ export function Dial() {
 	return (
 		<div className='flex flex-col items-center gap-7'>
 			<span>{value}</span>
-
 			<div className='relative h-23 w-80 overflow-hidden border border-border'>
 				<div className='absolute inset-0 mask-[linear-gradient(90deg,transparent,#000_22%,#000_78%,transparent)]'>
 					<motion.div
@@ -48,7 +53,14 @@ export function Dial() {
 						{UNITS.map((unit) => {
 							const isActive = value === unit
 
-							return <Tick key={unit} unit={unit} isActive={isActive} />
+							return (
+								<Tick
+									key={unit}
+									unit={unit}
+									isActive={isActive}
+									position={position}
+								/>
+							)
 						})}
 					</motion.div>
 				</div>

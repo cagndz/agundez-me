@@ -1,8 +1,12 @@
 import { DEGREES_PER_UNIT, MAX, MIN, PX_PER_UNIT } from './constants'
 import type { TickType } from './types'
 
+export function pixelToPosition(pixel: number): number {
+	return MIN - pixel / PX_PER_UNIT
+}
+
 export function pixelToUnit(pixel: number): number {
-	return Math.round(Math.max(MIN, Math.min(MAX, MIN - pixel / PX_PER_UNIT)))
+	return Math.round(Math.max(MIN, Math.min(MAX, pixelToPosition(pixel))))
 }
 
 export function snapToTick(pixel: number): number {
