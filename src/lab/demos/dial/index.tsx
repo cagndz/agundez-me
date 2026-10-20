@@ -31,6 +31,7 @@ export function Dial() {
 	const rotateDial = useTransform(x, pixelToDegrees)
 	const position = useTransform(x, pixelToPosition)
 	const [value, setValue] = useState(INITIAL)
+	const [isDragging, setIsDragging] = useState(false)
 	const dragControls = useDragControls()
 
 	useMotionValueEvent(x, 'change', (latest) => {
@@ -39,7 +40,7 @@ export function Dial() {
 
 	return (
 		<div className='flex flex-col items-center gap-7'>
-			<Readout value={value} />
+			<Readout value={value} isDragging={isDragging} />
 			<div className='relative h-23 w-80 overflow-hidden border border-border'>
 				<div className='absolute inset-0 mask-[linear-gradient(90deg,transparent,#000_22%,#000_78%,transparent)]'>
 					<motion.div
@@ -81,6 +82,8 @@ export function Dial() {
 					}}
 					dragListener={false}
 					dragControls={dragControls}
+					onDragStart={() => setIsDragging(true)}
+					onDragEnd={() => setIsDragging(false)}
 				/>
 				<div
 					onPointerDown={(e) => dragControls.start(e)}

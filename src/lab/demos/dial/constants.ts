@@ -25,3 +25,9 @@ export const TICK_GROW: Record<TickType, number> = {
 }
 export const DIGIT_HEIGHT = 44
 export const DIGITS = Array.from({ length: 10 }, (_, i) => i)
+export const ROLL_STAGGER = 0.035
+export const ROLL_TWEEN = {
+	duration: 0.4,
+	ease: [0.23, 1, 0.32, 1],
+} as const
+export const ROLL_FADE = 1.3
