@@ -1,5 +1,5 @@
 import { useReducedMotion } from 'motion/react'
-import { ROLL_STAGGER } from './constants'
+import { ROLL_STAGGER, UNIT_FONT_SIZE, UNIT_GAP, UNIT_LIFT } from './constants'
 import { DigitColumn } from './digit-column'
 import { getDigits } from './utils'
 
@@ -26,7 +26,16 @@ export function Readout({ value, isDragging }: ReadoutProps) {
 						isDimmed={value < 10 ** (2 - i) && i < 2}
 					/>
 				))}
-				<span className='ml-2 pb-2 text-sm text-muted'>%</span>
+				<span
+					className='text-muted'
+					style={{
+						marginLeft: UNIT_GAP,
+						paddingBottom: UNIT_LIFT,
+						fontSize: UNIT_FONT_SIZE,
+					}}
+				>
+					%
+				</span>
 			</div>
 		</div>
 	)

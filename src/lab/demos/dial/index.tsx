@@ -14,11 +14,17 @@ import {
 import {
 	INITIAL,
 	INITIAL_OFFSET_PX,
+	MARKER_HEIGHT,
+	MARKER_TOP,
+	MARKER_WIDTH,
+	READOUT_GAP,
 	RELEASE_SPRING,
 	TRAVEL,
 	BAND_WIDTH,
 	RADIUS,
 	WHEEL_TOP,
+	WINDOW_HEIGHT,
+	WINDOW_WIDTH,
 	UNITS,
 } from './constants'
 import {
@@ -61,10 +67,14 @@ export function Dial() {
 		<div
 			role='group'
 			aria-label='Dial'
-			className='flex flex-col items-center gap-7'
+			className='flex flex-col items-center'
+			style={{ gap: READOUT_GAP }}
 		>
 			<Readout value={value} isDragging={isDragging} />
-			<div className='relative h-23 w-80 overflow-hidden'>
+			<div
+				className='relative overflow-hidden'
+				style={{ width: WINDOW_WIDTH, height: WINDOW_HEIGHT }}
+			>
 				<div
 					aria-hidden
 					className='absolute inset-0 mask-[linear-gradient(90deg,transparent,#000_22%,#000_78%,transparent)]'
@@ -115,7 +125,12 @@ export function Dial() {
 				/>
 				<div
 					aria-hidden
-					className='pointer-events-none absolute top-[47px] left-1/2 h-2.25 w-3 -translate-x-1/2 bg-accent [clip-path:polygon(50%_0%,0%_100%,100%_100%)]'
+					className='pointer-events-none absolute left-1/2 -translate-x-1/2 bg-accent [clip-path:polygon(50%_0%,0%_100%,100%_100%)]'
+					style={{
+						top: MARKER_TOP,
+						width: MARKER_WIDTH,
+						height: MARKER_HEIGHT,
+					}}
 				/>
 			</div>
 		</div>

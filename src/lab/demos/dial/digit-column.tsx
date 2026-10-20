@@ -7,7 +7,14 @@ import {
 	wrap,
 	type MotionValue,
 } from 'motion/react'
-import { DIGIT_HEIGHT, DIGITS, ROLL_FADE, ROLL_TWEEN } from './constants'
+import {
+	DIGIT_FONT_SIZE,
+	DIGIT_HEIGHT,
+	DIGIT_WIDTH,
+	DIGITS,
+	ROLL_FADE,
+	ROLL_TWEEN,
+} from './constants'
 
 type DigitItemProps = {
 	digit: number
@@ -23,8 +30,8 @@ function DigitItem({ digit, pos }: DigitItemProps) {
 
 	return (
 		<motion.span
-			className='absolute inset-0 grid place-items-center text-[38px] leading-none font-medium tabular-nums'
-			style={{ y, opacity }}
+			className='absolute inset-0 grid place-items-center leading-none font-medium tabular-nums'
+			style={{ y, opacity, fontSize: DIGIT_FONT_SIZE }}
 		>
 			{digit}
 		</motion.span>
@@ -63,7 +70,8 @@ export function DigitColumn({
 
 	return (
 		<div
-			className={`relative h-11 w-6.5 overflow-hidden mask-[linear-gradient(to_bottom,transparent,#000_14%,#000_86%,transparent)] font-mono transition-opacity duration-300 ease-out-strong ${isDimmed ? 'opacity-15' : ''}`}
+			className={`relative overflow-hidden mask-[linear-gradient(to_bottom,transparent,#000_14%,#000_86%,transparent)] font-mono transition-opacity duration-300 ease-out-strong ${isDimmed ? 'opacity-15' : ''}`}
+			style={{ width: DIGIT_WIDTH, height: DIGIT_HEIGHT }}
 		>
 			{DIGITS.map((d) => (
 				<DigitItem key={d} digit={d} pos={pos} />
