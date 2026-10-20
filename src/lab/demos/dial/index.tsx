@@ -64,7 +64,7 @@ export function Dial() {
 			className='flex flex-col items-center gap-7'
 		>
 			<Readout value={value} isDragging={isDragging} />
-			<div className='relative h-23 w-80 overflow-hidden border border-border'>
+			<div className='relative h-23 w-80 overflow-hidden'>
 				<div
 					aria-hidden
 					className='absolute inset-0 mask-[linear-gradient(90deg,transparent,#000_22%,#000_78%,transparent)]'

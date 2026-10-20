@@ -3,6 +3,7 @@ import {
 	RADIUS,
 	TICK_GROW,
 	TICK_HEIGHTS,
+	TICK_WIDTHS,
 	DEGREES_PER_UNIT,
 	MIN,
 	TICK_BOX_HEIGHT,
@@ -35,11 +36,12 @@ export function Tick({ unit, isActive, position }: TickProps) {
 
 	return (
 		<div
-			className='absolute bottom-full left-1/2 w-px -translate-x-1/2'
+			className='absolute bottom-full left-1/2 -translate-x-1/2'
 			style={{
 				transformOrigin: `50% ${RADIUS + TICK_BOX_HEIGHT}px`,
 				rotate: `${(unit - MIN) * DEGREES_PER_UNIT}deg`,
 				height: TICK_BOX_HEIGHT,
+				width: TICK_WIDTHS[tickType],
 			}}
 		>
 			<motion.div

@@ -17,6 +17,11 @@ export const TICK_HEIGHTS: Record<TickType, number> = {
 	minor: 9,
 }
 export const TICK_BOX_HEIGHT = 34
+export const TICK_WIDTHS: Record<TickType, number> = {
+	major: 2,
+	mid: 1,
+	minor: 1,
+}
 export const SIGMA = 2
 export const TICK_GROW: Record<TickType, number> = {
 	major: 10,
