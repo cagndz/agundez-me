@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import {
 	motion,
+	useDragControls,
 	useMotionValue,
 	useMotionValueEvent,
 	useTransform,
@@ -24,6 +25,7 @@ export function Dial() {
 	const x = useMotionValue(INITIAL_OFFSET_PX)
 	const rotateDial = useTransform(x, pixelToDegrees)
 	const [value, setValue] = useState(INITIAL)
+	const dragControls = useDragControls()
 
 	useMotionValueEvent(x, 'change', (latest) => {
 		setValue(pixelToUnit(latest))
@@ -68,6 +70,12 @@ export function Dial() {
 						power: 0.2,
 						timeConstant: 300,
 					}}
+					dragListener={false}
+					dragControls={dragControls}
+				/>
+				<div
+					onPointerDown={(e) => dragControls.start(e)}
+					className='absolute inset-0 touch-pan-y'
 				/>
 				<div className='pointer-events-none absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-accent' />
 			</div>
