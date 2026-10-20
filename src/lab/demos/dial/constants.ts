@@ -23,3 +23,5 @@ export const TICK_GROW: Record<TickType, number> = {
 	mid: 17,
 	minor: 17,
 }
+export const DIGIT_HEIGHT = 44
+export const DIGITS = Array.from({ length: 10 }, (_, i) => i)
