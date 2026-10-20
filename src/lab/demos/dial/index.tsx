@@ -21,6 +21,7 @@ import {
 	TICK_HEIGHTS,
 } from './constants'
 import { getTickType, pixelToDegrees, pixelToUnit, snapToTick } from './utils'
+import { HEIGHT } from '../hold-to-confirm/draw'
 
 export function Dial() {
 	const x = useMotionValue(INITIAL_OFFSET_PX)
@@ -52,9 +53,9 @@ export function Dial() {
 						return (
 							<div
 								key={unit}
-								className='absolute top-0 left-1/2 w-px -translate-x-1/2 bg-foreground'
+								className='absolute bottom-full left-1/2 w-px -translate-x-1/2 bg-foreground'
 								style={{
-									transformOrigin: `50% ${RADIUS}px`,
+									transformOrigin: `50% ${RADIUS + height}px`,
 									rotate: `${(unit - MIN) * DEGREES_PER_UNIT}deg`,
 									height,
 								}}
