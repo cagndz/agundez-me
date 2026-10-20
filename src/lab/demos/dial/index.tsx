@@ -15,13 +15,10 @@ import {
 	BAND_WIDTH,
 	RADIUS,
 	WHEEL_TOP,
-	DEGREES_PER_UNIT,
 	UNITS,
-	MIN,
-	TICK_HEIGHTS,
 } from './constants'
-import { getTickType, pixelToDegrees, pixelToUnit, snapToTick } from './utils'
-import { HEIGHT } from '../hold-to-confirm/draw'
+import { pixelToDegrees, pixelToUnit, snapToTick } from './utils'
+import { Tick } from './tick'
 
 export function Dial() {
 	const x = useMotionValue(INITIAL_OFFSET_PX)
@@ -49,21 +46,9 @@ export function Dial() {
 						}}
 					>
 						{UNITS.map((unit) => {
-							const tickType = getTickType(unit)
-							const height = TICK_HEIGHTS[tickType]
 							const isActive = value === unit
 
-							return (
-								<div
-									key={unit}
-									className={`absolute bottom-full left-1/2 w-px -translate-x-1/2 ${isActive ? 'bg-accent' : 'bg-foreground'}`}
-									style={{
-										transformOrigin: `50% ${RADIUS + height}px`,
-										rotate: `${(unit - MIN) * DEGREES_PER_UNIT}deg`,
-										height,
-									}}
-								/>
-							)
+							return <Tick key={unit} unit={unit} isActive={isActive} />
 						})}
 					</motion.div>
 				</div>
