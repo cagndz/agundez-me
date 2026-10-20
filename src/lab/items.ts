@@ -26,7 +26,21 @@ export const items: LabItem[] = [
 			{ label: 'A11y', value: 'Enter · live region · reduced motion' },
 		],
 	},
-	{ id: '002', slug: 'empty-002', title: 'Empty' },
+	{
+		id: '002',
+		slug: 'dial',
+		title: 'Dial',
+		summary:
+			'Drag to turn the wheel, release to settle on a tick. Position is one continuous value; ticks and digits only read it.',
+		specs: [
+			{ label: 'Release', value: 'Spring · k 120 · ratio 0.72' },
+			{ label: 'Ends', value: 'Progressive rubber band' },
+			{ label: 'Render', value: 'DOM · 101 ticks · one rotation' },
+			{ label: 'Digits', value: 'Rolling · 400 ms · 35 ms stagger' },
+			{ label: 'A11y', value: 'Pointer only · reduced motion' },
+			{ label: 'Stack', value: 'React · Motion · TypeScript' },
+		],
+	},
 	{ id: '003', slug: 'empty-003', title: 'Empty' },
 	{ id: '004', slug: 'empty-004', title: 'Empty' },
 	{ id: '005', slug: 'empty-005', title: 'Empty' },
