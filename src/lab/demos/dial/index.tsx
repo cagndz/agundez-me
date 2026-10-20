@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import {
+	animate,
 	motion,
+	type PanInfo,
 	useDragControls,
 	useMotionValue,
 	useMotionValueEvent,
@@ -12,6 +14,7 @@ import {
 import {
 	INITIAL,
 	INITIAL_OFFSET_PX,
+	RELEASE_SPRING,
 	TRAVEL,
 	BAND_WIDTH,
 	RADIUS,
@@ -21,8 +24,8 @@ import {
 import {
 	pixelToDegrees,
 	pixelToPosition,
+	getReleaseTarget,
 	pixelToUnit,
-	snapToTick,
 } from './utils'
 import { Tick } from './tick'
 import { Readout } from './readout'
@@ -36,10 +39,19 @@ export function Dial() {
 	const dragControls = useDragControls()
 	const reduceMotion = useReducedMotion()
 
-	// With reduced motion the dial still snaps to a tick, but it doesn't coast.
-	const dragTransition = reduceMotion
-		? { modifyTarget: snapToTick, power: 0, timeConstant: 1 }
-		: { modifyTarget: snapToTick, power: 0.2, timeConstant: 300 }
+	function handleDragEnd(_event: PointerEvent, info: PanInfo) {
+		setIsDragging(false)
+
+		const target = getReleaseTarget(x.get(), info.velocity.x)
+
+		if (reduceMotion) {
+			x.set(target)
+			return
+		}
+
+		// Start the spring with the finger's own velocity so the hand-off is seamless.
+		animate(x, target, { ...RELEASE_SPRING, velocity: info.velocity.x })
+	}
 
 	useMotionValueEvent(x, 'change', (latest) => {
 		setValue(pixelToUnit(latest))
@@ -90,11 +102,11 @@ export function Dial() {
 					drag='x'
 					dragConstraints={{ left: -TRAVEL, right: 0 }}
 					dragElastic={0.25}
-					dragTransition={dragTransition}
+					dragMomentum={false}
 					dragListener={false}
 					dragControls={dragControls}
 					onDragStart={() => setIsDragging(true)}
-					onDragEnd={() => setIsDragging(false)}
+					onDragEnd={handleDragEnd}
 				/>
 				<div
 					aria-hidden

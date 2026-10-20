@@ -31,3 +31,11 @@ export const ROLL_TWEEN = {
 	ease: [0.23, 1, 0.32, 1],
 } as const
 export const ROLL_FADE = 1.3
+// Release feel: where the dial lands = release point + velocity * RELEASE_POWER (seconds),
+// then a soft spring (k=120, damping ratio ~0.72) carries it there with a hint of overshoot.
+export const RELEASE_POWER = 0.15
+export const RELEASE_SPRING = {
+	type: 'spring',
+	stiffness: 120,
+	damping: 15.8,
+} as const

@@ -1,4 +1,12 @@
-import { DEGREES_PER_UNIT, MAX, MIN, PX_PER_UNIT, SIGMA } from './constants'
+import {
+	DEGREES_PER_UNIT,
+	MAX,
+	MIN,
+	PX_PER_UNIT,
+	RELEASE_POWER,
+	SIGMA,
+	TRAVEL,
+} from './constants'
 import type { TickType } from './types'
 
 export function pixelToPosition(pixel: number): number {
@@ -37,4 +45,9 @@ export function getDigits(value: number): [number, number, number] {
 		Math.floor(value / 10) % 10,
 		Math.floor(value / 1) % 10,
 	]
+}
+
+export function getReleaseTarget(pixel: number, velocity: number): number {
+	const thrown = pixel + velocity * RELEASE_POWER
+	return Math.max(-TRAVEL, Math.min(0, snapToTick(thrown)))
 }
