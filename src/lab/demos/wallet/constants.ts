@@ -1,9 +1,12 @@
 export const STAGE_WIDTH = 300
-export const STAGE_HEIGHT = 512
+// The stage fits the wallet at rest: the top card's tab (minus room for the
+// hover lift) down to the case's shadow. A presented card is allowed to
+// overflow it, so the stage doesn't reserve empty space for that moment.
+export const STAGE_HEIGHT = 380
 export const CARD_WIDTH = 132
 export const CARD_HEIGHT = 208
 export const CARD_PEEK = 32
-export const CASE_TOP = 240
+export const CASE_TOP = 120
 export const CASE_WIDTH = 184
 export const CASE_HEIGHT = 244
 export const CASE_RADIUS = 14
