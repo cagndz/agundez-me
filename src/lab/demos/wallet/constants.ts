@@ -53,3 +53,5 @@ export const CARD_PRESENTED_ROTATION = -90
 export const CARD_PRESENTED_SCALE = 1.2
 // How far above the case top the center of the presented card sits.
 export const CARD_PRESENTED_CENTER_ABOVE_CASE = 50
+// Must stay above the case front, z-10 in case.tsx
+export const CARD_PRESENTED_LAYER = 20
