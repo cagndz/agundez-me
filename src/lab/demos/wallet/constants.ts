@@ -1,3 +1,5 @@
+import type { WalletCardPalette, WalletCardTone } from './types'
+
 export const STAGE_WIDTH = 300
 // The stage fits the wallet at rest: the top card's tab (minus room for the
 // hover lift) down to the case's shadow. A presented card is allowed to
@@ -21,3 +23,25 @@ export const CARDS_IN_CASE = 174
 // Top edge of the last card at rest: its bottom edge (case top + depth) minus its height.
 // The other cards stack above it, CARD_PEEK apart.
 export const LAST_CARD_TOP = CASE_TOP + CARDS_IN_CASE - CARD_HEIGHT
+// Dark and light are the colors of an object, so they are fixed. Accent is the
+// site's brand color, so it follows --accent instead of repeating its value.
+export const CARD_PALETTES: Record<WalletCardTone, WalletCardPalette> = {
+	dark: {
+		background: '#1a1a18',
+		foreground: '#ececea',
+		muted: '#8f8f8c',
+		edge: 'rgb(255 255 255 / 0.16)',
+	},
+	light: {
+		background: '#f6f6f4',
+		foreground: '#111111',
+		muted: '#5f5f5d',
+		edge: 'rgb(17 17 17 / 0.14)',
+	},
+	accent: {
+		background: 'var(--accent)',
+		foreground: '#111111',
+		muted: '#5a2200',
+		edge: 'rgb(17 17 17 / 0.18)',
+	},
+}

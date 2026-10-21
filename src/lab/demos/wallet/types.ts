@@ -7,3 +7,10 @@ export type WalletCardData = {
 	code: string
 	tone: WalletCardTone
 }
+
+export type WalletCardPalette = {
+	background: string
+	foreground: string
+	muted: string
+	edge: string
+}
