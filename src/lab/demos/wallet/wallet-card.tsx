@@ -2,6 +2,7 @@ import {
 	CARD_HEIGHT,
 	CARD_PALETTES,
 	CARD_RADIUS,
+	CARD_SINK,
 	CARD_WIDTH,
 } from './constants'
 import type { WalletCardData } from './types'
@@ -39,6 +40,10 @@ export function WalletCard({
 				color: palette.foreground,
 				boxShadow: `inset 0 0 0 1px ${palette.edge}, 0 1px 0 rgb(0 0 0 / 0.06), 0 6px 16px -8px rgb(0 0 0 / 0.35)`,
 				zIndex: index + 1,
+				transform:
+					isAnyPresented && !isPresented
+						? `translateY(${CARD_SINK}px)`
+						: undefined,
 			}}
 			aria-pressed={isPresented}
 			onClick={() => onToggle(card.id)}

@@ -46,3 +46,4 @@ export const CARD_PALETTES: Record<WalletCardTone, WalletCardPalette> = {
 	},
 }
 export const CARD_RADIUS = 10
+export const CARD_SINK = 12
