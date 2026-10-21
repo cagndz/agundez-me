@@ -6,7 +6,7 @@ import {
 	CARD_WIDTH,
 } from './constants'
 import type { WalletCardData } from './types'
-import { getRestTop } from './utils'
+import { getApexOffset, getRestTop } from './utils'
 
 type WalletCardProps = {
 	card: WalletCardData
@@ -26,6 +26,13 @@ export function WalletCard({
 	onToggle,
 }: WalletCardProps) {
 	const palette = CARD_PALETTES[card.tone]
+	let offsetY = 0
+
+	if (isPresented) {
+		offsetY = getApexOffset(index, count)
+	} else if (isAnyPresented) {
+		offsetY = CARD_SINK
+	}
 
 	return (
 		<button
@@ -40,10 +47,7 @@ export function WalletCard({
 				color: palette.foreground,
 				boxShadow: `inset 0 0 0 1px ${palette.edge}, 0 1px 0 rgb(0 0 0 / 0.06), 0 6px 16px -8px rgb(0 0 0 / 0.35)`,
 				zIndex: index + 1,
-				transform:
-					isAnyPresented && !isPresented
-						? `translateY(${CARD_SINK}px)`
-						: undefined,
+				transform: `translateY(${offsetY}px)`,
 			}}
 			aria-pressed={isPresented}
 			onClick={() => onToggle(card.id)}
