@@ -1,6 +1,7 @@
 import type { LabItem } from '@/lab/items'
 import Link from 'next/link'
 import { demos } from '@/lab/registry'
+import { DemoFit } from '@/lab/demo-fit'
 
 export function LabGrid({ items }: { items: LabItem[] }) {
 	return (
@@ -29,9 +30,13 @@ export function LabGrid({ items }: { items: LabItem[] }) {
 							<span aria-hidden='true'>/</span>
 							<span className='text-muted'>{item.title}</span>
 						</span>
-						<div className='pointer-events-none absolute inset-0 flex items-center justify-center'>
-							<div className='pointer-events-auto'>{Demo && <Demo />}</div>
-						</div>
+						{/* inset-y-12 keeps the demo clear of the label, and equal top and
+						    bottom so it stays centred in the cell */}
+						{Demo && (
+							<DemoFit className='pointer-events-none absolute inset-x-4 inset-y-12 *:pointer-events-auto'>
+								<Demo />
+							</DemoFit>
+						)}
 					</div>
 				)
 			})}

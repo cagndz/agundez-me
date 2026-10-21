@@ -6,6 +6,7 @@ import type { LabItem } from '@/lab/items'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { applyOrigin, applyOriginWithoutTransition } from '@/lab/origin'
 import { demos } from '@/lab/registry'
+import { DemoFit } from '@/lab/demo-fit'
 import { XMark } from '@/components/icons/x-mark'
 import './lab-modal.css'
 
@@ -74,7 +75,9 @@ export function LabModal({ item }: { item: LabItem | undefined }) {
 						className='lab-stage flex size-(--stage) items-center justify-center rounded-xs border border-border bg-background p-4'
 					>
 						{Demo ? (
-							<Demo />
+							<DemoFit className='size-full'>
+								<Demo />
+							</DemoFit>
 						) : (
 							<span className='font-mono text-sm tracking-widest text-muted uppercase'>
 								No demo yet
