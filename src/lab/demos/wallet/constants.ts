@@ -45,3 +45,4 @@ export const CARD_PALETTES: Record<WalletCardTone, WalletCardPalette> = {
 		edge: 'rgb(17 17 17 / 0.18)',
 	},
 }
+export const CARD_RADIUS = 10
