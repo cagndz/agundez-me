@@ -4,7 +4,7 @@ import { demos } from '@/lab/registry'
 
 export function LabGrid({ items }: { items: LabItem[] }) {
 	return (
-		<div className='grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] border-t border-l border-border'>
+		<div className='grid grid-cols-[repeat(auto-fill,minmax(min(400px,100%),1fr))] border-t border-l border-border'>
 			{items.map((item) => {
 				const Demo = demos[item.slug]
 				return (
