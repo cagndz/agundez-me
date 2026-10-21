@@ -3,16 +3,21 @@ import Link from 'next/link'
 import { demos } from '@/lab/registry'
 import { DemoFit } from '@/lab/demo-fit'
 
+// Below 800px (two 400px columns) the grid has a single column. Only there a
+// tall item gets a 1:2 cell. The grid is the container, so this follows the
+// grid's width, not the window's.
+const TALL_ON_ONE_COLUMN = '@max-[800px]:aspect-[1/2]'
+
 export function LabGrid({ items }: { items: LabItem[] }) {
 	return (
-		<div className='grid grid-cols-[repeat(auto-fill,minmax(min(400px,100%),1fr))] border-t border-l border-border'>
+		<div className='@container grid grid-cols-[repeat(auto-fill,minmax(min(400px,100%),1fr))] border-t border-l border-border'>
 			{items.map((item) => {
 				const Demo = demos[item.slug]
 				return (
 					<div
 						key={item.id}
 						data-lab-item
-						className='group relative aspect-square border-r border-b border-border p-4 font-mono text-sm uppercase'
+						className={`group relative aspect-square border-r border-b border-border p-4 font-mono text-sm uppercase ${item.size === 'tall' ? TALL_ON_ONE_COLUMN : ''}`}
 					>
 						<Link
 							href={`/lab?c=${item.slug}`}

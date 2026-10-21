@@ -9,6 +9,10 @@ export type LabItem = {
 	title: string
 	summary?: string
 	specs?: LabSpec[]
+	// 'tall' doubles the cell's height when the grid has a single column (phones),
+	// for demos taller than they are wide. With two or more columns every cell
+	// stays square, so the grid keeps its rhythm and the modal opens from a square.
+	size?: 'square' | 'tall'
 }
 
 export const items: LabItem[] = [
