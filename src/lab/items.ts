@@ -45,7 +45,7 @@ export const items: LabItem[] = [
 			{ label: 'Stack', value: 'React · Motion · TypeScript' },
 		],
 	},
-	{ id: '003', slug: 'empty-003', title: 'Empty' },
+	{ id: '003', slug: 'wallet', title: 'Wallet' },
 	{ id: '004', slug: 'empty-004', title: 'Empty' },
 	{ id: '005', slug: 'empty-005', title: 'Empty' },
 	{ id: '006', slug: 'empty-006', title: 'Empty' },

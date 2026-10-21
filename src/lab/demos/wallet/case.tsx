@@ -11,7 +11,7 @@ import {
 export function CaseBack() {
 	return (
 		<div
-			className='absolute left-1/2 -translate-x-1/2 rounded-t-2xl border border-b-0 border-foreground/18 bg-foreground/2.5'
+			className='absolute left-1/2 -translate-x-1/2 rounded-t-[10px] border border-b-0 border-foreground/18 bg-foreground/2.5'
 			style={{ top: LIP_TOP, width: LIP_WIDTH, height: LIP_HEIGHT }}
 			aria-hidden='true'
 		/>
