@@ -1,12 +1,14 @@
 import {
 	CARD_HEIGHT,
 	CARD_PALETTES,
+	CARD_PRESENTED_ROTATION,
+	CARD_PRESENTED_SCALE,
 	CARD_RADIUS,
 	CARD_SINK,
 	CARD_WIDTH,
 } from './constants'
 import type { WalletCardData } from './types'
-import { getApexOffset, getRestTop } from './utils'
+import { getPresentedOffset, getRestTop } from './utils'
 
 type WalletCardProps = {
 	card: WalletCardData
@@ -27,9 +29,13 @@ export function WalletCard({
 }: WalletCardProps) {
 	const palette = CARD_PALETTES[card.tone]
 	let offsetY = 0
+	let rotate = 0
+	let scale = 1
 
 	if (isPresented) {
-		offsetY = getApexOffset(index, count)
+		offsetY = getPresentedOffset(index, count)
+		rotate = CARD_PRESENTED_ROTATION
+		scale = CARD_PRESENTED_SCALE
 	} else if (isAnyPresented) {
 		offsetY = CARD_SINK
 	}
@@ -47,7 +53,7 @@ export function WalletCard({
 				color: palette.foreground,
 				boxShadow: `inset 0 0 0 1px ${palette.edge}, 0 1px 0 rgb(0 0 0 / 0.06), 0 6px 16px -8px rgb(0 0 0 / 0.35)`,
 				zIndex: index + 1,
-				transform: `translateY(${offsetY}px)`,
+				transform: `translateY(${offsetY}px) rotate(${rotate}deg) scale(${scale})`,
 			}}
 			aria-pressed={isPresented}
 			onClick={() => onToggle(card.id)}
