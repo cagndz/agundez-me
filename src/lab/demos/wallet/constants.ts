@@ -47,4 +47,9 @@ export const CARD_PALETTES: Record<WalletCardTone, WalletCardPalette> = {
 }
 export const CARD_RADIUS = 10
 export const CARD_SINK = 12
-export const CARD_BASE_GAP = 6
+// How far above the case a card's base stops at the top of its rise.
+export const CARD_APEX_GAP = 6
+export const CARD_PRESENTED_ROTATION = -90
+export const CARD_PRESENTED_SCALE = 1.2
+// How far above the case top the center of the presented card sits.
+export const CARD_PRESENTED_CENTER_ABOVE_CASE = 50

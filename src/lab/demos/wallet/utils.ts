@@ -1,7 +1,8 @@
 import {
-	CARD_BASE_GAP,
+	CARD_APEX_GAP,
 	CARD_HEIGHT,
 	CARD_PEEK,
+	CARD_PRESENTED_CENTER_ABOVE_CASE,
 	CASE_TOP,
 	LAST_CARD_TOP,
 } from './constants'
@@ -15,5 +16,13 @@ export function getRestTop(index: number, count: number): number {
 
 // How far up a card moves so its base ends above the case
 export function getApexOffset(index: number, count: number): number {
-	return CASE_TOP - CARD_BASE_GAP - (getRestTop(index, count) + CARD_HEIGHT)
+	return CASE_TOP - CARD_APEX_GAP - (getRestTop(index, count) + CARD_HEIGHT)
+}
+
+export function getPresentedOffset(index: number, count: number): number {
+	return (
+		CASE_TOP -
+		CARD_PRESENTED_CENTER_ABOVE_CASE -
+		(getRestTop(index, count) + CARD_HEIGHT / 2)
+	)
 }
