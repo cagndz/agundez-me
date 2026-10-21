@@ -7,10 +7,10 @@ export const CASE_TOP = 240
 export const CASE_WIDTH = 184
 export const CASE_HEIGHT = 244
 export const CASE_RADIUS = 14
-export const LIP_WIDTH = 168
+export const LIP_WIDTH = 178
 // How far the lip pokes above the glass. The rest of LIP_HEIGHT hides behind the glass corner.
 export const LIP_OVERHANG = 16
-export const LIP_HEIGHT = LIP_OVERHANG + 2
+export const LIP_HEIGHT = 22
 // Top edge of the lip: the case top minus the part that pokes out.
 export const LIP_TOP = CASE_TOP - LIP_OVERHANG
 // How far the last card sits inside the case, measured from the case top to the card's bottom edge.
