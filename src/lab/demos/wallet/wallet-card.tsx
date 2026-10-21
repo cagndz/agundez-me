@@ -11,13 +11,24 @@ type WalletCardProps = {
 	card: WalletCardData
 	index: number
 	count: number
+	isPresented: boolean
+	isAnyPresented: boolean
+	onToggle: (id: string) => void
 }
 
-export function WalletCard({ card, index, count }: WalletCardProps) {
+export function WalletCard({
+	card,
+	index,
+	count,
+	isPresented,
+	isAnyPresented,
+	onToggle,
+}: WalletCardProps) {
 	const palette = CARD_PALETTES[card.tone]
 
 	return (
-		<div
+		<button
+			type='button'
 			className='absolute left-1/2 -translate-x-1/2'
 			style={{
 				top: getRestTop(index, count),
@@ -29,7 +40,8 @@ export function WalletCard({ card, index, count }: WalletCardProps) {
 				boxShadow: `inset 0 0 0 1px ${palette.edge}, 0 1px 0 rgb(0 0 0 / 0.06), 0 6px 16px -8px rgb(0 0 0 / 0.35)`,
 				zIndex: index + 1,
 			}}
-			aria-hidden='true'
+			aria-pressed={isPresented}
+			onClick={() => onToggle(card.id)}
 		>
 			<div className='absolute inset-x-3 top-2 flex items-center justify-between'>
 				<span className='text-[11px] font-medium'>{card.title}</span>
@@ -40,6 +52,6 @@ export function WalletCard({ card, index, count }: WalletCardProps) {
 					{card.code}
 				</span>
 			</div>
-		</div>
+		</button>
 	)
 }

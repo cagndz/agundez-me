@@ -1,7 +1,9 @@
+'use client'
 import { CaseBack, CaseFront } from './case'
 import { STAGE_HEIGHT, STAGE_WIDTH } from './constants'
 import type { WalletCardData } from './types'
 import { WalletCard } from './wallet-card'
+import { useState } from 'react'
 
 const CARDS: WalletCardData[] = [
 	{
@@ -28,6 +30,12 @@ const CARDS: WalletCardData[] = [
 ]
 
 export function Wallet() {
+	const [presentedId, setPresentedId] = useState<string | null>(null)
+	const isAnyPresented: boolean = presentedId !== null
+
+	const handleToggle = (id: string) =>
+		setPresentedId(id === presentedId ? null : id)
+
 	return (
 		<div
 			className='relative'
@@ -40,6 +48,9 @@ export function Wallet() {
 					card={card}
 					index={index}
 					count={CARDS.length}
+					isPresented={card.id === presentedId}
+					isAnyPresented={isAnyPresented}
+					onToggle={handleToggle}
 				/>
 			))}
 			<CaseFront />
