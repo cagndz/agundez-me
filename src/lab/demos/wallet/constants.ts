@@ -47,7 +47,7 @@ export const CARD_PALETTES: Record<WalletCardTone, WalletCardPalette> = {
 }
 export const CARD_RADIUS = 10
 export const CARD_SINK = 12
-// How far above the case a card's base stops at the top of its rise.
+// How far past the clear line (see getClearOffset) a card's base rises before it settles.
 export const CARD_APEX_GAP = 6
 export const CARD_PRESENTED_ROTATION = -90
 export const CARD_PRESENTED_SCALE = 1.2
@@ -55,3 +55,20 @@ export const CARD_PRESENTED_SCALE = 1.2
 export const CARD_PRESENTED_CENTER_ABOVE_CASE = 50
 // Must stay above the case front, z-10 in case.tsx
 export const CARD_PRESENTED_LAYER = 20
+
+// Card motion. Short tweens for straight moves along the case, springs for the turn.
+export const CARD_RISE = { duration: 0.28, ease: [0.32, 0.72, 0, 1] } as const
+export const CARD_PRESENT_SPRING = {
+	type: 'spring',
+	duration: 0.55,
+	bounce: 0.2,
+} as const
+export const CARD_RETURN_SPRING = {
+	type: 'spring',
+	duration: 0.42,
+	bounce: 0,
+} as const
+export const CARD_DROP = { duration: 0.32, ease: [0.32, 0.72, 0, 1] } as const
+export const CARD_SETTLE = { duration: 0.3, ease: [0.2, 0, 0, 1] } as const
+// Degrees a returning card may still be tilted when it starts dropping into the case.
+export const CARD_UPRIGHT_TOLERANCE = 2

@@ -1,17 +1,13 @@
-import { useEffect, useRef } from 'react'
-import { useAnimate } from 'motion/react'
+import { motion } from 'motion/react'
 import {
 	CARD_HEIGHT,
 	CARD_PALETTES,
-	CARD_PRESENTED_LAYER,
-	CARD_PRESENTED_ROTATION,
-	CARD_PRESENTED_SCALE,
 	CARD_RADIUS,
-	CARD_SINK,
 	CARD_WIDTH,
 } from './constants'
 import type { WalletCardData } from './types'
-import { getApexOffset, getPresentedOffset, getRestTop } from './utils'
+import { useWalletCardMotion } from './use-wallet-card-motion'
+import { getRestTop } from './utils'
 
 type WalletCardProps = {
 	card: WalletCardData
@@ -31,75 +27,16 @@ export function WalletCard({
 	onToggle,
 }: WalletCardProps) {
 	const palette = CARD_PALETTES[card.tone]
-	let offsetY = 0
-	let rotate = 0
-	let scale = 1
-	const [scope, animate] = useAnimate()
-	const wasPresented = useRef(false)
-
-	if (isPresented) {
-		offsetY = getPresentedOffset(index, count)
-		rotate = CARD_PRESENTED_ROTATION
-		scale = CARD_PRESENTED_SCALE
-	} else if (isAnyPresented) {
-		offsetY = CARD_SINK
-	}
-
-	useEffect(() => {
-		let cancelled = false
-		async function run() {
-			const wasOpen = wasPresented.current
-			wasPresented.current = isPresented
-			if (isPresented) {
-				await animate(
-					scope.current,
-					{ y: getApexOffset(index, count) },
-					{ duration: 0.28, ease: [0.32, 0.72, 0, 1] },
-				)
-				if (cancelled) return
-				await animate(
-					scope.current,
-					{ zIndex: CARD_PRESENTED_LAYER },
-					{ duration: 0 },
-				)
-				if (cancelled) return
-				await animate(
-					scope.current,
-					{ y: offsetY, rotate, scale },
-					{ duration: 0.4, ease: [0.2, 0, 0, 1] },
-				)
-			} else if (wasOpen) {
-				await animate(
-					scope.current,
-					{ y: getApexOffset(index, count), rotate: 0, scale: 1 },
-					{ type: 'spring', duration: 0.42, bounce: 0 },
-				)
-				if (cancelled) return
-				await animate(scope.current, { zIndex: index + 1 }, { duration: 0 })
-				if (cancelled) return
-				await animate(
-					scope.current,
-					{ y: offsetY },
-					{ duration: 0.32, ease: [0.32, 0.72, 0, 1] },
-				)
-			} else {
-				await animate(
-					scope.current,
-					{ y: offsetY, rotate, scale },
-					{ duration: 0.4, ease: [0.2, 0, 0, 1] },
-				)
-			}
-		}
-		run()
-		return () => {
-			cancelled = true
-		}
-	}, [offsetY, rotate, scale, animate, scope, count, index, isPresented])
+	const { y, rotate, scale, zIndex } = useWalletCardMotion({
+		index,
+		count,
+		isPresented,
+		isAnyPresented,
+	})
 
 	return (
-		<button
+		<motion.button
 			type='button'
-			ref={scope}
 			className='absolute left-1/2 -translate-x-1/2'
 			style={{
 				top: getRestTop(index, count),
@@ -109,7 +46,10 @@ export function WalletCard({
 				background: palette.background,
 				color: palette.foreground,
 				boxShadow: `inset 0 0 0 1px ${palette.edge}, 0 1px 0 rgb(0 0 0 / 0.06), 0 6px 16px -8px rgb(0 0 0 / 0.35)`,
-				zIndex: index + 1,
+				y,
+				rotate,
+				scale,
+				zIndex,
 			}}
 			aria-pressed={isPresented}
 			onClick={() => onToggle(card.id)}
@@ -123,6 +63,6 @@ export function WalletCard({
 					{card.code}
 				</span>
 			</div>
-		</button>
+		</motion.button>
 	)
 }
