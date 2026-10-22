@@ -46,6 +46,7 @@ export function WalletCard({
 	}
 
 	useEffect(() => {
+		let cancelled = false
 		async function run() {
 			const wasOpen = wasPresented.current
 			wasPresented.current = isPresented
@@ -55,11 +56,13 @@ export function WalletCard({
 					{ y: getApexOffset(index, count) },
 					{ duration: 0.28, ease: [0.32, 0.72, 0, 1] },
 				)
+				if (cancelled) return
 				await animate(
 					scope.current,
 					{ zIndex: CARD_PRESENTED_LAYER },
 					{ duration: 0 },
 				)
+				if (cancelled) return
 				await animate(
 					scope.current,
 					{ y: offsetY, rotate, scale },
@@ -71,7 +74,9 @@ export function WalletCard({
 					{ y: getApexOffset(index, count), rotate: 0, scale: 1 },
 					{ type: 'spring', duration: 0.42, bounce: 0 },
 				)
+				if (cancelled) return
 				await animate(scope.current, { zIndex: index + 1 }, { duration: 0 })
+				if (cancelled) return
 				await animate(
 					scope.current,
 					{ y: offsetY },
@@ -86,6 +91,9 @@ export function WalletCard({
 			}
 		}
 		run()
+		return () => {
+			cancelled = true
+		}
 	}, [offsetY, rotate, scale, animate, scope, count, index, isPresented])
 
 	return (
