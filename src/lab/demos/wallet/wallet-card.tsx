@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { CardShadow } from './card-shadow'
 import {
 	CARD_HEIGHT,
 	CARD_PALETTES,
@@ -46,6 +47,7 @@ export function WalletCard({
 				willChange: 'transform',
 			}}
 		>
+			<CardShadow rotate={rotate} scale={scale} />
 			<motion.button
 				type='button'
 				className='absolute size-full'
@@ -53,7 +55,7 @@ export function WalletCard({
 					borderRadius: CARD_RADIUS,
 					background: palette.background,
 					color: palette.foreground,
-					boxShadow: `inset 0 0 0 1px ${palette.edge}, 0 1px 0 rgb(0 0 0 / 0.06), 0 6px 16px -8px rgb(0 0 0 / 0.35)`,
+					boxShadow: `inset 0 0 0 1px ${palette.edge}`,
 					rotate,
 					scale,
 					willChange: 'transform',

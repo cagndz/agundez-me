@@ -72,3 +72,12 @@ export const CARD_DROP = { duration: 0.32, ease: [0.32, 0.72, 0, 1] } as const
 export const CARD_SETTLE = { duration: 0.3, ease: [0.2, 0, 0, 1] } as const
 // Degrees a returning card may still be tilted when it starts dropping into the case.
 export const CARD_UPRIGHT_TOLERANCE = 2
+
+// Card shadow. It lives on its own layer that never turns, so light always comes from above.
+// The shape is inset to keep the blur tucked under the card's edges.
+export const CARD_SHADOW_COLOR = 'rgb(0 0 0 / 0.32)'
+export const CARD_SHADOW_BLUR = 9
+export const CARD_SHADOW_INSET = 4
+// Offset and strength go from resting in the case to fully lifted (presented).
+export const CARD_SHADOW_OFFSET = [6, 22]
+export const CARD_SHADOW_OPACITY = [0.6, 1]
