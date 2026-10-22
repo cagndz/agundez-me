@@ -11,7 +11,7 @@ import {
 	CARD_WIDTH,
 } from './constants'
 import type { WalletCardData } from './types'
-import { getPresentedOffset, getRestTop } from './utils'
+import { getApexOffset, getPresentedOffset, getRestTop } from './utils'
 
 type WalletCardProps = {
 	card: WalletCardData
@@ -45,12 +45,22 @@ export function WalletCard({
 	}
 
 	useEffect(() => {
-		animate(
-			scope.current,
-			{ y: offsetY, rotate, scale },
-			{ duration: 0.3, ease: [0.2, 0, 0, 1] },
-		)
-	}, [offsetY, rotate, scale, animate, scope])
+		async function run() {
+			if (isPresented) {
+				await animate(
+					scope.current,
+					{ y: getApexOffset(index, count) },
+					{ duration: 0.28, ease: [0.32, 0.72, 0, 1] },
+				)
+			}
+			await animate(
+				scope.current,
+				{ y: offsetY, rotate, scale },
+				{ duration: 0.4, ease: [0.2, 0, 0, 1] },
+			)
+		}
+		run()
+	}, [offsetY, rotate, scale, animate, scope, count, index, isPresented])
 
 	return (
 		<button
