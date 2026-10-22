@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { motion, transform } from 'motion/react'
 import {
 	CARD_HEIGHT,
 	CARD_PALETTES,
@@ -50,6 +50,7 @@ export function WalletCard({
 				rotate,
 				scale,
 				zIndex,
+				willChange: 'transform',
 			}}
 			aria-pressed={isPresented}
 			onClick={() => onToggle(card.id)}
