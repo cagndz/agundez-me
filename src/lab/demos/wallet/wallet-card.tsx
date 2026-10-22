@@ -52,6 +52,11 @@ export function WalletCard({
 					{ y: getApexOffset(index, count) },
 					{ duration: 0.28, ease: [0.32, 0.72, 0, 1] },
 				)
+				await animate(
+					scope.current,
+					{ zIndex: CARD_PRESENTED_LAYER },
+					{ duration: 0 },
+				)
 			}
 			await animate(
 				scope.current,
@@ -75,7 +80,7 @@ export function WalletCard({
 				background: palette.background,
 				color: palette.foreground,
 				boxShadow: `inset 0 0 0 1px ${palette.edge}, 0 1px 0 rgb(0 0 0 / 0.06), 0 6px 16px -8px rgb(0 0 0 / 0.35)`,
-				zIndex: isPresented ? CARD_PRESENTED_LAYER : index + 1,
+				zIndex: index + 1,
 			}}
 			aria-pressed={isPresented}
 			onClick={() => onToggle(card.id)}
