@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAnimate } from 'motion/react'
 import {
 	CARD_HEIGHT,
@@ -35,6 +35,7 @@ export function WalletCard({
 	let rotate = 0
 	let scale = 1
 	const [scope, animate] = useAnimate()
+	const wasPresented = useRef(false)
 
 	if (isPresented) {
 		offsetY = getPresentedOffset(index, count)
@@ -46,6 +47,8 @@ export function WalletCard({
 
 	useEffect(() => {
 		async function run() {
+			const wasOpen = wasPresented.current
+			wasPresented.current = isPresented
 			if (isPresented) {
 				await animate(
 					scope.current,
@@ -57,12 +60,30 @@ export function WalletCard({
 					{ zIndex: CARD_PRESENTED_LAYER },
 					{ duration: 0 },
 				)
+				await animate(
+					scope.current,
+					{ y: offsetY, rotate, scale },
+					{ duration: 0.4, ease: [0.2, 0, 0, 1] },
+				)
+			} else if (wasOpen) {
+				await animate(
+					scope.current,
+					{ y: getApexOffset(index, count), rotate: 0, scale: 1 },
+					{ type: 'spring', duration: 0.42, bounce: 0 },
+				)
+				await animate(scope.current, { zIndex: index + 1 }, { duration: 0 })
+				await animate(
+					scope.current,
+					{ y: offsetY },
+					{ duration: 0.32, ease: [0.32, 0.72, 0, 1] },
+				)
+			} else {
+				await animate(
+					scope.current,
+					{ y: offsetY, rotate, scale },
+					{ duration: 0.4, ease: [0.2, 0, 0, 1] },
+				)
 			}
-			await animate(
-				scope.current,
-				{ y: offsetY, rotate, scale },
-				{ duration: 0.4, ease: [0.2, 0, 0, 1] },
-			)
 		}
 		run()
 	}, [offsetY, rotate, scale, animate, scope, count, index, isPresented])
