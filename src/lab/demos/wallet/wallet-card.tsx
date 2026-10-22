@@ -1,3 +1,4 @@
+import { motion } from 'motion/react'
 import {
 	CARD_HEIGHT,
 	CARD_PALETTES,
@@ -42,7 +43,7 @@ export function WalletCard({
 	}
 
 	return (
-		<button
+		<motion.button
 			type='button'
 			className='absolute left-1/2 -translate-x-1/2'
 			style={{
@@ -54,8 +55,9 @@ export function WalletCard({
 				color: palette.foreground,
 				boxShadow: `inset 0 0 0 1px ${palette.edge}, 0 1px 0 rgb(0 0 0 / 0.06), 0 6px 16px -8px rgb(0 0 0 / 0.35)`,
 				zIndex: isPresented ? CARD_PRESENTED_LAYER : index + 1,
-				transform: `translateY(${offsetY}px) rotate(${rotate}deg) scale(${scale})`,
 			}}
+			animate={{ y: offsetY, rotate, scale }}
+			transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
 			aria-pressed={isPresented}
 			onClick={() => onToggle(card.id)}
 		>
@@ -68,6 +70,6 @@ export function WalletCard({
 					{card.code}
 				</span>
 			</div>
-		</button>
+		</motion.button>
 	)
 }
