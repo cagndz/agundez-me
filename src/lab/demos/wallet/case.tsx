@@ -21,7 +21,7 @@ export function CaseBack() {
 export function CaseFront() {
 	return (
 		<div
-			className='pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 bg-white/16 shadow-[inset_0_0_0_1px_rgb(17_17_17/0.28),inset_0_2px_0_rgb(255_255_255/0.9),inset_0_-14px_22px_-16px_rgb(17_17_17/0.25),0_14px_24px_-14px_rgb(17_17_17/0.26)]'
+			className='absolute left-1/2 z-10 -translate-x-1/2 bg-white/16 shadow-[inset_0_0_0_1px_rgb(17_17_17/0.28),inset_0_2px_0_rgb(255_255_255/0.9),inset_0_-14px_22px_-16px_rgb(17_17_17/0.25),0_14px_24px_-14px_rgb(17_17_17/0.26)]'
 			style={{
 				top: CASE_TOP,
 				width: CASE_WIDTH,
