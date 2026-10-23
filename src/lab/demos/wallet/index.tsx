@@ -1,9 +1,9 @@
 'use client'
+import { useEffect, useState } from 'react'
 import { CaseBack, CaseFront } from './case'
 import { STAGE_HEIGHT, STAGE_WIDTH } from './constants'
 import type { WalletCardData } from './types'
 import { WalletCard } from './wallet-card'
-import { useEffect, useState } from 'react'
 
 const CARDS: WalletCardData[] = [
 	{
@@ -31,7 +31,7 @@ const CARDS: WalletCardData[] = [
 
 export function Wallet() {
 	const [presentedId, setPresentedId] = useState<string | null>(null)
-	const isAnyPresented: boolean = presentedId !== null
+	const isAnyPresented = presentedId !== null
 
 	// Cards physically out of the case, which is not the same as presentedId:
 	// a card is still in the case while it rises, and still out while it returns.

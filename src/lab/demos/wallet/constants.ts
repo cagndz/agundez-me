@@ -50,6 +50,9 @@ export const CARD_SINK = 12
 // How far past the clear line (see getClearOffset) a card's base rises before it settles.
 export const CARD_APEX_GAP = 6
 export const CARD_PRESENTED_ROTATION = -90
+// The small tab fades out early in the turn, before it looks tilted, and the
+// landscape face fades in near the end. The gap between them keeps the two
+// texts from ever crossing.
 export const CARD_TAB_FADE_END = -30
 export const CARD_FACE_FADE_START = -53
 export const CARD_PRESENTED_SCALE = 1.2
@@ -83,5 +86,7 @@ export const CARD_SHADOW_INSET = 4
 // Offset and strength go from resting in the case to fully lifted (presented).
 export const CARD_SHADOW_OFFSET = [6, 22]
 export const CARD_SHADOW_OPACITY = [0.6, 1]
+
+// Hover: a small lift that only cards resting in the case get.
 export const CARD_HOVER_LIFT = 8
 export const CARD_HOVER = { duration: 0.18, ease: [0.2, 0, 0, 1] } as const
