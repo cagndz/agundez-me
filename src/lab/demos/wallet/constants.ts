@@ -81,3 +81,5 @@ export const CARD_SHADOW_INSET = 4
 // Offset and strength go from resting in the case to fully lifted (presented).
 export const CARD_SHADOW_OFFSET = [6, 22]
 export const CARD_SHADOW_OPACITY = [0.6, 1]
+export const CARD_HOVER_LIFT = 8
+export const CARD_HOVER = { duration: 0.18, ease: [0.2, 0, 0, 1] } as const

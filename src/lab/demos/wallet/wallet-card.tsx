@@ -1,7 +1,10 @@
-import { motion } from 'motion/react'
+import { useEffect } from 'react'
+import { motion, useMotionValue, useTransform, animate } from 'motion/react'
 import { CardShadow } from './card-shadow'
 import {
 	CARD_HEIGHT,
+	CARD_HOVER,
+	CARD_HOVER_LIFT,
 	CARD_PALETTES,
 	CARD_RADIUS,
 	CARD_WIDTH,
@@ -34,6 +37,24 @@ export function WalletCard({
 		isPresented,
 		isAnyPresented,
 	})
+	const hoverLift = useMotionValue(0)
+	const cardY = useTransform(() => y.get() + hoverLift.get())
+
+	const handleHoverStart = () => {
+		if (!isAnyPresented) {
+			animate(hoverLift, -CARD_HOVER_LIFT, CARD_HOVER)
+		}
+	}
+
+	const handleHoverEnd = () => {
+		animate(hoverLift, 0, CARD_HOVER)
+	}
+
+	useEffect(() => {
+		if (isAnyPresented) {
+			animate(hoverLift, 0, CARD_HOVER)
+		}
+	}, [hoverLift, isAnyPresented])
 
 	return (
 		<motion.div
@@ -42,7 +63,7 @@ export function WalletCard({
 				top: getRestTop(index, count),
 				width: CARD_WIDTH,
 				height: CARD_HEIGHT,
-				y,
+				y: cardY,
 				zIndex,
 				willChange: 'transform',
 			}}
@@ -62,6 +83,8 @@ export function WalletCard({
 				}}
 				aria-pressed={isPresented}
 				onClick={() => onToggle(card.id)}
+				onHoverStart={handleHoverStart}
+				onHoverEnd={handleHoverEnd}
 			>
 				<div className='absolute inset-x-3 top-2 flex items-center justify-between'>
 					<span className='text-[11px] font-medium'>{card.title}</span>
