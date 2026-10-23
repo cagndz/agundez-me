@@ -2,10 +2,12 @@ import { useEffect } from 'react'
 import { motion, useMotionValue, useTransform, animate } from 'motion/react'
 import { CardShadow } from './card-shadow'
 import {
+	CARD_FACE_FADE_START,
 	CARD_HEIGHT,
 	CARD_HOVER,
 	CARD_HOVER_LIFT,
 	CARD_PALETTES,
+	CARD_PRESENTED_ROTATION,
 	CARD_RADIUS,
 	CARD_TAB_FADE_END,
 	CARD_WIDTH,
@@ -41,6 +43,11 @@ export function WalletCard({
 	const hoverLift = useMotionValue(0)
 	const cardY = useTransform(() => y.get() + hoverLift.get())
 	const tabOpacity = useTransform(rotate, [0, CARD_TAB_FADE_END], [1, 0])
+	const faceOpacity = useTransform(
+		rotate,
+		[0, CARD_FACE_FADE_START, CARD_PRESENTED_ROTATION],
+		[0, 0, 1],
+	)
 
 	const handleHoverStart = () => {
 		if (!isAnyPresented) {
@@ -98,6 +105,35 @@ export function WalletCard({
 						style={{ color: palette.muted }}
 					>
 						{card.code}
+					</span>
+				</motion.div>
+				<motion.div
+					aria-hidden='true'
+					className='absolute top-0 left-0 flex origin-top-left flex-col p-4 text-left'
+					style={{
+						width: CARD_HEIGHT,
+						height: CARD_WIDTH,
+						transform: `translateX(${CARD_WIDTH}px) rotate(90deg)`,
+						opacity: faceOpacity,
+						willChange: 'opacity',
+					}}
+				>
+					<div className='flex justify-between'>
+						<span className='text-[14px] leading-none font-semibold tracking-tight'>
+							{card.title}
+						</span>
+						<span
+							className='font-mono text-[10px]'
+							style={{ color: palette.muted }}
+						>
+							{card.code}
+						</span>
+					</div>
+					<span
+						className='mt-auto text-[10px] font-normal'
+						style={{ color: palette.muted }}
+					>
+						{card.description}
 					</span>
 				</motion.div>
 			</motion.button>
