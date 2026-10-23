@@ -90,6 +90,7 @@ export function WalletCard({
 					scale,
 					willChange: 'transform',
 				}}
+				data-wallet-card=''
 				aria-label={card.title}
 				aria-pressed={isPresented}
 				onClick={() => onToggle(card.id)}

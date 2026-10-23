@@ -3,7 +3,7 @@ import { CaseBack, CaseFront } from './case'
 import { STAGE_HEIGHT, STAGE_WIDTH } from './constants'
 import type { WalletCardData } from './types'
 import { WalletCard } from './wallet-card'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const CARDS: WalletCardData[] = [
 	{
@@ -35,6 +35,25 @@ export function Wallet() {
 
 	const handleToggle = (id: string) =>
 		setPresentedId(id === presentedId ? null : id)
+
+	useEffect(() => {
+		if (!isAnyPresented) return
+
+		// pointerdown, not click: the click that presents a card also reaches
+		// document, and a click listener added during it could close the card at once.
+		const handlePointerDown = (event: PointerEvent) => {
+			if (
+				event.target instanceof Element &&
+				event.target.closest('[data-wallet-card]')
+			) {
+				return
+			}
+			setPresentedId(null)
+		}
+
+		document.addEventListener('pointerdown', handlePointerDown)
+		return () => document.removeEventListener('pointerdown', handlePointerDown)
+	}, [isAnyPresented])
 
 	return (
 		<div
