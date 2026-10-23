@@ -12,6 +12,14 @@ import {
 
 // The label plate sits in the strip below the cards, where nothing shows through the glass.
 const PLATE_TOP = CARDS_IN_CASE + 4
+const SCREW_INSET = 10
+// Slot angles are irregular on purpose: screws driven by hand never line up.
+const SCREWS = [
+	{ x: 'left', y: 'top', angle: 35 },
+	{ x: 'right', y: 'top', angle: -20 },
+	{ x: 'left', y: 'bottom', angle: 80 },
+	{ x: 'right', y: 'bottom', angle: 10 },
+] as const
 
 export function CaseBack() {
 	return (
@@ -40,7 +48,42 @@ export function CaseFront({ slots, outCount }: CaseFrontProps) {
 			}}
 			aria-hidden='true'
 		>
+			<DotGrid />
+			{SCREWS.map((screw) => (
+				<Screw key={`${screw.x}-${screw.y}`} {...screw} />
+			))}
 			<LabelPlate slots={slots} outCount={outCount} />
+		</div>
+	)
+}
+
+// Printed on the glass over the card bodies, so a card at rest reads as
+// something behind a surface rather than a flat shape.
+function DotGrid() {
+	return (
+		<div
+			className='absolute top-[26px] left-6 h-36 w-34 bg-[radial-gradient(circle,rgb(17_17_17/0.2)_0.9px,transparent_1.3px)] bg-size-[8px_8px]'
+			aria-hidden='true'
+		/>
+	)
+}
+
+type ScrewProps = {
+	x: 'left' | 'right'
+	y: 'top' | 'bottom'
+	angle: number
+}
+
+function Screw({ x, y, angle }: ScrewProps) {
+	return (
+		<div
+			className='absolute size-2.5 rounded-full border border-[rgb(17_17_17/0.42)] bg-[rgb(17_17_17/0.06)] shadow-[0_1px_0_rgb(255_255_255/0.8)]'
+			style={{ [x]: SCREW_INSET, [y]: SCREW_INSET }}
+		>
+			<div
+				className='absolute top-[3.25px] left-px h-[1.5px] w-1.5 rounded-[1px] bg-[rgb(17_17_17/0.6)]'
+				style={{ rotate: `${angle}deg` }}
+			/>
 		</div>
 	)
 }
