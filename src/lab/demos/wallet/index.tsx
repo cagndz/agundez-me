@@ -33,8 +33,18 @@ export function Wallet() {
 	const [presentedId, setPresentedId] = useState<string | null>(null)
 	const isAnyPresented: boolean = presentedId !== null
 
+	// Cards physically out of the case, which is not the same as presentedId:
+	// a card is still in the case while it rises, and still out while it returns.
+	const [outIds, setOutIds] = useState<string[]>([])
+
 	const handleToggle = (id: string) =>
 		setPresentedId(id === presentedId ? null : id)
+
+	const handleOutChange = (id: string, isOut: boolean) =>
+		setOutIds((ids) => {
+			const others = ids.filter((outId) => outId !== id)
+			return isOut ? [...others, id] : others
+		})
 
 	useEffect(() => {
 		if (!isAnyPresented) return
@@ -70,9 +80,10 @@ export function Wallet() {
 					isPresented={card.id === presentedId}
 					isAnyPresented={isAnyPresented}
 					onToggle={handleToggle}
+					onOutChange={handleOutChange}
 				/>
 			))}
-			<CaseFront />
+			<CaseFront slots={CARDS.length} outCount={outIds.length} />
 		</div>
 	)
 }

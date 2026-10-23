@@ -1,5 +1,11 @@
 import { useEffect } from 'react'
-import { motion, useMotionValue, useTransform, animate } from 'motion/react'
+import {
+	animate,
+	motion,
+	useMotionValue,
+	useMotionValueEvent,
+	useTransform,
+} from 'motion/react'
 import { CardShadow } from './card-shadow'
 import {
 	CARD_FACE_FADE_START,
@@ -7,6 +13,7 @@ import {
 	CARD_HOVER,
 	CARD_HOVER_LIFT,
 	CARD_PALETTES,
+	CARD_PRESENTED_LAYER,
 	CARD_PRESENTED_ROTATION,
 	CARD_RADIUS,
 	CARD_TAB_FADE_END,
@@ -23,6 +30,7 @@ type WalletCardProps = {
 	isPresented: boolean
 	isAnyPresented: boolean
 	onToggle: (id: string) => void
+	onOutChange: (id: string, isOut: boolean) => void
 }
 
 export function WalletCard({
@@ -32,6 +40,7 @@ export function WalletCard({
 	isPresented,
 	isAnyPresented,
 	onToggle,
+	onOutChange,
 }: WalletCardProps) {
 	const palette = CARD_PALETTES[card.tone]
 	const { y, rotate, scale, zIndex } = useWalletCardMotion({
@@ -40,6 +49,12 @@ export function WalletCard({
 		isPresented,
 		isAnyPresented,
 	})
+	// The card is out of the case exactly while it sits on the presented layer:
+	// the hook switches layers when the card crosses the case edge, both ways.
+	useMotionValueEvent(zIndex, 'change', (layer) => {
+		onOutChange(card.id, layer === CARD_PRESENTED_LAYER)
+	})
+
 	const hoverLift = useMotionValue(0)
 	const cardY = useTransform(() => y.get() + hoverLift.get())
 	const tabOpacity = useTransform(rotate, [0, CARD_TAB_FADE_END], [1, 0])
