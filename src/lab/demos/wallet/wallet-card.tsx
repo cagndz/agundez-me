@@ -8,6 +8,7 @@ import {
 } from 'motion/react'
 import { CardShadow } from './card-shadow'
 import {
+	CARD_FACE_BLUR,
 	CARD_FACE_FADE_START,
 	CARD_HEIGHT,
 	CARD_HOVER,
@@ -58,6 +59,19 @@ export function WalletCard({
 	const hoverLift = useMotionValue(0)
 	const cardY = useTransform(() => y.get() + hoverLift.get())
 	const tabOpacity = useTransform(rotate, [0, CARD_TAB_FADE_END], [1, 0])
+	// The two texts also blur while they swap, so the face comes into focus
+	// instead of just appearing. Filters on these promoted layers are applied
+	// by the compositor: measured, no extra paint or raster.
+	const tabBlur = useTransform(
+		rotate,
+		[0, CARD_TAB_FADE_END],
+		['blur(0px)', `blur(${CARD_FACE_BLUR}px)`],
+	)
+	const faceBlur = useTransform(
+		rotate,
+		[CARD_FACE_FADE_START, CARD_PRESENTED_ROTATION],
+		[`blur(${CARD_FACE_BLUR}px)`, 'blur(0px)'],
+	)
 	const faceOpacity = useTransform(
 		rotate,
 		[0, CARD_FACE_FADE_START, CARD_PRESENTED_ROTATION],
@@ -114,7 +128,11 @@ export function WalletCard({
 			>
 				<motion.div
 					className='absolute inset-x-3 top-2 flex items-center justify-between'
-					style={{ opacity: tabOpacity, willChange: 'opacity' }}
+					style={{
+						opacity: tabOpacity,
+						filter: tabBlur,
+						willChange: 'opacity, filter',
+					}}
 				>
 					<span className='text-[11px] font-medium'>{card.title}</span>
 					<span
@@ -132,7 +150,8 @@ export function WalletCard({
 						height: CARD_WIDTH,
 						transform: `translateX(${CARD_WIDTH}px) rotate(90deg)`,
 						opacity: faceOpacity,
-						willChange: 'opacity',
+						filter: faceBlur,
+						willChange: 'opacity, filter',
 					}}
 				>
 					<div className='flex justify-between'>

@@ -55,6 +55,8 @@ export const CARD_PRESENTED_ROTATION = -90
 // texts from ever crossing.
 export const CARD_TAB_FADE_END = -30
 export const CARD_FACE_FADE_START = -53
+// Blur at the faded end of each text, in px.
+export const CARD_FACE_BLUR = 4
 export const CARD_PRESENTED_SCALE = 1.2
 // How far above the case top the center of the presented card sits.
 export const CARD_PRESENTED_CENTER_ABOVE_CASE = 50
