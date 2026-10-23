@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+	CARD_SINK,
 	CARDS_IN_CASE,
 	CASE_HEIGHT,
 	CASE_RADIUS,
@@ -10,8 +11,9 @@ import {
 	LIP_WIDTH,
 } from './constants'
 
-// The label plate sits in the strip below the cards, where nothing shows through the glass.
-const PLATE_TOP = CARDS_IN_CASE + 4
+// The label plate sits in the strip below the cards, where nothing shows
+// through the glass. It clears the front card even when that card sinks.
+const PLATE_TOP = CARDS_IN_CASE + CARD_SINK + 2
 const SCREW_INSET = 10
 // Slot angles are irregular on purpose: screws driven by hand never line up.
 const SCREWS = [
@@ -108,7 +110,7 @@ function LabelPlate({ slots, outCount }: LabelPlateProps) {
 
 	return (
 		<div
-			className='absolute inset-x-3.5 flex h-9 items-center justify-between rounded-lg bg-[rgb(246_246_244/0.55)] px-3 font-mono text-[10px]/[1.2] font-medium tracking-[0.06em] uppercase shadow-[inset_0_0_0_1px_rgb(17_17_17/0.14),inset_0_1px_0_rgb(17_17_17/0.06)]'
+			className='absolute inset-x-3.5 flex h-8 items-center justify-between rounded-lg bg-[rgb(246_246_244/0.55)] px-3 font-mono text-[10px]/[1.2] font-medium tracking-[0.06em] uppercase shadow-[inset_0_0_0_1px_rgb(17_17_17/0.14),inset_0_1px_0_rgb(17_17_17/0.06)]'
 			style={{ top: PLATE_TOP }}
 		>
 			<div className='flex flex-col gap-0.5 text-foreground'>
