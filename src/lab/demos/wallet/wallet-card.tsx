@@ -7,6 +7,7 @@ import {
 	CARD_HOVER_LIFT,
 	CARD_PALETTES,
 	CARD_RADIUS,
+	CARD_TAB_FADE_END,
 	CARD_WIDTH,
 } from './constants'
 import type { WalletCardData } from './types'
@@ -39,6 +40,7 @@ export function WalletCard({
 	})
 	const hoverLift = useMotionValue(0)
 	const cardY = useTransform(() => y.get() + hoverLift.get())
+	const tabOpacity = useTransform(rotate, [0, CARD_TAB_FADE_END], [1, 0])
 
 	const handleHoverStart = () => {
 		if (!isAnyPresented) {
@@ -86,7 +88,10 @@ export function WalletCard({
 				onHoverStart={handleHoverStart}
 				onHoverEnd={handleHoverEnd}
 			>
-				<div className='absolute inset-x-3 top-2 flex items-center justify-between'>
+				<motion.div
+					className='absolute inset-x-3 top-2 flex items-center justify-between'
+					style={{ opacity: tabOpacity, willChange: 'opacity' }}
+				>
 					<span className='text-[11px] font-medium'>{card.title}</span>
 					<span
 						className='font-mono text-[10px]'
@@ -94,7 +99,7 @@ export function WalletCard({
 					>
 						{card.code}
 					</span>
-				</div>
+				</motion.div>
 			</motion.button>
 		</motion.div>
 	)

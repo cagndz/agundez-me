@@ -50,6 +50,7 @@ export const CARD_SINK = 12
 // How far past the clear line (see getClearOffset) a card's base rises before it settles.
 export const CARD_APEX_GAP = 6
 export const CARD_PRESENTED_ROTATION = -90
+export const CARD_TAB_FADE_END = -30
 export const CARD_PRESENTED_SCALE = 1.2
 // How far above the case top the center of the presented card sits.
 export const CARD_PRESENTED_CENTER_ABOVE_CASE = 50
