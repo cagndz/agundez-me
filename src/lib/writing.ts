@@ -3,7 +3,14 @@ import path from 'node:path'
 import type { ComponentType } from 'react'
 import { slugify } from './slugify'
 
-export type PostMeta = { title: string; date: string; summary: string }
+export type PostMeta = {
+	title: string
+	date: string
+	summary: string
+	// What the post was checked against, shown under the date: versions change
+	// faster than the posts do.
+	tested?: string
+}
 
 const dir = path.join(process.cwd(), 'src/content/writing')
 

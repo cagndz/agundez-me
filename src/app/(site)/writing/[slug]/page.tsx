@@ -42,6 +42,9 @@ export default async function Post({ params }: PageProps<'/writing/[slug]'>) {
 				<time dateTime={meta.date} className='text-muted'>
 					{formatDate(meta.date)}
 				</time>
+				{meta.tested && (
+					<p className='mt-1 text-sm text-muted'>Tested with {meta.tested}</p>
+				)}
 			</header>
 			<article className='mt-10'>
 				<Content />
