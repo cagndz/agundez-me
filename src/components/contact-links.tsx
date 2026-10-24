@@ -4,9 +4,6 @@ import { CopyEmail } from './copy-email'
 export function ContactLinks() {
 	return (
 		<ul className='flex gap-x-4'>
-			<li>
-				<CopyEmail />
-			</li>
 			{contactLinks.map(({ label, href }) => (
 				<li key={label}>
 					<a
@@ -19,6 +16,11 @@ export function ContactLinks() {
 					</a>
 				</li>
 			))}
+			{/* Last: the button is as wide as "Copied", and that extra room
+			    only shows as a gap when something follows it. */}
+			<li>
+				<CopyEmail />
+			</li>
 		</ul>
 	)
 }
