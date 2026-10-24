@@ -142,36 +142,45 @@ export function WalletCard({
 						{card.code}
 					</span>
 				</motion.div>
-				<motion.div
+				{/* Static quarter turn: once the card turns -90 deg this face reads
+				    horizontally. It is its own element so the animated layer inside
+				    carries no transform of its own. */}
+				<div
 					aria-hidden='true'
-					className='absolute top-0 left-0 flex origin-top-left flex-col p-4 text-left'
+					className='absolute top-0 left-0 origin-top-left'
 					style={{
 						width: CARD_HEIGHT,
 						height: CARD_WIDTH,
 						transform: `translateX(${CARD_WIDTH}px) rotate(90deg)`,
-						opacity: faceOpacity,
-						filter: faceBlur,
-						willChange: 'opacity, filter',
 					}}
 				>
-					<div className='flex justify-between'>
-						<span className='text-[14px] leading-none font-semibold tracking-tight'>
-							{card.title}
-						</span>
+					<motion.div
+						className='flex size-full flex-col p-4 text-left'
+						style={{
+							opacity: faceOpacity,
+							filter: faceBlur,
+							willChange: 'opacity, filter',
+						}}
+					>
+						<div className='flex justify-between'>
+							<span className='text-[14px] leading-none font-semibold tracking-tight'>
+								{card.title}
+							</span>
+							<span
+								className='font-mono text-[10px]'
+								style={{ color: palette.muted }}
+							>
+								{card.code}
+							</span>
+						</div>
 						<span
-							className='font-mono text-[10px]'
+							className='mt-auto text-[10px] font-normal'
 							style={{ color: palette.muted }}
 						>
-							{card.code}
+							{card.description}
 						</span>
-					</div>
-					<span
-						className='mt-auto text-[10px] font-normal'
-						style={{ color: palette.muted }}
-					>
-						{card.description}
-					</span>
-				</motion.div>
+					</motion.div>
+				</div>
 			</motion.button>
 		</motion.div>
 	)
