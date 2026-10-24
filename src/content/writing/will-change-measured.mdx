@@ -108,7 +108,7 @@ animate(rotate, -90, { type: 'spring', duration: 0.55, bounce: 0.2 })
 return <motion.div style={{ y, rotate, willChange: 'transform' }} />
 ```
 
-To put numbers on it, I opened and closed one card in headless Chromium 141 through Playwright, recorded a trace and added up the raster work. Each number is the average of three runs. Headless numbers aren't what you'd get on a phone, so compare them with each other, not with your device.
+To put numbers on it, I opened and closed one card in headless Chromium 141 through Playwright, recorded a trace and added up the raster work. Each number is the average of three runs.
 
 <RasterBars
   caption='Raster time while opening and closing one card.'
