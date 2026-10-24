@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft } from '@/components/icons/arrow-left'
-import { PostToc } from '@/components/post-toc'
+import { PostToc } from '@/components/writing/post-toc'
 import { formatDate, getHeadings, getPost, getSlugs } from '@/lib/writing'
 
 export const dynamicParams = false
@@ -42,6 +42,9 @@ export default async function Post({ params }: PageProps<'/writing/[slug]'>) {
 				<time dateTime={meta.date} className='text-muted'>
 					{formatDate(meta.date)}
 				</time>
+				{meta.tested && (
+					<p className='mt-1 text-sm text-muted'>Tested with {meta.tested}</p>
+				)}
 			</header>
 			<article className='mt-10'>
 				<Content />

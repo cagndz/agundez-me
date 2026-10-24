@@ -1,0 +1,196 @@
+import { DialLayers } from '@/components/writing/will-change/dial-layers'
+import { MainThreadDemo } from '@/components/writing/will-change/main-thread-demo'
+import { PipelineDiagram } from '@/components/writing/will-change/pipeline-diagram'
+import { RasterBars } from '@/components/writing/will-change/raster-bars'
+import { PostVideo } from '@/components/writing/post-video'
+
+export const meta = {
+  title: "When will-change helps, and when it doesn't",
+  date: '2026-10-24',
+  summary:
+    'Two animations from my lab, traced in Chromium. Where will-change removed the repaint, where it did nothing useful, and why the Motion docs seemed to say otherwise.',
+  tested: 'Chromium 141, Motion 13.4.4 and 14.6.0',
+}
+
+My lab has a wallet: three cards in a clear case. Click one and it rises out of the case, turns sideways and grows. On my 60 Hz screen the turn left a faint trail, and the card's edge flickered while it rotated.
+
+I added `will-change: transform` to the card and the edge stopped flickering. Paint flashing, which used to light up the whole card on every frame, went quiet.
+
+<PostVideo
+  caption='Paint flashing in Chrome: every green rectangle is an area painted again in that frame.'
+  clips={[
+    {
+      label: 'Without will-change',
+      description:
+        'The wallet opening and closing a card with paint flashing on. Green rectangles pile up over the moving card on every frame.',
+      poster: '/media/when-will-change-helps/wallet-without.jpg',
+      width: 592,
+      height: 794,
+      sources: [
+        {
+          src: '/media/when-will-change-helps/wallet-without.webm',
+          type: 'video/webm',
+        },
+        {
+          src: '/media/when-will-change-helps/wallet-without.mp4',
+          type: 'video/mp4',
+        },
+      ],
+    },
+    {
+      label: 'With will-change',
+      description:
+        'The same interaction with will-change on the card. Only the small label on the case flashes.',
+      poster: '/media/when-will-change-helps/wallet-with.jpg',
+      width: 592,
+      height: 794,
+      sources: [
+        {
+          src: '/media/when-will-change-helps/wallet-with.webm',
+          type: 'video/webm',
+        },
+        {
+          src: '/media/when-will-change-helps/wallet-with.mp4',
+          type: 'video/mp4',
+        },
+      ],
+    },
+  ]}
+/>
+
+So I tried it on the next component, a dial, and there it did almost nothing. I wanted to understand why before putting it anywhere else.
+
+## What the browser does with a frame
+
+Roughly, every frame goes through four steps:
+
+- **Style**: work out which CSS applies to each element.
+- **Layout**: work out sizes and positions.
+- **Paint**: record what to draw, and then **raster** it: turn that record into pixels, tile by tile.
+- **Composite**: put the finished layers on screen, each in its place.
+
+The page is split into layers, and each layer is rastered on its own. Chrome does the raster work on helper threads and the compositing on a compositor thread, away from the main thread where your JavaScript runs. [Mariko Kosaka explains this really well](https://developer.chrome.com/blog/inside-browser-part3).
+
+`transform` and `opacity` are special. If an element has its own layer, the compositor can move, turn, scale or fade that layer without painting or rastering it again. It's like sliding a printed photo across a table instead of drawing it again in every position.
+
+The catch is that "if". Without its own layer, the element is part of the layer underneath, and moving it means repainting that layer. Switch between the two below:
+
+<PipelineDiagram />
+
+## Who tells the browser
+
+There are two ways to animate a `transform`.
+
+With a CSS animation, a CSS transition or the Web Animations API (WAAPI), you hand the whole animation to the browser up front. It knows what's going to move, so it gives the element its own layer and runs the animation on the compositor. That's what people usually mean by hardware acceleration.
+
+With JavaScript and `requestAnimationFrame`, you write a new value into the style on every frame. The browser doesn't know an animation is happening. It just sees a style change, again and again, on the main thread.
+
+The demo below shows the main thread part. Both cards run the same turn: the left one is a Web Animation, the right one is written frame by frame from JavaScript. The button keeps the main thread busy for one second, the way a long task would.
+
+<MainThreadDemo />
+
+The left card keeps turning because nothing in its animation needs the main thread. The right one freezes, then jumps to where it should be once the thread is free.
+
+That's the part you can see. The part you can't see is the layer. An element animated from JavaScript doesn't get one by default, so on every frame it changes, the browser repaints and rasters the layer it lives in. `will-change: transform` tells the browser ahead of time: the element gets its own layer, and the compositor can move it without repainting it.
+
+## The card
+
+The wallet is built with [Motion](https://motion.dev). The animation has two phases, rise and then turn, and it has to survive a click in the middle of either one. So I drive it with motion values and `animate()`:
+
+```tsx
+const y = useMotionValue(0)
+const rotate = useMotionValue(0)
+
+animate(rotate, -90, { type: 'spring', duration: 0.55, bounce: 0.2 })
+
+return <motion.div style={{ y, rotate, willChange: 'transform' }} />
+```
+
+To put numbers on it, I opened and closed one card in headless Chromium 141 through Playwright, recorded a trace and added up the raster work. Each number is the average of three runs.
+
+<RasterBars
+  caption='Raster time while opening and closing one card.'
+  rows={[
+    { label: 'No will-change', ms: 185, detail: '245 tasks' },
+    {
+      label: 'will-change on the shadow only',
+      ms: 38,
+      detail: '213 tasks',
+    },
+    {
+      label: 'will-change on the card and its shadow',
+      ms: 2.5,
+      detail: '6 tasks',
+      highlight: true,
+    },
+  ]}
+/>
+
+The shadow was the surprise. It's a blurred silhouette on a layer of its own, so it can keep pointing down while the card turns. Without a layer of its own, that blur was rastered again on every frame, and blur is expensive to raster. That's most of the 185 ms.
+
+I want to be honest about the trail, though. Raster runs on helper threads, not on the main thread, and 185 ms spread over almost two seconds of animation is under 2 ms per frame on my machine. The trail was mostly the speed of the turn: at its fastest, the card rotates about 10 degrees between two frames at 60 Hz. The repaint was extra work on top, not the cause. It would matter more on a slow phone.
+
+## The Motion docs said otherwise
+
+This is where I got stuck. Motion's [performance page](https://motion.dev/docs/performance) says independent transforms like `x`, `scale` and `rotate` "are hardware accelerated, just like animating `transform` directly". If that was true, why did my card repaint?
+
+There were two reasons, one about versions and one about the API.
+
+That acceleration shipped in [Motion 14.2.0](https://motion.dev/changelog?lib=motion), on October 13, 2026. My repo was on 13.4.4, and the docs already describe the new version. [Emil Kowalski's animation standards](https://github.com/emilkowalski/skills/blob/main/skills/review-animations/STANDARDS.md) say the opposite, that the `x`/`y`/`scale` shorthands "run on the main thread via rAF". That was true before 14.2.
+
+The second reason holds even on the latest version. Motion can only hand an animation to the browser when it animates a CSS property of an element. A motion value created with `useMotionValue` and animated with `animate(value, …)` isn't tied to an element or a property. In the source, Motion starts that animation with an empty property name, the check for hardware acceleration fails, and it falls back to its JavaScript loop.
+
+I checked it with a card that moves and turns, counting the WAAPI animations on the element and the raster tasks:
+
+- `animate(element, { x, rotate })`: not accelerated in 13.4.4 (about 90 raster tasks), accelerated in 14.6.0 (3).
+- `<motion.div animate={{ x, rotate }} />`: not accelerated in 13.4.4 (89), accelerated in 14.6.0 (3).
+- `animate(element, { transform })`: accelerated in both (3).
+- A motion value animated with `animate(value)`: not accelerated in either (about 90).
+- The same motion value with `will-change: transform`: 0.
+
+So for the wallet, upgrading Motion wouldn't remove the need for `will-change`. The choreography needs motion values.
+
+## The dial
+
+The dial is a wheel with 101 ticks. You drag it to turn it, and the ticks near the center grow and fade in as they pass.
+
+Same kind of test, a drag and a release:
+
+<RasterBars
+  caption='Raster time during one drag and release. Runs varied by a few milliseconds.'
+  rows={[
+    {
+      label: 'As it was',
+      ms: 36,
+      detail: '4 layers',
+    },
+    {
+      label: 'will-change on the wheel',
+      ms: 22,
+      detail: '8 layers',
+    },
+    {
+      label: 'will-change on every tick',
+      ms: 3.3,
+      detail: '119 layers',
+    },
+  ]}
+/>
+
+Giving the wheel its own layer didn't change the number of raster tasks. The wheel moves as a whole, but what's inside it changes on every frame: the ticks scale and fade. A layer whose content changes has to be rastered again anyway.
+
+Promoting every tick fixes that, at the cost of more than a hundred layers.
+
+<DialLayers />
+
+Each one takes GPU memory, and the [web.dev guide on layers](https://web.dev/articles/stick-to-compositor-only-properties-and-manage-layer-count) is blunt about it: "Do not promote elements unnecessarily." The dial was spending well under half a millisecond per frame on raster to begin with, so I left it as it was.
+
+## What I do now
+
+- I measure first. Paint flashing shows what repaints, and the Performance panel shows what the raster costs.
+- I use `will-change: transform` on elements that move as a whole and are animated from JavaScript: motion values, springs, drag, gestures.
+- I don't use it on elements whose content changes while they move. The layer doesn't help there.
+- When an animation can be a CSS transition, a CSS animation or a WAAPI animation, I let the browser handle the layer.
+- I write down versions. The library I use changed this exact behavior a few days before I measured it.
+
+[MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/will-change) calls `will-change` "a last resort to try to deal with existing performance problems". After all this, I agree. Find the problem first.

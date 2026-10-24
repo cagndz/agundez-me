@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { PostMeta } from '@/lib/writing'
-import { LinkArrow } from './link-arrow'
+import { LinkArrow } from '@/components/link-arrow'
 
 type Item = { slug: string; meta: PostMeta }
 

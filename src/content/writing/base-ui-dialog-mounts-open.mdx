@@ -1,11 +1,12 @@
+import { ModalDemo } from '@/components/writing/base-ui-dialog/modal-demo'
+
 export const meta = {
-  title: "Why my Base UI dialog wasn't animating",
+  title: 'Animating a Base UI dialog that mounts open',
   date: '2026-10-02',
   summary:
     'A Base UI dialog that mounts already open skips its enter animation. Why it happens and how I fixed it.',
+  tested: 'Base UI 1.8.0',
 }
-
-Tested with Base UI 1.8.0, October 2026.
 
 I keep a small lab of component experiments. Click a cell and a modal grows out of it. Close it and it shrinks back into the same cell.
 
@@ -41,7 +42,7 @@ In Base UI's source this is a flag called `animateInitialOpen` (in `internals/us
 
 Closing fails for the same reason, seen from the other side. When `selectedComponent` goes away, React removes the dialog in that same render. It never gets to see `open` become `false`, so there is no `data-ending-style` and no time to play an exit.
 
-You can try both below. Slow motion is on so you can see what happens.
+You can try both below.
 
 <ModalDemo />
 

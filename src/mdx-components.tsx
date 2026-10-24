@@ -1,9 +1,7 @@
 import type { MDXComponents } from 'mdx/types'
-import { ModalDemo } from '@/components/modal-demo'
 import { slugify, textOf } from '@/lib/slugify'
 
 const components: MDXComponents = {
-	ModalDemo,
 	h2: ({ children, ...props }) => (
 		<h2
 			id={slugify(textOf(children))}
