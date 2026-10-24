@@ -34,8 +34,25 @@
 		animation: signal-blink 1.6s steps(1) infinite;
 	}
 
+	/* One short LED-style flicker when a readout changes */
+	@keyframes signal-flicker {
+		0%,
+		55% {
+			opacity: 0.15;
+		}
+		35%,
+		75% {
+			opacity: 1;
+		}
+	}
+
+	.signal-flicker {
+		animation: signal-flicker 260ms steps(1) 1;
+	}
+
 	@media (prefers-reduced-motion: reduce) {
-		.signal-dot {
+		.signal-dot,
+		.signal-flicker {
 			animation: none;
 		}
 	}
