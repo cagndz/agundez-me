@@ -1,35 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { type RefObject, useRef, useState } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { Figure } from '@/components/writing/figure'
 
-type Mode = 'conditional' | 'mounted'
+type Strategy = 'conditional' | 'mounted'
 
-const MODES = {
+const STRATEGIES = {
 	conditional: {
 		label: 'Conditional',
-		code: '{open && <Dialog.Root open>…</Dialog.Root>}',
-		result: 'It is born open and removed at once: no enter, no exit.',
+		code: '{open && <Dialog.Root open>}',
 	},
 	mounted: {
 		label: 'Mounted',
-		code: '<Dialog.Root open={open}>…</Dialog.Root>',
-		result: 'It sees the open prop change, so it can fade in and out.',
+		code: '<Dialog.Root open={open}>',
 	},
-} satisfies Record<Mode, { label: string; code: string; result: string }>
+} satisfies Record<Strategy, { label: string; code: string }>
 
 const pillButton =
 	'h-8 rounded-full bg-background px-3.5 text-[13px] shadow-[0_0_0_1px_rgb(26_25_23/0.06),0_1px_2px_rgb(26_25_23/0.06)] transition-[scale,box-shadow] duration-150 ease-out-quart hover:shadow-[0_0_0_1px_rgb(26_25_23/0.1),0_1px_2px_rgb(26_25_23/0.08)] active:scale-[0.97]'
 
-function DemoDialog({
+// The dialog renders into its own stage instead of the page. It is not modal
+// and a click outside doesn't close it, so both stages work independently and
+// the page never locks its scroll.
+function StageDialog({
 	open,
 	onOpenChange,
+	stage,
 	slow,
+	label,
 }: {
 	open: boolean
 	onOpenChange: (open: boolean) => void
+	stage: RefObject<HTMLDivElement | null>
 	slow: boolean
+	label: string
 }) {
 	// Complete class strings on purpose: Tailwind only generates classes it can
 	// find written out in full, so `duration-${n}` would never be picked up.
@@ -38,19 +43,24 @@ function DemoDialog({
 		: 'duration-300 data-ending-style:duration-200'
 
 	return (
-		<Dialog.Root open={open} onOpenChange={onOpenChange}>
-			<Dialog.Portal>
+		<Dialog.Root
+			open={open}
+			onOpenChange={onOpenChange}
+			modal={false}
+			disablePointerDismissal
+		>
+			<Dialog.Portal container={stage}>
 				<Dialog.Backdrop
-					className={`fixed inset-0 bg-foreground/10 transition-opacity ease-out-quart data-ending-style:opacity-0 data-starting-style:opacity-0 ${speed}`}
+					className={`absolute inset-0 bg-foreground/[0.04] transition-opacity ease-out-quart data-ending-style:opacity-0 data-starting-style:opacity-0 ${speed}`}
 				/>
 				<Dialog.Popup
-					className={`fixed inset-0 m-auto flex h-fit w-[min(22rem,calc(100vw-3rem))] flex-col gap-1 rounded-xl bg-background p-5 text-foreground shadow-[0_0_0_1px_rgb(26_25_23/0.06),0_16px_40px_-16px_rgb(26_25_23/0.3)] transition-[opacity,scale] ease-out-quart data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:scale-95 motion-safe:data-starting-style:scale-95 ${speed}`}
+					className={`absolute inset-0 m-auto flex h-fit w-[min(14rem,calc(100%-2rem))] flex-col gap-1 rounded-[10px] bg-background p-4 text-left shadow-[0_0_0_1px_rgb(26_25_23/0.06),0_12px_28px_-12px_rgb(26_25_23/0.3)] transition-[opacity,scale] ease-out-quart data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:scale-95 motion-safe:data-starting-style:scale-95 ${speed}`}
 				>
-					<Dialog.Title className='text-[15px] font-medium'>Modal</Dialog.Title>
-					<Dialog.Description className='text-[13px] text-muted'>
-						Open and close me a few times.
+					<Dialog.Title className='text-[13px] font-medium'>Modal</Dialog.Title>
+					<Dialog.Description className='text-xs text-muted'>
+						{label}
 					</Dialog.Description>
-					<Dialog.Close className={`${pillButton} mt-4 self-end`}>
+					<Dialog.Close className={`${pillButton} mt-3 self-end`}>
 						Close
 					</Dialog.Close>
 				</Dialog.Popup>
@@ -59,56 +69,65 @@ function DemoDialog({
 	)
 }
 
-export function ModalDemo() {
+function Stage({ strategy, slow }: { strategy: Strategy; slow: boolean }) {
+	const stage = useRef<HTMLDivElement>(null)
 	const [open, setOpen] = useState(false)
-	const [mode, setMode] = useState<Mode>('conditional')
-	const [slow, setSlow] = useState(true)
-	const current = MODES[mode]
+	const { label, code } = STRATEGIES[strategy]
 
 	return (
-		<Figure
-			caption='Slow motion stretches each transition to 3 s, so you can see what happens.'
-			className='relative'
-		>
-			<div className='flex flex-col items-center gap-6 px-4 pt-14 pb-8 text-center'>
-				<div
-					role='group'
-					aria-label='How the dialog is rendered'
-					className='flex gap-0.5 rounded-full bg-foreground/5 p-0.5'
-				>
-					{(Object.keys(MODES) as Mode[]).map((value) => (
-						<button
-							key={value}
-							type='button'
-							aria-pressed={mode === value}
-							onClick={() => setMode(value)}
-							className='rounded-full px-3 py-1 text-[13px] transition-[color,background-color,box-shadow] duration-200 ease-out-quart not-aria-pressed:text-muted not-aria-pressed:hover:text-foreground aria-pressed:bg-background aria-pressed:shadow-[0_1px_2px_rgb(26_25_23/0.08)]'
-						>
-							{MODES[value].label}
-						</button>
-					))}
-				</div>
-
-				<code className='font-mono text-[12px] text-balance text-muted sm:text-[13px]'>
-					{current.code}
-				</code>
-
+		<div className='flex flex-col items-center gap-4'>
+			<div
+				ref={stage}
+				className='relative grid h-48 w-full place-items-center overflow-hidden rounded-lg bg-foreground/[0.035]'
+			>
 				<button
 					type='button'
 					onClick={() => setOpen(true)}
 					className={pillButton}
+					aria-label={`Open the ${label.toLowerCase()} dialog`}
 				>
-					Open modal
+					Open
 				</button>
-
-				<p
-					aria-live='polite'
-					className='max-w-xs text-[13px] leading-5 text-muted'
-				>
-					{current.result}
-				</p>
+				{strategy === 'mounted' ? (
+					<StageDialog
+						open={open}
+						onOpenChange={setOpen}
+						stage={stage}
+						slow={slow}
+						label={label}
+					/>
+				) : (
+					open && (
+						<StageDialog
+							open
+							onOpenChange={setOpen}
+							stage={stage}
+							slow={slow}
+							label={label}
+						/>
+					)
+				)}
 			</div>
+			<div className='flex flex-col items-center gap-0.5 text-center'>
+				<p className='text-[13px]'>{label}</p>
+				<code className='font-mono text-[11px] text-muted'>{code}</code>
+			</div>
+		</div>
+	)
+}
 
+export function ModalDemo() {
+	const [slow, setSlow] = useState(true)
+
+	return (
+		<Figure
+			caption='Each stage has its own dialog. Slow motion stretches every transition to 3 s.'
+			className='relative px-4 pt-14 pb-6'
+		>
+			<div className='grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-4'>
+				<Stage strategy='conditional' slow={slow} />
+				<Stage strategy='mounted' slow={slow} />
+			</div>
 			<button
 				type='button'
 				aria-pressed={slow}
@@ -121,24 +140,6 @@ export function ModalDemo() {
 				/>
 				Slow motion
 			</button>
-
-			{mode === 'mounted' ? (
-				<DemoDialog
-					key='mounted'
-					open={open}
-					onOpenChange={setOpen}
-					slow={slow}
-				/>
-			) : (
-				open && (
-					<DemoDialog
-						key='conditional'
-						open
-						onOpenChange={setOpen}
-						slow={slow}
-					/>
-				)
-			)}
 		</Figure>
 	)
 }
