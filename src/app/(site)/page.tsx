@@ -1,4 +1,4 @@
-import { PostList } from '@/components/post-list'
+import { PostList } from '@/components/writing/post-list'
 import { getAllPosts } from '@/lib/writing'
 import { RevealOnce } from '@/components/reveal-once'
 import { ProjectList } from '@/components/project-list'

@@ -1,4 +1,4 @@
-import { Figure } from '../figure'
+import { Figure } from '@/components/writing/figure'
 
 // A schematic of the dial: a stretch of its ticks along the arc, and tinted
 // shapes for the layers they are drawn into.

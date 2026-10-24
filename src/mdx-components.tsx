@@ -1,19 +1,7 @@
 import type { MDXComponents } from 'mdx/types'
-import { ModalDemo } from '@/components/modal-demo'
-import { PostVideo } from '@/components/post-video'
-import { DialLayers } from '@/components/will-change/dial-layers'
-import { MainThreadDemo } from '@/components/will-change/main-thread-demo'
-import { PipelineDiagram } from '@/components/will-change/pipeline-diagram'
-import { RasterBars } from '@/components/will-change/raster-bars'
 import { slugify, textOf } from '@/lib/slugify'
 
 const components: MDXComponents = {
-	DialLayers,
-	MainThreadDemo,
-	ModalDemo,
-	PipelineDiagram,
-	PostVideo,
-	RasterBars,
 	h2: ({ children, ...props }) => (
 		<h2
 			id={slugify(textOf(children))}

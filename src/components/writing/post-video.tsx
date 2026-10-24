@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Figure } from './figure'
+import { Figure } from '@/components/writing/figure'
 
 type Clip = {
 	label: string

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft } from '@/components/icons/arrow-left'
-import { PostToc } from '@/components/post-toc'
+import { PostToc } from '@/components/writing/post-toc'
 import { formatDate, getHeadings, getPost, getSlugs } from '@/lib/writing'
 
 export const dynamicParams = false

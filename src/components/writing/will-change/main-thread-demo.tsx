@@ -1,7 +1,7 @@
 'use client'
 
 import { type Ref, useEffect, useRef, useState } from 'react'
-import { Figure } from '../figure'
+import { Figure } from '@/components/writing/figure'
 
 // Both cards run the same turn: 0° to -90° and back, same duration, same curve.
 const TURN_MS = 1600

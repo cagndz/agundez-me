@@ -1,7 +1,7 @@
 'use client'
 
 import { Fragment, useState } from 'react'
-import { Figure } from '../figure'
+import { Figure } from '@/components/writing/figure'
 
 type Layer = 'shared' | 'own'
 
