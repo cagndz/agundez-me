@@ -38,8 +38,9 @@ function StageDialog({
 }) {
 	// Complete class strings on purpose: Tailwind only generates classes it can
 	// find written out in full, so `duration-${n}` would never be picked up.
+	// Quarter speed is 4× the real 300 ms enter and 200 ms exit.
 	const speed = slow
-		? 'duration-3000 data-ending-style:duration-3000'
+		? 'duration-1200 data-ending-style:duration-800'
 		: 'duration-300 data-ending-style:duration-200'
 
 	return (
@@ -76,18 +77,22 @@ function Stage({ strategy, slow }: { strategy: Strategy; slow: boolean }) {
 
 	return (
 		<div className='flex flex-col items-center gap-4'>
+			{/* The dialog portals into this element. The button sits in its own
+			    absolute layer, so whatever the portal adds can't shift it. */}
 			<div
 				ref={stage}
-				className='relative grid h-48 w-full place-items-center overflow-hidden rounded-lg bg-foreground/[0.035]'
+				className='relative h-48 w-full overflow-hidden rounded-lg bg-foreground/[0.035]'
 			>
-				<button
-					type='button'
-					onClick={() => setOpen(true)}
-					className={pillButton}
-					aria-label={`Open the ${label.toLowerCase()} dialog`}
-				>
-					Open
-				</button>
+				<div className='absolute inset-0 grid place-items-center'>
+					<button
+						type='button'
+						onClick={() => setOpen(true)}
+						className={pillButton}
+						aria-label={`Open the ${label.toLowerCase()} dialog`}
+					>
+						Open
+					</button>
+				</div>
 				{strategy === 'mounted' ? (
 					<StageDialog
 						open={open}
@@ -117,29 +122,38 @@ function Stage({ strategy, slow }: { strategy: Strategy; slow: boolean }) {
 }
 
 export function ModalDemo() {
-	const [slow, setSlow] = useState(true)
+	const [slow, setSlow] = useState(false)
 
 	return (
 		<Figure
-			caption='Each stage has its own dialog. Slow motion stretches every transition to 3 s.'
+			caption='Each stage has its own dialog. 0.25× plays the transitions at a quarter of their speed.'
 			className='relative px-4 pt-14 pb-6'
 		>
 			<div className='grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-4'>
 				<Stage strategy='conditional' slow={slow} />
 				<Stage strategy='mounted' slow={slow} />
 			</div>
-			<button
-				type='button'
-				aria-pressed={slow}
-				onClick={() => setSlow(!slow)}
-				className='absolute top-3 right-3 flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[12px] text-muted transition-colors duration-150 ease-out-quart hover:bg-foreground/5 hover:text-foreground'
+			<div
+				role='group'
+				aria-label='Animation speed'
+				className='absolute top-3 right-3 flex gap-0.5 rounded-full bg-foreground/5 p-0.5'
 			>
-				<span
-					aria-hidden='true'
-					className={`size-1.5 rounded-full transition-colors duration-150 ${slow ? 'bg-accent' : 'bg-foreground/20'}`}
-				/>
-				Slow motion
-			</button>
+				{[
+					{ label: '1×', value: false, name: 'Real speed' },
+					{ label: '0.25×', value: true, name: 'Quarter speed' },
+				].map((option) => (
+					<button
+						key={option.label}
+						type='button'
+						aria-pressed={slow === option.value}
+						aria-label={option.name}
+						onClick={() => setSlow(option.value)}
+						className='h-7 min-w-9 rounded-full px-2 font-mono text-[12px] tabular-nums transition-[color,background-color,box-shadow] duration-200 ease-out-quart not-aria-pressed:text-muted not-aria-pressed:hover:text-foreground aria-pressed:bg-background aria-pressed:shadow-[0_1px_2px_rgb(26_25_23/0.08)]'
+					>
+						{option.label}
+					</button>
+				))}
+			</div>
 		</Figure>
 	)
 }
