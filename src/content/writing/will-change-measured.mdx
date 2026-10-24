@@ -10,7 +10,26 @@ Tested in Chromium 141 with Motion 13.4.4 and 14.6.0, October 2026.
 
 My lab has a wallet: three cards in a clear case. Click one and it rises out of the case, turns sideways and grows. On my 60 Hz screen the turn left a faint trail, and the card's edge flickered while it rotated.
 
-I added `will-change: transform` to the card and the edge stopped flickering. Paint flashing in DevTools, which used to light up the whole card on every frame, went quiet.
+I added `will-change: transform` to the card and the edge stopped flickering. Paint flashing, which used to light up the whole card on every frame, went quiet.
+
+<PostVideo
+  sources={[
+    {
+      src: '/media/will-change-measured/wallet-paint-flashing.webm',
+      type: 'video/webm',
+    },
+    {
+      src: '/media/will-change-measured/wallet-paint-flashing.mp4',
+      type: 'video/mp4',
+    },
+  ]}
+  poster='/media/will-change-measured/wallet-paint-flashing-poster.jpg'
+  width={960}
+  height={660}
+  columns={['Without will-change', 'With will-change']}
+  label='The wallet opening and closing a card with paint flashing on. Without will-change, green rectangles cover the moving card on every frame. With it, only the small label changes.'
+  caption='Paint flashing in Chromium: every green rectangle is an area painted again in that frame.'
+/>
 
 So I tried it on the next component, a dial, and there it did almost nothing. I wanted to understand why before putting it anywhere else.
 
@@ -27,7 +46,9 @@ The page is split into layers, and each layer is rastered on its own. Chrome doe
 
 `transform` and `opacity` are special. If an element has its own layer, the compositor can move, turn, scale or fade that layer without painting or rastering it again. It's like sliding a printed photo across a table instead of drawing it again in every position.
 
-The catch is that "if". Without its own layer, the element is part of the layer underneath, and moving it means repainting that layer.
+The catch is that "if". Without its own layer, the element is part of the layer underneath, and moving it means repainting that layer. Switch between the two below:
+
+<PipelineDiagram />
 
 ## Who tells the browser
 
@@ -37,11 +58,11 @@ With a CSS animation, a CSS transition or the Web Animations API (WAAPI), you ha
 
 With JavaScript and `requestAnimationFrame`, you write a new value into the style on every frame. The browser doesn't know an animation is happening. It just sees a style change, again and again, on the main thread.
 
-The demo below shows the main thread part. Both cards turn once every two seconds. The button keeps the main thread busy for one second, the way a long task would.
+The demo below shows the main thread part. Both cards run the same turn: the left one is a Web Animation, the right one is written frame by frame from JavaScript. The button keeps the main thread busy for one second, the way a long task would.
 
 <MainThreadDemo />
 
-The CSS card keeps turning because nothing in its animation needs the main thread. The other one waits until the thread is free.
+The left card keeps turning because nothing in its animation needs the main thread. The right one freezes, then jumps to where it should be once the thread is free.
 
 That's the part you can see. The part you can't see is the layer. An element animated from JavaScript doesn't get one by default, so on every frame it changes, the browser repaints and rasters the layer it lives in. `will-change: transform` tells the browser ahead of time: the element gets its own layer, and the compositor can move it without repainting it.
 
@@ -58,11 +79,24 @@ animate(rotate, -90, { type: 'spring', duration: 0.55, bounce: 0.2 })
 return <motion.div style={{ y, rotate, willChange: 'transform' }} />
 ```
 
-To measure it, I opened and closed one card in headless Chromium with tracing on, and counted the raster tasks. Each number is the average of three runs:
+To put numbers on it, I opened and closed one card in headless Chromium 141 through Playwright, recorded a trace and added up the raster work. Each number is the average of three runs. Headless numbers aren't what you'd get on a phone, so compare them with each other, not with your device.
 
-- No `will-change` at all: **245 raster tasks, 185 ms** of raster work.
-- `will-change` on the card's shadow, not on the card: **213 tasks, 38 ms**.
-- `will-change` on the card and on its shadow: **6 tasks, 2.5 ms**.
+<RasterBars
+  caption='Raster time while opening and closing one card.'
+  rows={[
+    { label: 'No will-change', ms: 185, detail: '245 raster tasks' },
+    {
+      label: 'will-change on the shadow only',
+      ms: 38,
+      detail: '213 raster tasks',
+    },
+    {
+      label: 'will-change on the card and its shadow',
+      ms: 2.5,
+      detail: '6 raster tasks',
+    },
+  ]}
+/>
 
 The shadow was the surprise. It's a blurred silhouette on a layer of its own, so it can keep pointing down while the card turns. Without a layer of its own, that blur was rastered again on every frame, and blur is expensive to raster. That's most of the 185 ms.
 
@@ -94,13 +128,34 @@ The dial is a wheel with 101 ticks. You drag it to turn it, and the ticks near t
 
 Same kind of test, a drag and a release:
 
-- As it was: **219 raster tasks, 32 to 39 ms**, with 4 layers on the page.
-- `will-change: transform` on the wheel: **218 tasks, 21 to 23 ms**, with 8 layers.
-- `will-change: transform` on every tick: **35 tasks, 3 to 4 ms**, with 119 layers.
+<RasterBars
+  caption='Raster time during one drag and release. Runs varied by a few milliseconds.'
+  rows={[
+    {
+      label: 'As it was',
+      ms: 36,
+      detail: '219 raster tasks · 4 layers',
+    },
+    {
+      label: 'will-change on the wheel',
+      ms: 22,
+      detail: '218 raster tasks · 8 layers',
+    },
+    {
+      label: 'will-change on every tick',
+      ms: 3.3,
+      detail: '35 raster tasks · 119 layers',
+    },
+  ]}
+/>
 
 Giving the wheel its own layer didn't change the number of raster tasks. The wheel moves as a whole, but what's inside it changes on every frame: the ticks scale and fade. A layer whose content changes has to be rastered again anyway.
 
-Promoting every tick fixes that, at the cost of more than a hundred layers. Each one takes GPU memory, and the [web.dev guide on layers](https://web.dev/articles/stick-to-compositor-only-properties-and-manage-layer-count) is blunt about it: "Do not promote elements unnecessarily." The dial was spending well under half a millisecond per frame on raster to begin with, so I left it as it was.
+Promoting every tick fixes that, at the cost of more than a hundred layers.
+
+<DialLayers />
+
+Each one takes GPU memory, and the [web.dev guide on layers](https://web.dev/articles/stick-to-compositor-only-properties-and-manage-layer-count) is blunt about it: "Do not promote elements unnecessarily." The dial was spending well under half a millisecond per frame on raster to begin with, so I left it as it was.
 
 ## What I do now
 
@@ -111,7 +166,3 @@ Promoting every tick fixes that, at the cost of more than a hundred layers. Each
 - I write down versions. The library I use changed this exact behavior a few days before I measured it.
 
 [MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/will-change) calls `will-change` "a last resort to try to deal with existing performance problems". After all this, I agree. Find the problem first.
-
-## How I measured
-
-Everything ran in headless Chromium 141 through Playwright, at a device pixel ratio of 2, with GPU rasterization on. I recorded a trace for each interaction and counted the `RasterTask` events and their total duration, three runs per case. Headless numbers aren't what you'd get on a phone, so compare them with each other, not with your own device.
