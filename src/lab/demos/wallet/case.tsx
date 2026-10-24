@@ -98,9 +98,9 @@ type LabelPlateProps = {
 function LabelPlate({ slots, outCount }: LabelPlateProps) {
 	const readout =
 		outCount > 0 ? `${outCount} out` : `${String(slots).padStart(2, '0')} slots`
-	// Counts readout changes, so the line flickers when it changes but not when
-	// the wallet first mounts (in the grid, or when the modal opens).
-	// Adjusting state while rendering: https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+	// Counts readout changes: the line flickers when it changes, not when the
+	// wallet mounts. Setting state during render is the pattern React documents
+	// for resetting state when a value changes.
 	const [previousReadout, setPreviousReadout] = useState(readout)
 	const [changes, setChanges] = useState(0)
 	if (previousReadout !== readout) {
@@ -126,7 +126,7 @@ function LabelPlate({ slots, outCount }: LabelPlateProps) {
 			<div
 				className={
 					outCount > 0
-						? 'led-blink size-[7px] rounded-full bg-accent shadow-[0_0_6px_var(--color-accent)]'
+						? 'size-[7px] rounded-full bg-accent shadow-[0_0_6px_var(--color-accent)]'
 						: 'size-[7px] rounded-full bg-[rgb(17_17_17/0.18)] shadow-[inset_0_1px_1px_rgb(17_17_17/0.3)]'
 				}
 			/>

@@ -34,13 +34,6 @@
 		animation: signal-blink 1.6s steps(1) infinite;
 	}
 
-	/* Same blink for LEDs inside demos. A separate class, so the rule below
-	   that quiets the header's dot while a cell is hovered leaves them alone. */
-	.led-blink {
-		--signal-dim: 0.3;
-		animation: signal-blink 1.6s steps(1) infinite;
-	}
-
 	/* One short LED-style flicker when a readout changes */
 	@keyframes signal-flicker {
 		0%,
@@ -59,7 +52,6 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.signal-dot,
-		.led-blink,
 		.signal-flicker {
 			animation: none;
 		}
