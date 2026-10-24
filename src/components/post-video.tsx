@@ -3,42 +3,40 @@
 import { useEffect, useRef, useState } from 'react'
 import { Figure } from './figure'
 
-type PostVideoProps = {
-	// Listed in order of preference. WebM first: Chromium builds without
-	// proprietary codecs can't play MP4, and Safari picks the MP4.
-	sources: { src: string; type: string }[]
+type Clip = {
+	label: string
+	description: string
 	poster: string
 	width: number
 	height: number
-	label: string
-	// Short labels over each half of a side-by-side clip.
-	columns?: string[]
-	caption?: string
+	// In order of preference. WebM first: Chromium builds without proprietary
+	// codecs can't play MP4, and Safari picks the MP4.
+	sources: { src: string; type: string }[]
 }
 
-// Plays muted and looped while it is on screen, and stops when it leaves.
-// With reduced motion it never starts on its own: the native controls are
-// shown instead, so playing it is the reader's choice.
-export function PostVideo({
-	sources,
-	poster,
-	width,
-	height,
-	label,
-	columns,
-	caption,
-}: PostVideoProps) {
-	const ref = useRef<HTMLVideoElement>(null)
-	const [reduceMotion, setReduceMotion] = useState(false)
-
+function useReducedMotion() {
+	const [reduce, setReduce] = useState(false)
 	useEffect(() => {
 		const query = window.matchMedia('(prefers-reduced-motion: reduce)')
-		const update = () => setReduceMotion(query.matches)
+		const update = () => setReduce(query.matches)
 		update()
 		query.addEventListener('change', update)
 		return () => query.removeEventListener('change', update)
 	}, [])
+	return reduce
+}
 
+function ClipVideo({
+	clip,
+	reduceMotion,
+}: {
+	clip: Clip
+	reduceMotion: boolean
+}) {
+	const ref = useRef<HTMLVideoElement>(null)
+
+	// Plays muted and looped only while on screen. With reduced motion it
+	// never starts on its own: native controls let the reader decide.
 	useEffect(() => {
 		const video = ref.current
 		if (!video || reduceMotion) return
@@ -58,36 +56,50 @@ export function PostVideo({
 	}, [reduceMotion])
 
 	return (
-		<Figure caption={caption}>
-			{columns && (
-				<div
-					className='grid border-b border-border font-mono text-[11px] tracking-widest text-muted uppercase'
-					style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}
-				>
-					{columns.map((column) => (
-						<span key={column} className='px-3 py-2 text-center'>
-							{column}
-						</span>
-					))}
-				</div>
-			)}
+		<div className='flex flex-col gap-3'>
 			<video
 				ref={ref}
-				poster={poster}
-				width={width}
-				height={height}
-				aria-label={label}
+				poster={clip.poster}
+				width={clip.width}
+				height={clip.height}
+				aria-label={clip.description}
 				muted
 				loop
 				playsInline
 				preload='metadata'
 				controls={reduceMotion}
-				className='block h-auto w-full'
+				className='block h-auto w-full rounded-lg'
 			>
-				{sources.map((source) => (
+				{clip.sources.map((source) => (
 					<source key={source.src} src={source.src} type={source.type} />
 				))}
 			</video>
+			<p className='text-center text-[13px] text-muted'>{clip.label}</p>
+		</div>
+	)
+}
+
+export function PostVideo({
+	clips,
+	caption,
+}: {
+	clips: Clip[]
+	caption?: string
+}) {
+	const reduceMotion = useReducedMotion()
+
+	return (
+		<Figure caption={caption} className='p-3 sm:p-4'>
+			<div
+				className='grid gap-3 sm:gap-4'
+				style={{
+					gridTemplateColumns: `repeat(${clips.length}, minmax(0, 1fr))`,
+				}}
+			>
+				{clips.map((clip) => (
+					<ClipVideo key={clip.label} clip={clip} reduceMotion={reduceMotion} />
+				))}
+			</div>
 		</Figure>
 	)
 }

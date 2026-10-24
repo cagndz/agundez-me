@@ -13,22 +13,45 @@ My lab has a wallet: three cards in a clear case. Click one and it rises out of 
 I added `will-change: transform` to the card and the edge stopped flickering. Paint flashing, which used to light up the whole card on every frame, went quiet.
 
 <PostVideo
-  sources={[
+  caption='Paint flashing in Chrome: every green rectangle is an area painted again in that frame.'
+  clips={[
     {
-      src: '/media/will-change-measured/wallet-paint-flashing.webm',
-      type: 'video/webm',
+      label: 'Without will-change',
+      description:
+        'The wallet opening and closing a card with paint flashing on. Green rectangles pile up over the moving card on every frame.',
+      poster: '/media/will-change-measured/wallet-without.jpg',
+      width: 592,
+      height: 800,
+      sources: [
+        {
+          src: '/media/will-change-measured/wallet-without.webm',
+          type: 'video/webm',
+        },
+        {
+          src: '/media/will-change-measured/wallet-without.mp4',
+          type: 'video/mp4',
+        },
+      ],
     },
     {
-      src: '/media/will-change-measured/wallet-paint-flashing.mp4',
-      type: 'video/mp4',
+      label: 'With will-change',
+      description:
+        'The same interaction with will-change on the card. Only the small label on the case flashes.',
+      poster: '/media/will-change-measured/wallet-with.jpg',
+      width: 592,
+      height: 800,
+      sources: [
+        {
+          src: '/media/will-change-measured/wallet-with.webm',
+          type: 'video/webm',
+        },
+        {
+          src: '/media/will-change-measured/wallet-with.mp4',
+          type: 'video/mp4',
+        },
+      ],
     },
   ]}
-  poster='/media/will-change-measured/wallet-paint-flashing-poster.jpg'
-  width={960}
-  height={660}
-  columns={['Without will-change', 'With will-change']}
-  label='The wallet opening and closing a card with paint flashing on. Without will-change, green rectangles cover the moving card on every frame. With it, only the small label changes.'
-  caption='Paint flashing in Chromium: every green rectangle is an area painted again in that frame.'
 />
 
 So I tried it on the next component, a dial, and there it did almost nothing. I wanted to understand why before putting it anywhere else.
@@ -84,16 +107,17 @@ To put numbers on it, I opened and closed one card in headless Chromium 141 thro
 <RasterBars
   caption='Raster time while opening and closing one card.'
   rows={[
-    { label: 'No will-change', ms: 185, detail: '245 raster tasks' },
+    { label: 'No will-change', ms: 185, detail: '245 tasks' },
     {
       label: 'will-change on the shadow only',
       ms: 38,
-      detail: '213 raster tasks',
+      detail: '213 tasks',
     },
     {
       label: 'will-change on the card and its shadow',
       ms: 2.5,
-      detail: '6 raster tasks',
+      detail: '6 tasks',
+      highlight: true,
     },
   ]}
 />
@@ -134,17 +158,17 @@ Same kind of test, a drag and a release:
     {
       label: 'As it was',
       ms: 36,
-      detail: '219 raster tasks · 4 layers',
+      detail: '4 layers',
     },
     {
       label: 'will-change on the wheel',
       ms: 22,
-      detail: '218 raster tasks · 8 layers',
+      detail: '8 layers',
     },
     {
       label: 'will-change on every tick',
       ms: 3.3,
-      detail: '35 raster tasks · 119 layers',
+      detail: '119 layers',
     },
   ]}
 />

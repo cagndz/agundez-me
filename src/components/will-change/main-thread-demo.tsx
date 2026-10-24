@@ -54,20 +54,20 @@ function blockMainThread(ms: number) {
 
 function Card({ ref }: { ref: Ref<HTMLDivElement> }) {
 	return (
-		<div className='relative grid place-items-center'>
-			{/* The shadow stays put while the card turns. */}
-			<div
-				aria-hidden='true'
-				className='absolute top-full mt-3 h-2 w-14 rounded-full bg-foreground/15 blur-[6px]'
-			/>
-			<div
-				ref={ref}
-				className='relative h-[72px] w-12 rounded-[6px] bg-foreground shadow-[inset_0_0_0_1px_rgb(255_255_255/0.08)]'
-				style={{ willChange: 'transform' }}
-			>
-				<div className='absolute inset-x-2 top-2.5 h-[3px] rounded-full bg-background/25' />
-			</div>
-		</div>
+		<div
+			ref={ref}
+			className='h-[68px] w-11 rounded-[6px] bg-foreground'
+			style={{ willChange: 'transform' }}
+		/>
+	)
+}
+
+function PauseIcon() {
+	return (
+		<svg viewBox='0 0 12 12' className='size-3' aria-hidden='true'>
+			<rect x='2.5' y='2' width='2.4' height='8' rx='0.6' fill='currentColor' />
+			<rect x='7.1' y='2' width='2.4' height='8' rx='0.6' fill='currentColor' />
+		</svg>
 	)
 }
 
@@ -75,25 +75,9 @@ function PlayIcon() {
 	return (
 		<svg viewBox='0 0 12 12' className='size-3' aria-hidden='true'>
 			<path
-				d='M3 1.8v8.4a.6.6 0 0 0 .9.5l6.6-4.2a.6.6 0 0 0 0-1L3.9 1.3a.6.6 0 0 0-.9.5Z'
+				d='M3.5 2.3v7.4a.6.6 0 0 0 .9.5l5.8-3.7a.6.6 0 0 0 0-1L4.4 1.8a.6.6 0 0 0-.9.5Z'
 				fill='currentColor'
 			/>
-		</svg>
-	)
-}
-
-function PauseIcon() {
-	return (
-		<svg viewBox='0 0 12 12' className='size-3' aria-hidden='true'>
-			<rect
-				x='2.5'
-				y='1.5'
-				width='2.5'
-				height='9'
-				rx='0.6'
-				fill='currentColor'
-			/>
-			<rect x='7' y='1.5' width='2.5' height='9' rx='0.6' fill='currentColor' />
 		</svg>
 	)
 }
@@ -204,86 +188,53 @@ export function MainThreadDemo() {
 		)
 	}
 
-	const status = busy
-		? 'Main thread busy for 1 s.'
-		: skipped !== null
-			? `JavaScript skipped ${skipped} frames. The browser never stopped.`
-			: playing
-				? 'Block the main thread while they turn.'
-				: 'Paused.'
-
 	return (
-		<Figure caption='The same 1.6 s turn twice: a Web Animation on the left, requestAnimationFrame on the right. Only one of them needs the main thread.'>
+		<Figure
+			caption='The same 1.6 s turn twice: a Web Animation on the left, requestAnimationFrame on the right.'
+			className='relative'
+		>
 			<div
 				ref={root}
-				className='relative bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] bg-size-[12px_12px]'
+				className='flex flex-col items-center gap-9 px-4 pt-14 pb-8'
 			>
-				<div className='absolute top-3 left-3 flex items-center gap-2 rounded-full border border-border bg-background py-1 pr-2.5 pl-2 font-mono text-[11px] tracking-widest uppercase'>
-					<span
-						aria-hidden='true'
-						className={`size-1.5 rounded-full transition-colors duration-150 ${busy ? 'bg-accent shadow-[0_0_6px_var(--color-accent)]' : 'bg-foreground/20'}`}
-					/>
-					<span className='text-muted'>Main thread</span>
-					<span>{busy ? 'Busy' : 'Idle'}</span>
-				</div>
-
-				<div className='grid grid-cols-2 divide-x divide-border pt-12'>
+				<div className='grid w-full max-w-sm grid-cols-2'>
 					{[
-						{
-							ref: browserCard,
-							name: 'Browser',
-							thread: 'WAAPI · compositor thread',
-						},
-						{
-							ref: scriptCard,
-							name: 'JavaScript',
-							thread: 'rAF · main thread',
-						},
+						{ ref: browserCard, name: 'Browser' },
+						{ ref: scriptCard, name: 'JavaScript' },
 					].map((lane) => (
-						<div
-							key={lane.name}
-							className='flex flex-col items-center gap-10 pt-10 pb-5'
-						>
-							<Card ref={lane.ref} />
-							<div className='text-center'>
-								<p className='font-mono text-[11px] tracking-widest uppercase'>
-									{lane.name}
-								</p>
-								<p className='text-xs text-muted'>{lane.thread}</p>
+						<div key={lane.name} className='flex flex-col items-center gap-9'>
+							<div className='grid h-20 place-items-center'>
+								<Card ref={lane.ref} />
 							</div>
+							<p className='text-[13px] text-muted'>{lane.name}</p>
 						</div>
 					))}
 				</div>
-			</div>
-
-			<div className='flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border px-3 py-3'>
-				<button
-					type='button'
-					aria-label={playing ? 'Pause' : 'Play'}
-					onClick={() => setWantsToPlay(!playing)}
-					disabled={busy}
-					className='grid size-8 place-items-center rounded-xs border border-border transition-[background-color,scale] duration-150 ease-out-quart hover:bg-foreground/5 active:scale-[0.96] disabled:pointer-events-none disabled:opacity-50'
-				>
-					{playing ? <PauseIcon /> : <PlayIcon />}
-				</button>
 				<button
 					type='button'
 					onClick={handleBlock}
 					disabled={busy}
-					className='inline-flex h-8 items-center gap-2 rounded-xs bg-foreground px-3 font-mono text-[11px] tracking-widest text-background uppercase transition-[opacity,scale] duration-150 ease-out-quart hover:opacity-85 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50'
+					className='h-8 rounded-full bg-background px-3.5 text-[13px] shadow-[0_0_0_1px_rgb(26_25_23/0.06),0_1px_2px_rgb(26_25_23/0.06)] transition-[scale,opacity] duration-150 ease-out-quart hover:shadow-[0_0_0_1px_rgb(26_25_23/0.1),0_1px_2px_rgb(26_25_23/0.08)] active:scale-[0.97] disabled:opacity-60'
 				>
-					Block main thread
-					<span className='rounded-[3px] bg-background/15 px-1.5 py-0.5'>
-						1 s
-					</span>
+					{busy ? 'Main thread busy…' : 'Block main thread'}
 				</button>
-				<p
-					aria-live='polite'
-					className='basis-full text-xs text-muted sm:ml-auto sm:basis-auto'
-				>
-					{status}
-				</p>
 			</div>
+			<p
+				aria-live='polite'
+				className={`absolute inset-x-0 bottom-2 text-center text-xs text-muted transition-opacity duration-200 ${skipped === null ? 'opacity-0' : 'opacity-100'}`}
+			>
+				{skipped !== null &&
+					`JavaScript skipped ${skipped} frames. The browser never stopped.`}
+			</p>
+			<button
+				type='button'
+				aria-label={playing ? 'Pause animation' : 'Play animation'}
+				onClick={() => setWantsToPlay(!playing)}
+				disabled={busy}
+				className='absolute top-3 right-3 grid size-8 place-items-center rounded-full text-muted transition-colors duration-150 hover:bg-foreground/5 hover:text-foreground'
+			>
+				{playing ? <PauseIcon /> : <PlayIcon />}
+			</button>
 		</Figure>
 	)
 }

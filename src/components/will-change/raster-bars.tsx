@@ -6,11 +6,12 @@ import { Figure } from '../figure'
 type Row = {
 	label: string
 	ms: number
-	detail: string
+	detail?: string
+	highlight?: boolean
 }
 
-// Horizontal bars for raster time, on a linear scale so small values look as
-// small as they are. They grow once when the chart scrolls into view.
+// Bars for raster time, on a linear scale so small values look as small as
+// they are. They grow once when the chart scrolls into view.
 export function RasterBars({
 	rows,
 	caption,
@@ -40,25 +41,31 @@ export function RasterBars({
 
 	return (
 		<Figure caption={caption}>
-			<div ref={ref} className='flex flex-col gap-4 p-3 sm:p-4'>
+			<div ref={ref} className='flex flex-col gap-5 px-5 py-6 sm:px-8 sm:py-7'>
 				{rows.map((row, index) => (
-					<div key={row.label}>
-						<div className='flex items-baseline justify-between gap-4'>
-							<p className='text-sm'>{row.label}</p>
-							<p className='font-mono text-sm tabular-nums'>
-								{row.ms} <span className='text-muted'>ms</span>
-							</p>
+					<div key={row.label} className='flex flex-col gap-2'>
+						<div className='flex items-baseline justify-between gap-4 text-[13px]'>
+							<span>
+								{row.label}
+								{row.detail && (
+									<span className='text-muted'> · {row.detail}</span>
+								)}
+							</span>
+							<span
+								className={`font-mono text-xs tabular-nums ${row.highlight ? 'text-accent' : ''}`}
+							>
+								{row.ms} ms
+							</span>
 						</div>
-						<div className='mt-2 h-1.5 overflow-hidden rounded-full bg-border/70'>
+						<div className='h-1 overflow-hidden rounded-full bg-foreground/[0.06]'>
 							<div
-								className='h-full origin-left rounded-full bg-foreground transition-transform duration-700 ease-out-strong motion-reduce:transition-none'
+								className={`h-full origin-left rounded-full transition-transform duration-700 ease-out-strong motion-reduce:transition-none ${row.highlight ? 'bg-accent' : 'bg-foreground'}`}
 								style={{
-									transform: `scaleX(${shown ? Math.max(row.ms / max, 0.004) : 0})`,
+									transform: `scaleX(${shown ? Math.max(row.ms / max, 0.01) : 0})`,
 									transitionDelay: `${index * 80}ms`,
 								}}
 							/>
 						</div>
-						<p className='mt-1.5 text-xs text-muted'>{row.detail}</p>
 					</div>
 				))}
 			</div>
