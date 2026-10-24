@@ -70,7 +70,12 @@ export function PostVideo({
 	}, [playing])
 
 	return (
-		<Figure caption={caption} surface={false} className='relative pt-12'>
+		<Figure
+			caption={caption}
+			// The background of the recordings, so they blend into the figure.
+			surface='bg-[#e9e9e7]'
+			className='relative px-3 pt-12 pb-4 sm:px-4'
+		>
 			<div
 				ref={root}
 				className='grid gap-3 sm:gap-4'
@@ -92,7 +97,7 @@ export function PostVideo({
 							loop
 							playsInline
 							preload='metadata'
-							className='block h-auto w-full rounded-lg'
+							className='block h-auto w-full'
 						>
 							{clip.sources.map((source) => (
 								<source key={source.src} src={source.src} type={source.type} />
