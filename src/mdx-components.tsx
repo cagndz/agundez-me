@@ -1,8 +1,10 @@
 import type { MDXComponents } from 'mdx/types'
+import { MainThreadDemo } from '@/components/main-thread-demo'
 import { ModalDemo } from '@/components/modal-demo'
 import { slugify, textOf } from '@/lib/slugify'
 
 const components: MDXComponents = {
+	MainThreadDemo,
 	ModalDemo,
 	h2: ({ children, ...props }) => (
 		<h2
