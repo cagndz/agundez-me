@@ -2,6 +2,7 @@
 
 import { type Ref, useEffect, useRef, useState } from 'react'
 import { Figure } from '@/components/writing/figure'
+import { PlayPauseButton } from '@/components/writing/play-pause-button'
 
 // Both cards run the same turn: 0° to -90° and back, same duration, same curve.
 const TURN_MS = 1600
@@ -59,26 +60,6 @@ function Card({ ref }: { ref: Ref<HTMLDivElement> }) {
 			className='h-[68px] w-11 rounded-[6px] bg-foreground'
 			style={{ willChange: 'transform' }}
 		/>
-	)
-}
-
-function PauseIcon() {
-	return (
-		<svg viewBox='0 0 12 12' className='size-3' aria-hidden='true'>
-			<rect x='2.5' y='2' width='2.4' height='8' rx='0.6' fill='currentColor' />
-			<rect x='7.1' y='2' width='2.4' height='8' rx='0.6' fill='currentColor' />
-		</svg>
-	)
-}
-
-function PlayIcon() {
-	return (
-		<svg viewBox='0 0 12 12' className='size-3' aria-hidden='true'>
-			<path
-				d='M3.5 2.3v7.4a.6.6 0 0 0 .9.5l5.8-3.7a.6.6 0 0 0 0-1L4.4 1.8a.6.6 0 0 0-.9.5Z'
-				fill='currentColor'
-			/>
-		</svg>
 	)
 }
 
@@ -226,15 +207,12 @@ export function MainThreadDemo() {
 				{skipped !== null &&
 					`JavaScript skipped ${skipped} frames. The browser never stopped.`}
 			</p>
-			<button
-				type='button'
-				aria-label={playing ? 'Pause animation' : 'Play animation'}
-				onClick={() => setWantsToPlay(!playing)}
+			<PlayPauseButton
+				playing={playing}
+				onToggle={() => setWantsToPlay(!playing)}
+				label='animation'
 				disabled={busy}
-				className='absolute top-3 right-3 grid size-8 place-items-center rounded-full text-muted transition-colors duration-150 hover:bg-foreground/5 hover:text-foreground'
-			>
-				{playing ? <PauseIcon /> : <PlayIcon />}
-			</button>
+			/>
 		</Figure>
 	)
 }

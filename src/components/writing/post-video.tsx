@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Figure } from '@/components/writing/figure'
+import { PlayPauseButton } from '@/components/writing/play-pause-button'
 
 type Clip = {
 	label: string
@@ -12,26 +13,6 @@ type Clip = {
 	// In order of preference. WebM first: Chromium builds without proprietary
 	// codecs can't play MP4, and Safari picks the MP4.
 	sources: { src: string; type: string }[]
-}
-
-function PauseIcon() {
-	return (
-		<svg viewBox='0 0 12 12' className='size-3' aria-hidden='true'>
-			<rect x='2.5' y='2' width='2.4' height='8' rx='0.6' fill='currentColor' />
-			<rect x='7.1' y='2' width='2.4' height='8' rx='0.6' fill='currentColor' />
-		</svg>
-	)
-}
-
-function PlayIcon() {
-	return (
-		<svg viewBox='0 0 12 12' className='size-3' aria-hidden='true'>
-			<path
-				d='M3.5 2.3v7.4a.6.6 0 0 0 .9.5l5.8-3.7a.6.6 0 0 0 0-1L4.4 1.8a.6.6 0 0 0-.9.5Z'
-				fill='currentColor'
-			/>
-		</svg>
-	)
 }
 
 // Muted, looping clips that play together, side by side. All clips must have
@@ -89,7 +70,7 @@ export function PostVideo({
 	}, [playing])
 
 	return (
-		<Figure caption={caption} className='relative p-3 sm:p-4'>
+		<Figure caption={caption} surface={false} className='relative pt-12'>
 			<div
 				ref={root}
 				className='grid gap-3 sm:gap-4'
@@ -121,14 +102,11 @@ export function PostVideo({
 					</div>
 				))}
 			</div>
-			<button
-				type='button'
-				aria-label={playing ? 'Pause videos' : 'Play videos'}
-				onClick={() => setWantsToPlay(!playing)}
-				className='absolute top-5 right-5 grid size-8 place-items-center rounded-full bg-background/90 text-foreground shadow-[0_0_0_1px_rgb(26_25_23/0.06),0_1px_2px_rgb(26_25_23/0.08)] transition-[scale,background-color] duration-150 ease-out-quart hover:bg-background active:scale-[0.96] sm:top-6 sm:right-6'
-			>
-				{playing ? <PauseIcon /> : <PlayIcon />}
-			</button>
+			<PlayPauseButton
+				playing={playing}
+				onToggle={() => setWantsToPlay(!playing)}
+				label='videos'
+			/>
 		</Figure>
 	)
 }
