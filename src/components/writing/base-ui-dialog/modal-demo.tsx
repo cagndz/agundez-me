@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
+import { Figure } from '@/components/writing/figure'
 
 type Mode = 'conditional' | 'mounted'
 
@@ -18,8 +19,8 @@ const MODES = {
 	},
 } satisfies Record<Mode, { label: string; code: string; result: string }>
 
-const buttonBase =
-	'rounded-xs border border-border px-3 py-1.5 font-mono text-xs uppercase tracking-widest transition-colors duration-150 ease-out-quart active:scale-98'
+const pillButton =
+	'h-8 rounded-full bg-background px-3.5 text-[13px] shadow-[0_0_0_1px_rgb(26_25_23/0.06),0_1px_2px_rgb(26_25_23/0.06)] transition-[scale,box-shadow] duration-150 ease-out-quart hover:shadow-[0_0_0_1px_rgb(26_25_23/0.1),0_1px_2px_rgb(26_25_23/0.08)] active:scale-[0.97]'
 
 function DemoDialog({
 	open,
@@ -43,17 +44,13 @@ function DemoDialog({
 					className={`fixed inset-0 bg-foreground/10 transition-opacity ease-out-quart data-ending-style:opacity-0 data-starting-style:opacity-0 ${speed}`}
 				/>
 				<Dialog.Popup
-					className={`fixed inset-0 m-auto h-fit w-[min(24rem,calc(100vw-3rem))] rounded-xs border border-border bg-background p-4 text-foreground transition-[opacity,scale] ease-out-quart data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:scale-95 motion-safe:data-starting-style:scale-95 ${speed}`}
+					className={`fixed inset-0 m-auto flex h-fit w-[min(22rem,calc(100vw-3rem))] flex-col gap-1 rounded-xl bg-background p-5 text-foreground shadow-[0_0_0_1px_rgb(26_25_23/0.06),0_16px_40px_-16px_rgb(26_25_23/0.3)] transition-[opacity,scale] ease-out-quart data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:scale-95 motion-safe:data-starting-style:scale-95 ${speed}`}
 				>
-					<Dialog.Title className='font-mono text-xs tracking-widest uppercase'>
-						Modal
-					</Dialog.Title>
-					<Dialog.Description className='mt-2 text-sm text-muted'>
+					<Dialog.Title className='text-[15px] font-medium'>Modal</Dialog.Title>
+					<Dialog.Description className='text-[13px] text-muted'>
 						Open and close me a few times.
 					</Dialog.Description>
-					<Dialog.Close
-						className={`${buttonBase} mt-4 ml-auto block hover:bg-foreground/5`}
-					>
+					<Dialog.Close className={`${pillButton} mt-4 self-end`}>
 						Close
 					</Dialog.Close>
 				</Dialog.Popup>
@@ -69,51 +66,61 @@ export function ModalDemo() {
 	const current = MODES[mode]
 
 	return (
-		<div className='mt-8 rounded-xs border border-border p-4'>
-			<div
-				role='group'
-				aria-label='Mount strategy'
-				className='grid grid-cols-2 gap-0.5 rounded-xs border border-border p-0.5'
-			>
-				{(Object.keys(MODES) as Mode[]).map((value) => (
-					<button
-						key={value}
-						type='button'
-						aria-pressed={mode === value}
-						onClick={() => setMode(value)}
-						className='rounded-xs px-3 py-1.5 font-mono text-xs tracking-widest uppercase transition-colors duration-150 ease-out-quart not-aria-pressed:text-muted not-aria-pressed:hover:text-foreground aria-pressed:bg-foreground aria-pressed:text-background'
-					>
-						{MODES[value].label}
-					</button>
-				))}
-			</div>
+		<Figure
+			caption='Slow motion stretches each transition to 3 s, so you can see what happens.'
+			className='relative'
+		>
+			<div className='flex flex-col items-center gap-6 px-4 pt-14 pb-8 text-center'>
+				<div
+					role='group'
+					aria-label='How the dialog is rendered'
+					className='flex gap-0.5 rounded-full bg-foreground/5 p-0.5'
+				>
+					{(Object.keys(MODES) as Mode[]).map((value) => (
+						<button
+							key={value}
+							type='button'
+							aria-pressed={mode === value}
+							onClick={() => setMode(value)}
+							className='rounded-full px-3 py-1 text-[13px] transition-[color,background-color,box-shadow] duration-200 ease-out-quart not-aria-pressed:text-muted not-aria-pressed:hover:text-foreground aria-pressed:bg-background aria-pressed:shadow-[0_1px_2px_rgb(26_25_23/0.08)]'
+						>
+							{MODES[value].label}
+						</button>
+					))}
+				</div>
 
-			<p className='mt-4 rounded-xs bg-border/40 px-3 py-2 font-mono text-xs'>
-				{current.code}
-			</p>
+				<code className='font-mono text-[12px] text-balance text-muted sm:text-[13px]'>
+					{current.code}
+				</code>
 
-			<div className='mt-4 flex flex-wrap items-center gap-x-6 gap-y-3'>
 				<button
 					type='button'
 					onClick={() => setOpen(true)}
-					className='rounded-xs bg-foreground px-4 py-2 font-mono text-xs tracking-widest text-background uppercase transition-[opacity,scale] duration-150 ease-out-quart hover:opacity-85 active:scale-98'
+					className={pillButton}
 				>
 					Open modal
 				</button>
-				<label className='flex items-center gap-2 text-sm'>
-					<input
-						type='checkbox'
-						checked={slow}
-						onChange={(event) => setSlow(event.target.checked)}
-						className='accent-foreground'
-					/>
-					Slow motion
-				</label>
+
+				<p
+					aria-live='polite'
+					className='max-w-xs text-[13px] leading-5 text-muted'
+				>
+					{current.result}
+				</p>
 			</div>
 
-			<p className='mt-4 border-t border-border pt-4 text-sm'>
-				{current.result}
-			</p>
+			<button
+				type='button'
+				aria-pressed={slow}
+				onClick={() => setSlow(!slow)}
+				className='absolute top-3 right-3 flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[12px] text-muted transition-colors duration-150 ease-out-quart hover:bg-foreground/5 hover:text-foreground'
+			>
+				<span
+					aria-hidden='true'
+					className={`size-1.5 rounded-full transition-colors duration-150 ${slow ? 'bg-accent' : 'bg-foreground/20'}`}
+				/>
+				Slow motion
+			</button>
 
 			{mode === 'mounted' ? (
 				<DemoDialog
@@ -132,6 +139,6 @@ export function ModalDemo() {
 					/>
 				)
 			)}
-		</div>
+		</Figure>
 	)
 }
