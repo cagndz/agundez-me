@@ -70,19 +70,24 @@ export function LabModal({ item }: { item: LabItem | undefined }) {
 					initialFocus={popupRef}
 					className='lab-popup fixed inset-0 m-auto flex h-fit w-fit flex-col gap-3 text-foreground focus-visible:outline-none! md:flex-row'
 				>
-					<div
-						data-lab-stage
-						className='lab-stage flex size-(--stage) items-center justify-center rounded-xs border border-border bg-background p-4'
-					>
-						{Demo ? (
-							<DemoFit className='size-full'>
-								<Demo />
-							</DemoFit>
-						) : (
-							<span className='font-mono text-sm tracking-widest text-muted uppercase'>
-								No demo yet
-							</span>
-						)}
+					{/* The frame travels from the cell; the demo doesn't move or scale,
+					    it appears once the frame has arrived (see lab-modal.css) */}
+					<div data-lab-stage className='lab-stage relative size-(--stage)'>
+						<div
+							aria-hidden='true'
+							className='lab-stage-frame absolute inset-0 rounded-xs border border-border bg-background'
+						/>
+						<div className='lab-stage-content relative flex size-full items-center justify-center p-4'>
+							{Demo ? (
+								<DemoFit className='size-full'>
+									<Demo />
+								</DemoFit>
+							) : (
+								<span className='font-mono text-sm tracking-widest text-muted uppercase'>
+									No demo yet
+								</span>
+							)}
+						</div>
 					</div>
 					<aside className='lab-aside flex w-(--stage) flex-col gap-6 overflow-y-auto rounded-xs border border-border bg-background p-4 max-md:max-h-[calc(100dvh-3rem-var(--stage)-0.75rem)] md:w-72'>
 						<div className='flex items-start justify-between'>
