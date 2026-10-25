@@ -1,6 +1,6 @@
 'use client'
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, type ReactNode } from 'react'
 
 type DemoFitProps = {
 	children: ReactNode
@@ -13,11 +13,14 @@ type DemoFitProps = {
  *
  * offsetWidth/offsetHeight ignore transforms, so the demo's natural size is
  * read correctly even while it is scaled.
+ *
+ * The scale lives in a CSS variable (--fit) on the box, not in React state:
+ * code outside React can set it before hydration, and resizing doesn't
+ * re-render the demo.
  */
 export function DemoFit({ children, className = '' }: DemoFitProps) {
 	const boxRef = useRef<HTMLDivElement>(null)
 	const demoRef = useRef<HTMLDivElement>(null)
-	const [scale, setScale] = useState(1)
 
 	useLayoutEffect(() => {
 		const box = boxRef.current
@@ -28,7 +31,12 @@ export function DemoFit({ children, className = '' }: DemoFitProps) {
 			const width = demo.offsetWidth
 			const height = demo.offsetHeight
 			if (!width || !height) return
-			setScale(Math.min(1, box.clientWidth / width, box.clientHeight / height))
+			const scale = Math.min(
+				1,
+				box.clientWidth / width,
+				box.clientHeight / height,
+			)
+			box.style.setProperty('--fit', String(scale))
 		}
 
 		// Fires once on observe and again whenever the box or the demo resizes.
@@ -45,7 +53,7 @@ export function DemoFit({ children, className = '' }: DemoFitProps) {
 			className={`flex items-center justify-center ${className}`}
 		>
 			{/* shrink-0: a flex item would otherwise squash the demo to the box's width */}
-			<div ref={demoRef} className='shrink-0' style={{ scale: `${scale}` }}>
+			<div ref={demoRef} className='shrink-0 scale-[var(--fit,1)]'>
 				{children}
 			</div>
 		</div>
