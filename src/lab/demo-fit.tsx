@@ -1,6 +1,7 @@
 'use client'
 
 import { useLayoutEffect, useRef, type ReactNode } from 'react'
+import { applyFit } from './fit'
 
 type DemoFitProps = {
 	children: ReactNode
@@ -11,12 +12,9 @@ type DemoFitProps = {
  * Shrinks a demo (never enlarges it) so it fits its box. Demos are built at
  * their natural size once; the lab decides how much room they get.
  *
- * offsetWidth/offsetHeight ignore transforms, so the demo's natural size is
- * read correctly even while it is scaled.
- *
  * The scale lives in a CSS variable (--fit) on the box, not in React state:
- * code outside React can set it before hydration, and resizing doesn't
- * re-render the demo.
+ * DemoFitScript sets it before hydration and React must not overwrite it, and
+ * resizing doesn't re-render the demo. See fit.ts for the calculation.
  */
 export function DemoFit({ children, className = '' }: DemoFitProps) {
 	const boxRef = useRef<HTMLDivElement>(null)
@@ -27,17 +25,7 @@ export function DemoFit({ children, className = '' }: DemoFitProps) {
 		const demo = demoRef.current
 		if (!box || !demo) return
 
-		const update = () => {
-			const width = demo.offsetWidth
-			const height = demo.offsetHeight
-			if (!width || !height) return
-			const scale = Math.min(
-				1,
-				box.clientWidth / width,
-				box.clientHeight / height,
-			)
-			box.style.setProperty('--fit', String(scale))
-		}
+		const update = () => applyFit(box, demo)
 
 		// Fires once on observe and again whenever the box or the demo resizes.
 		// Callbacks run after layout and before paint, so there is no visible jump.
@@ -50,6 +38,9 @@ export function DemoFit({ children, className = '' }: DemoFitProps) {
 	return (
 		<div
 			ref={boxRef}
+			data-demo-fit
+			// DemoFitScript writes --fit on this element before React hydrates
+			suppressHydrationWarning
 			className={`flex items-center justify-center ${className}`}
 		>
 			{/* shrink-0: a flex item would otherwise squash the demo to the box's width */}
