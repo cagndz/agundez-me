@@ -2,7 +2,8 @@ import type { TickType } from './types'
 
 // One knob for the whole size of the component. Every pixel measure below
 // is written at scale 1 (the prototype) and multiplied by SCALE.
-export const SCALE = 1.2
+// 1.15 makes the window 368px wide, the widest a lab demo can be.
+export const SCALE = 1.15
 
 // Layout measures are rounded so edges land on whole pixels (no blurry lines).
 const scaled = (px: number) => Math.round(px * SCALE)
