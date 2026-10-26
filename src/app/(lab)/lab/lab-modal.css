@@ -25,14 +25,15 @@
 	/* Exit is shorter than enter: it responds to a user action */
 	--lab-exit: calc(var(--origin-duration, 380ms) * 0.7);
 
-	/* Side of the stage (square, like the cells) */
-	--stage: min(calc(100vw - 3rem), 45dvh);
+	/* Side of the stage: the tallest card in the lab (--stage-max, set by
+	   lab-modal.tsx), but never more than the screen allows */
+	--stage: min(var(--stage-max), calc(100vw - 3rem), 45dvh);
 }
 
 @media (min-width: 768px) {
 	.lab-popup {
 		/* 18rem panel + 0.75rem gap + 3rem margin */
-		--stage: min(36rem, calc(100dvh - 3rem), calc(100vw - 21.75rem));
+		--stage: min(var(--stage-max), calc(100dvh - 3rem), calc(100vw - 21.75rem));
 	}
 }
 

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { demos } from '@/lab/registry'
 import { DemoFit } from '@/lab/demo-fit'
 import { DemoFitScript } from '@/lab/demo-fit-script'
+import { cardHeight } from '@/lab/card'
 
 // Loose cards in a masonry: each card is as tall as its demo needs and doesn't
 // change the height of its neighbours. Demos keep their natural size (except on
@@ -11,19 +12,11 @@ import { DemoFitScript } from '@/lab/demo-fit-script'
 //
 // The masonry is plain CSS, so the server sends it already laid out: the grid
 // has 1px rows (.lab-board in lab.css) and each card spans as many rows as it
-// is tall, plus the gap below it. Auto-placement then drops every card into
+// is tall (card.ts), plus the gap below it. Auto-placement then drops every card into
 // the column that ends first, which is what a masonry does.
 
-// Air above and below the demo, and the shortest a card can be: the values
-// the approved prototype used.
-const CARD_PADDING_Y = 82
-const CARD_MIN_HEIGHT = 300
 // Must match --gap on .lab-board (lab.css)
 const GAP = 12
-
-function cardHeight(item: LabItem) {
-	return Math.max(CARD_MIN_HEIGHT, item.size.height + CARD_PADDING_Y * 2)
-}
 
 export function LabGrid({ items }: { items: LabItem[] }) {
 	return (

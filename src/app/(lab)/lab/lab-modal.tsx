@@ -3,14 +3,27 @@
 import { useRouter } from 'next/navigation'
 import { Dialog } from '@base-ui/react/dialog'
 import type { LabItem } from '@/lab/items'
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import {
+	useCallback,
+	useLayoutEffect,
+	useRef,
+	useState,
+	type CSSProperties,
+} from 'react'
 import { applyOrigin, applyOriginWithoutTransition } from '@/lab/origin'
 import { demos } from '@/lab/registry'
 import { DemoFit } from '@/lab/demo-fit'
 import { XMark } from '@/components/icons/x-mark'
 import './lab-modal.css'
 
-export function LabModal({ item }: { item: LabItem | undefined }) {
+export function LabModal({
+	item,
+	stageSize,
+}: {
+	item: LabItem | undefined
+	// Side of the stage in px (see stageSize in card.ts)
+	stageSize: number
+}) {
 	const router = useRouter()
 	const [lastItem, setLastItem] = useState(item)
 
@@ -68,10 +81,11 @@ export function LabModal({ item }: { item: LabItem | undefined }) {
 					data-theme='lab'
 					tabIndex={-1}
 					initialFocus={popupRef}
+					style={{ '--stage-max': `${stageSize}px` } as CSSProperties}
 					className='lab-popup fixed inset-0 m-auto flex h-fit w-fit flex-col gap-3 text-foreground focus-visible:outline-none! md:flex-row'
 				>
-					{/* The frame travels from the cell; the demo doesn't move or scale,
-					    it appears once the frame has arrived (see lab-modal.css) */}
+					{/* The frame travels and stretches from the card; the demo travels
+					    with it but never scales (see lab-modal.css) */}
 					<div data-lab-stage className='lab-stage relative size-(--stage)'>
 						<div
 							aria-hidden='true'

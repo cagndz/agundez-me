@@ -1,6 +1,7 @@
 import { LabGrid } from './lab-grid'
 import { LabModal } from './lab-modal'
 import { items } from '@/lab/items'
+import { stageSize } from '@/lab/card'
 
 export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 	const { c } = await searchParams
@@ -21,7 +22,7 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 			<div className='mt-8'>
 				<LabGrid items={items} />
 			</div>
-			<LabModal item={selected} />
+			<LabModal item={selected} stageSize={stageSize(items)} />
 		</div>
 	)
 }
