@@ -15,60 +15,57 @@ import { cardHeight } from '@/lab/card'
 // is tall (card.ts), plus the gap below it. Auto-placement then drops every card into
 // the column that ends first, which is what a masonry does.
 
-// Must match --gap on .lab-board (lab.css)
+// Must match --gap on .lab-page (lab.css)
 const GAP = 12
 
 export function LabGrid({ items }: { items: LabItem[] }) {
 	return (
 		<>
-			{/* @container: the board's columns and dots follow its own width */}
-			<div className='@container'>
-				<div className='lab-board'>
-					{items.map((item) => {
-						const Demo = demos[item.slug]
-						const height = cardHeight(item)
-						const style: CSSProperties = {
-							height,
-							gridRowEnd: `span ${height + GAP}`,
-						}
-						return (
-							<div
-								key={item.id}
-								data-lab-item
-								style={style}
-								className='group relative grid place-items-center rounded-sm bg-(--surface) px-4 font-mono text-sm uppercase ring-1 ring-foreground/10'
-							>
-								<Link
-									href={`/lab?c=${item.slug}`}
-									data-lab-cell={item.slug}
-									scroll={false}
-									aria-label={`Open ${item.title}`}
-									className='absolute inset-0 rounded-sm'
+			<div className='lab-board'>
+				{items.map((item) => {
+					const Demo = demos[item.slug]
+					const height = cardHeight(item)
+					const style: CSSProperties = {
+						height,
+						gridRowEnd: `span ${height + GAP}`,
+					}
+					return (
+						<div
+							key={item.id}
+							data-lab-item
+							style={style}
+							className='group relative grid place-items-center rounded-sm bg-(--surface) px-4 font-mono text-sm uppercase ring-1 ring-foreground/10'
+						>
+							<Link
+								href={`/lab?c=${item.slug}`}
+								data-lab-cell={item.slug}
+								scroll={false}
+								aria-label={`Open ${item.title}`}
+								className='absolute inset-0 rounded-sm'
+							/>
+							<span className='absolute top-4 left-4 flex items-center gap-2'>
+								<span
+									className='size-2 rounded-full bg-accent opacity-0 transition-[opacity,translate] duration-150 ease-out-strong group-hover:opacity-100 group-hover:duration-200 group-has-[a:focus-visible]:opacity-100 group-has-[a:focus-visible]:duration-200 motion-safe:-translate-x-2 motion-safe:group-hover:translate-x-0 motion-safe:group-has-[a:focus-visible]:translate-x-0'
+									aria-hidden='true'
 								/>
-								<span className='absolute top-4 left-4 flex items-center gap-2'>
-									<span
-										className='size-2 rounded-full bg-accent opacity-0 transition-[opacity,translate] duration-150 ease-out-strong group-hover:opacity-100 group-hover:duration-200 group-has-[a:focus-visible]:opacity-100 group-has-[a:focus-visible]:duration-200 motion-safe:-translate-x-2 motion-safe:group-hover:translate-x-0 motion-safe:group-has-[a:focus-visible]:translate-x-0'
-										aria-hidden='true'
-									/>
-									<span>{item.id}</span>
-									<span aria-hidden='true'>/</span>
-									<span className='text-muted'>{item.title}</span>
-								</span>
-								{/* relative: paints above the card's link, which is positioned too.
+								<span>{item.id}</span>
+								<span aria-hidden='true'>/</span>
+								<span className='text-muted'>{item.title}</span>
+							</span>
+							{/* relative: paints above the card's link, which is positioned too.
 								    w-full min-w-0: the column's width, never the demo's, so on
 								    phones DemoFit sees how much room there really is */}
-								{Demo && (
-									<DemoFit
-										expectedSize={item.size}
-										className='pointer-events-none relative w-full min-w-0 *:pointer-events-auto'
-									>
-										<Demo />
-									</DemoFit>
-								)}
-							</div>
-						)
-					})}
-				</div>
+							{Demo && (
+								<DemoFit
+									expectedSize={item.size}
+									className='pointer-events-none relative w-full min-w-0 *:pointer-events-auto'
+								>
+									<Demo />
+								</DemoFit>
+							)}
+						</div>
+					)
+				})}
 			</div>
 			{/* Right after the grid: every DemoFit above is already in the HTML */}
 			<DemoFitScript />

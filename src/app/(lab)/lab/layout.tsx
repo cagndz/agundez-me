@@ -6,12 +6,21 @@ export default function LabLayout({ children }: LayoutProps<'/lab'>) {
 		notFound()
 	}
 
+	// @container: the board's columns and the dots follow the page's width
+	// (lab.css). isolate: the dots sit behind the content but above the
+	// page's own background.
 	return (
 		<div
 			data-theme='lab'
-			className='min-h-screen bg-background px-6 py-12 text-foreground md:px-12'
+			className='@container relative isolate min-h-screen bg-background px-(--page-pad) py-12 text-foreground [--page-pad:1.5rem] md:[--page-pad:3rem]'
 		>
-			<main>{children}</main>
+			<main className='lab-page'>
+				<div
+					aria-hidden='true'
+					className='lab-dots pointer-events-none absolute inset-0 -z-10'
+				/>
+				{children}
+			</main>
 		</div>
 	)
 }
