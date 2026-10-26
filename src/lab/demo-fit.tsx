@@ -6,6 +6,8 @@ import { applyFit } from './fit'
 type DemoFitProps = {
 	children: ReactNode
 	className?: string
+	// The size the demo declares (items.ts). Only checked in development.
+	expectedSize?: { width: number; height: number }
 }
 
 /**
@@ -16,7 +18,11 @@ type DemoFitProps = {
  * DemoFitScript sets it before hydration and React must not overwrite it, and
  * resizing doesn't re-render the demo. See fit.ts for the calculation.
  */
-export function DemoFit({ children, className = '' }: DemoFitProps) {
+export function DemoFit({
+	children,
+	className = '',
+	expectedSize,
+}: DemoFitProps) {
 	const boxRef = useRef<HTMLDivElement>(null)
 	const demoRef = useRef<HTMLDivElement>(null)
 
@@ -34,6 +40,20 @@ export function DemoFit({ children, className = '' }: DemoFitProps) {
 		observer.observe(demo)
 		return () => observer.disconnect()
 	}, [])
+
+	// The grid sizes each card from the declared size, so a stale one would
+	// leave the demo cramped or floating. Say so instead of failing silently.
+	useLayoutEffect(() => {
+		const demo = demoRef.current
+		if (process.env.NODE_ENV === 'production' || !expectedSize || !demo) return
+		const width = demo.offsetWidth
+		const height = demo.offsetHeight
+		if (width !== expectedSize.width || height !== expectedSize.height) {
+			console.warn(
+				`DemoFit: the demo measures ${width}×${height} but declares ${expectedSize.width}×${expectedSize.height}. Update its size in items.ts.`,
+			)
+		}
+	}, [expectedSize])
 
 	return (
 		<div

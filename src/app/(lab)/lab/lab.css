@@ -6,6 +6,9 @@
 		--foreground: #111111;
 		--muted: #5f5f5d;
 		--border: #cfcfcc;
+		/* Cards on the board, a step lighter than the page */
+		--surface: #f4f4f2;
+		--dot: color-mix(in oklab, var(--foreground) 16%, transparent);
 	}
 
 	/* Same as globals.css: the ring color lives on every element, so it never
@@ -62,5 +65,78 @@
 		.signal-dot {
 		animation: none;
 		opacity: var(--signal-dim);
+	}
+}
+
+@layer components {
+	/*
+	 * The lab's board: a masonry of cards (see lab-grid.tsx) over a dot grid
+	 * that covers the whole page.
+	 *
+	 * Columns are at least 400px with a 12px gap, so n columns fit from a width
+	 * of 412n − 12. The page is the container, and container queries and cqw
+	 * measure its content box: the board's width, without the page padding.
+	 * Written out instead of auto-fill because the dots need to know how many
+	 * columns there are. Wider than 2460px, the six columns grow.
+	 *
+	 * The dots are the column grid made visible: one column plus its gap holds
+	 * exactly 16 steps, and a dot sits in the middle of every gap. They line up
+	 * across the width only: a masonry has no rows to line up with.
+	 */
+	.lab-page {
+		--gap: 12px;
+		--cols: 1;
+		--pitch: calc((100cqw + var(--gap)) / var(--cols) / 16);
+	}
+
+	@container (min-width: 812px) {
+		.lab-page {
+			--cols: 2;
+		}
+	}
+	@container (min-width: 1224px) {
+		.lab-page {
+			--cols: 3;
+		}
+	}
+	@container (min-width: 1636px) {
+		.lab-page {
+			--cols: 4;
+		}
+	}
+	@container (min-width: 2048px) {
+		.lab-page {
+			--cols: 5;
+		}
+	}
+	@container (min-width: 2460px) {
+		.lab-page {
+			--cols: 6;
+		}
+	}
+
+	.lab-board {
+		display: grid;
+		grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+		/* 1px rows: each card spans its own height in rows (masonry) */
+		grid-auto-rows: 1px;
+		column-gap: var(--gap);
+		align-items: start;
+	}
+
+	.lab-dots {
+		background-image: radial-gradient(
+			circle,
+			var(--dot) 1px,
+			transparent 1.5px
+		);
+		background-size: var(--pitch) var(--pitch);
+		/* Each dot is drawn in the centre of its tile. The board starts one
+		   page padding in, so shift by that, minus half a gap and half a tile,
+		   and the dots land in the middle of the gaps */
+		background-position: calc(
+				var(--page-pad) - var(--gap) / 2 - var(--pitch) / 2
+			)
+			0;
 	}
 }

@@ -1,3 +1,6 @@
+import { SIZE as DIAL_SIZE } from './demos/dial/constants'
+import { SIZE as WALLET_SIZE } from './demos/wallet/constants'
+
 export type LabSpec = {
 	label: string
 	value: string
@@ -9,10 +12,10 @@ export type LabItem = {
 	title: string
 	summary?: string
 	specs?: LabSpec[]
-	// 'tall' doubles the cell's height when the grid has a single column (phones),
-	// for demos taller than they are wide. With two or more columns every cell
-	// stays square, so the grid keeps its rhythm and the modal opens from a square.
-	size?: 'square' | 'tall'
+	// The demo's natural size. The grid needs it before anything renders, to
+	// give each card its height on the server (see lab-grid.tsx). Widest
+	// allowed: 368px. DemoFit warns in development if the real size differs.
+	size: { width: number; height: number }
 }
 
 export const items: LabItem[] = [
@@ -20,6 +23,7 @@ export const items: LabItem[] = [
 		id: '001',
 		slug: 'dial',
 		title: 'Dial',
+		size: DIAL_SIZE,
 		summary:
 			'Drag to turn the wheel, release to settle on a tick. Position is one continuous value; ticks and digits only read it.',
 		specs: [
@@ -35,6 +39,7 @@ export const items: LabItem[] = [
 		id: '002',
 		slug: 'wallet',
 		title: 'Wallet',
+		size: WALLET_SIZE,
 		summary:
 			'Click a card to lift it out of the case and turn it to landscape. Each stage hands off by position, not time, so a click mid-flight only changes the destination.',
 		specs: [
@@ -48,10 +53,5 @@ export const items: LabItem[] = [
 			},
 			{ label: 'Stack', value: 'React · Motion · TypeScript' },
 		],
-		size: 'tall',
 	},
-	{ id: '003', slug: 'empty-003', title: 'Empty' },
-	{ id: '004', slug: 'empty-004', title: 'Empty' },
-	{ id: '005', slug: 'empty-005', title: 'Empty' },
-	{ id: '006', slug: 'empty-006', title: 'Empty' },
 ]

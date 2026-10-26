@@ -3,14 +3,27 @@
 import { useRouter } from 'next/navigation'
 import { Dialog } from '@base-ui/react/dialog'
 import type { LabItem } from '@/lab/items'
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import {
+	useCallback,
+	useLayoutEffect,
+	useRef,
+	useState,
+	type CSSProperties,
+} from 'react'
 import { applyOrigin, applyOriginWithoutTransition } from '@/lab/origin'
 import { demos } from '@/lab/registry'
 import { DemoFit } from '@/lab/demo-fit'
 import { XMark } from '@/components/icons/x-mark'
 import './lab-modal.css'
 
-export function LabModal({ item }: { item: LabItem | undefined }) {
+export function LabModal({
+	item,
+	stageSize,
+}: {
+	item: LabItem | undefined
+	// Side of the stage in px (see stageSize in card.ts)
+	stageSize: number
+}) {
 	const router = useRouter()
 	const [lastItem, setLastItem] = useState(item)
 
@@ -68,23 +81,29 @@ export function LabModal({ item }: { item: LabItem | undefined }) {
 					data-theme='lab'
 					tabIndex={-1}
 					initialFocus={popupRef}
+					style={{ '--stage-max': `${stageSize}px` } as CSSProperties}
 					className='lab-popup fixed inset-0 m-auto flex h-fit w-fit flex-col gap-3 text-foreground focus-visible:outline-none! md:flex-row'
 				>
-					<div
-						data-lab-stage
-						className='lab-stage flex size-(--stage) items-center justify-center rounded-xs border border-border bg-background p-4'
-					>
-						{Demo ? (
-							<DemoFit className='size-full'>
-								<Demo />
-							</DemoFit>
-						) : (
-							<span className='font-mono text-sm tracking-widest text-muted uppercase'>
-								No demo yet
-							</span>
-						)}
+					{/* The frame travels and stretches from the card; the demo travels
+					    with it but never scales (see lab-modal.css) */}
+					<div data-lab-stage className='lab-stage relative size-(--stage)'>
+						<div
+							aria-hidden='true'
+							className='lab-stage-frame absolute inset-0 rounded-sm bg-(--surface) ring-1 ring-foreground/10'
+						/>
+						<div className='lab-stage-content relative flex size-full items-center justify-center p-4'>
+							{Demo ? (
+								<DemoFit className='size-full'>
+									<Demo />
+								</DemoFit>
+							) : (
+								<span className='font-mono text-sm tracking-widest text-muted uppercase'>
+									No demo yet
+								</span>
+							)}
+						</div>
 					</div>
-					<aside className='lab-aside flex w-(--stage) flex-col gap-6 overflow-y-auto rounded-xs border border-border bg-background p-4 max-md:max-h-[calc(100dvh-3rem-var(--stage)-0.75rem)] md:w-72'>
+					<aside className='lab-aside flex w-(--stage) flex-col gap-6 overflow-y-auto rounded-sm bg-(--surface) p-4 ring-1 ring-foreground/10 max-md:max-h-[calc(100dvh-3rem-var(--stage)-0.75rem)] md:w-72'>
 						<div className='flex items-start justify-between'>
 							<div className='flex flex-col gap-1'>
 								<span className='font-mono text-xs tracking-widest text-muted uppercase tabular-nums'>

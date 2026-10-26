@@ -3,12 +3,14 @@
  *
  * Structure (see lab-modal.tsx):
  *   .lab-popup   invisible wrapper, only there to group the cards and tell Base UI when to unmount
- *   ├─ .lab-stage   the card with the demo: the only part that grows from the cell and returns to it
+ *   ├─ .lab-stage   the card with the demo
+ *   │  ├─ .lab-stage-frame     its surface: travels and stretches from the card and returns to it
+ *   │  └─ .lab-stage-content   the demo: travels with the frame but never scales
  *   └─ .lab-aside   the card with the specs: appears on its own, doesn't travel
  *
  * Variables origin.ts writes on the popup (inherited by the cards):
- *   --origin-x / --origin-y   how far to move the stage so it sits over the cell
- *   --origin-s                scale so it's the same size as the cell
+ *   --origin-x / --origin-y     how far to move the frame and the demo so they sit over the card
+ *   --origin-sx / --origin-sy   stretch so the frame is the same size as the card
  *   --origin-duration         travel duration, longer the further away the cell is
  */
 
@@ -23,14 +25,15 @@
 	/* Exit is shorter than enter: it responds to a user action */
 	--lab-exit: calc(var(--origin-duration, 380ms) * 0.7);
 
-	/* Side of the stage (square, like the cells) */
-	--stage: min(calc(100vw - 3rem), 45dvh);
+	/* Side of the stage: the tallest card in the lab (--stage-max, set by
+	   lab-modal.tsx), but never more than the screen allows */
+	--stage: min(var(--stage-max), calc(100vw - 3rem), 45dvh);
 }
 
 @media (min-width: 768px) {
 	.lab-popup {
 		/* 18rem panel + 0.75rem gap + 3rem margin */
-		--stage: min(36rem, calc(100dvh - 3rem), calc(100vw - 21.75rem));
+		--stage: min(var(--stage-max), calc(100dvh - 3rem), calc(100vw - 21.75rem));
 	}
 }
 
@@ -44,27 +47,39 @@
 }
 
 /* ── Stage ────────────────────────────────────────────────
-   Enter: travels from the cell. Fades are quick so the whole trip is visible,
-   not just the arrival. */
+   The demo keeps its size in the card and here, so nothing in it scales: the
+   frame (a plain box) travels and stretches from the card's exact rectangle,
+   and the demo only travels. At the start it sits right over the card's demo,
+   and on close it lands back on it. */
 .lab-stage {
-	position: relative;
 	z-index: 1; /* above the panel, which comes out from behind */
+}
+
+/* Enter: travels from the card. The fade is quick so the whole trip is
+   visible, not just the arrival (the card's own demo shows through meanwhile). */
+.lab-stage-frame,
+.lab-stage-content {
 	transition:
 		translate var(--lab-enter) var(--lab-glide),
 		scale var(--lab-enter) var(--lab-glide),
 		opacity 160ms var(--lab-out);
 }
 
-.lab-popup[data-starting-style] .lab-stage,
-.lab-popup[data-ending-style] .lab-stage {
+.lab-popup[data-starting-style] :is(.lab-stage-frame, .lab-stage-content),
+.lab-popup[data-ending-style] :is(.lab-stage-frame, .lab-stage-content) {
 	translate: var(--origin-x, 0px) var(--origin-y, 0px);
-	scale: var(--origin-s, 0.95);
 	opacity: 0;
 }
 
-/* Exit: returns to the cell and fades at the end of the trip (40% delay), not
+/* Only the frame stretches to the card's size */
+.lab-popup[data-starting-style] .lab-stage-frame,
+.lab-popup[data-ending-style] .lab-stage-frame {
+	scale: var(--origin-sx, 0.95) var(--origin-sy, 0.95);
+}
+
+/* Exit: returns to the card and fades at the end of the trip (40% delay), not
    at the start. If opacity dropped at once, the modal would vanish before arriving. */
-.lab-popup[data-ending-style] .lab-stage {
+.lab-popup[data-ending-style] :is(.lab-stage-frame, .lab-stage-content) {
 	transition:
 		translate var(--lab-exit) var(--lab-glide),
 		scale var(--lab-exit) var(--lab-glide),
@@ -114,8 +129,8 @@
 
 /* ── Reduced motion: fades only, nothing moves or scales ── */
 @media (prefers-reduced-motion: reduce) {
-	.lab-popup[data-starting-style] .lab-stage,
-	.lab-popup[data-ending-style] .lab-stage {
+	.lab-popup[data-starting-style] :is(.lab-stage-frame, .lab-stage-content),
+	.lab-popup[data-ending-style] :is(.lab-stage-frame, .lab-stage-content) {
 		translate: none;
 		scale: none;
 	}
