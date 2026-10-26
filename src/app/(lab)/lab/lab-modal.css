@@ -4,13 +4,13 @@
  * Structure (see lab-modal.tsx):
  *   .lab-popup   invisible wrapper, only there to group the cards and tell Base UI when to unmount
  *   ├─ .lab-stage   the card with the demo
- *   │  ├─ .lab-stage-frame     its border and background: the only part that grows from the cell and returns to it
- *   │  └─ .lab-stage-content   the demo: never moves or scales, fades in once the frame has arrived
+ *   │  ├─ .lab-stage-frame     its surface: travels and stretches from the card and returns to it
+ *   │  └─ .lab-stage-content   the demo: travels with the frame but never scales
  *   └─ .lab-aside   the card with the specs: appears on its own, doesn't travel
  *
  * Variables origin.ts writes on the popup (inherited by the cards):
- *   --origin-x / --origin-y     how far to move the frame so it sits over the cell
- *   --origin-sx / --origin-sy   stretch so it's the same size as the cell
+ *   --origin-x / --origin-y     how far to move the frame and the demo so they sit over the card
+ *   --origin-sx / --origin-sy   stretch so the frame is the same size as the card
  *   --origin-duration         travel duration, longer the further away the cell is
  */
 
@@ -46,52 +46,43 @@
 }
 
 /* ── Stage ────────────────────────────────────────────────
-   The demo keeps its size in the grid and here, so scaling the stage would
-   shrink and regrow it on the way. Only the frame (a plain box) travels and
-   stretches; the demo fades in at its final place. */
+   The demo keeps its size in the card and here, so nothing in it scales: the
+   frame (a plain box) travels and stretches from the card's exact rectangle,
+   and the demo only travels. At the start it sits right over the card's demo,
+   and on close it lands back on it. */
 .lab-stage {
 	z-index: 1; /* above the panel, which comes out from behind */
 }
 
-/* Enter: travels from the cell. The fade is quick so the whole trip is
-   visible, not just the arrival. */
-.lab-stage-frame {
+/* Enter: travels from the card. The fade is quick so the whole trip is
+   visible, not just the arrival (the card's own demo shows through meanwhile). */
+.lab-stage-frame,
+.lab-stage-content {
 	transition:
 		translate var(--lab-enter) var(--lab-glide),
 		scale var(--lab-enter) var(--lab-glide),
 		opacity 160ms var(--lab-out);
 }
 
-.lab-popup[data-starting-style] .lab-stage-frame,
-.lab-popup[data-ending-style] .lab-stage-frame {
+.lab-popup[data-starting-style] :is(.lab-stage-frame, .lab-stage-content),
+.lab-popup[data-ending-style] :is(.lab-stage-frame, .lab-stage-content) {
 	translate: var(--origin-x, 0px) var(--origin-y, 0px);
-	scale: var(--origin-sx, 0.95) var(--origin-sy, 0.95);
 	opacity: 0;
 }
 
-/* Exit: returns to the cell and fades at the end of the trip (40% delay), not
-   at the start. If opacity dropped at once, the modal would vanish before arriving. */
+/* Only the frame stretches to the card's size */
+.lab-popup[data-starting-style] .lab-stage-frame,
 .lab-popup[data-ending-style] .lab-stage-frame {
+	scale: var(--origin-sx, 0.95) var(--origin-sy, 0.95);
+}
+
+/* Exit: returns to the card and fades at the end of the trip (40% delay), not
+   at the start. If opacity dropped at once, the modal would vanish before arriving. */
+.lab-popup[data-ending-style] :is(.lab-stage-frame, .lab-stage-content) {
 	transition:
 		translate var(--lab-exit) var(--lab-glide),
 		scale var(--lab-exit) var(--lab-glide),
 		opacity calc(var(--lab-exit) * 0.45) linear calc(var(--lab-exit) * 0.4);
-}
-
-/* The demo appears when the frame is most of the way there (60% of the trip):
-   earlier, it would show outside a frame that is still smaller than it. */
-.lab-stage-content {
-	transition: opacity 180ms var(--lab-out) calc(var(--lab-enter) * 0.6);
-}
-
-.lab-popup[data-starting-style] .lab-stage-content,
-.lab-popup[data-ending-style] .lab-stage-content {
-	opacity: 0;
-}
-
-/* On close it leaves first and at once, so the frame travels back empty */
-.lab-popup[data-ending-style] .lab-stage-content {
-	transition: opacity 100ms linear;
 }
 
 /* ── Panel ────────────────────────────────────────────────
@@ -137,8 +128,8 @@
 
 /* ── Reduced motion: fades only, nothing moves or scales ── */
 @media (prefers-reduced-motion: reduce) {
-	.lab-popup[data-starting-style] .lab-stage-frame,
-	.lab-popup[data-ending-style] .lab-stage-frame {
+	.lab-popup[data-starting-style] :is(.lab-stage-frame, .lab-stage-content),
+	.lab-popup[data-ending-style] :is(.lab-stage-frame, .lab-stage-content) {
 		translate: none;
 		scale: none;
 	}

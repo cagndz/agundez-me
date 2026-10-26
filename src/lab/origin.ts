@@ -11,9 +11,9 @@ const DURATION_PER_PX = 0.35
 const DURATION_MAX = 520
 
 /**
- * Writes on the popup the CSS variables for the stage frame's "away" state:
- * moved and stretched until it covers the origin cell, plus the travel
- * duration.
+ * Writes on the popup the CSS variables for the stage's "away" state: the
+ * frame moved and stretched until it covers the origin card, the demo moved
+ * onto the card's own demo, plus the travel duration.
  * The variables are inherited, so .lab-stage reads them (see lab-modal.css).
  * Without a cell, it falls back to a generic effect from the center.
  */
