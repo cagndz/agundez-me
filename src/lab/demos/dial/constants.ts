@@ -76,3 +76,9 @@ export const RETURN_SPRING = {
 	stiffness: RETURN_STIFFNESS,
 	damping: 2 * Math.sqrt(RETURN_STIFFNESS),
 } as const
+
+// Outer size of the whole demo (readout over window), for the lab's card.
+export const SIZE = {
+	width: WINDOW_WIDTH,
+	height: DIGIT_HEIGHT + READOUT_GAP + WINDOW_HEIGHT,
+}

@@ -75,7 +75,7 @@ export function LabModal({ item }: { item: LabItem | undefined }) {
 					<div data-lab-stage className='lab-stage relative size-(--stage)'>
 						<div
 							aria-hidden='true'
-							className='lab-stage-frame absolute inset-0 rounded-xs border border-border bg-background'
+							className='lab-stage-frame absolute inset-0 rounded-sm bg-(--surface) ring-1 ring-foreground/10'
 						/>
 						<div className='lab-stage-content relative flex size-full items-center justify-center p-4'>
 							{Demo ? (
@@ -89,7 +89,7 @@ export function LabModal({ item }: { item: LabItem | undefined }) {
 							)}
 						</div>
 					</div>
-					<aside className='lab-aside flex w-(--stage) flex-col gap-6 overflow-y-auto rounded-xs border border-border bg-background p-4 max-md:max-h-[calc(100dvh-3rem-var(--stage)-0.75rem)] md:w-72'>
+					<aside className='lab-aside flex w-(--stage) flex-col gap-6 overflow-y-auto rounded-sm bg-(--surface) p-4 ring-1 ring-foreground/10 max-md:max-h-[calc(100dvh-3rem-var(--stage)-0.75rem)] md:w-72'>
 						<div className='flex items-start justify-between'>
 							<div className='flex flex-col gap-1'>
 								<span className='font-mono text-xs tracking-widest text-muted uppercase tabular-nums'>

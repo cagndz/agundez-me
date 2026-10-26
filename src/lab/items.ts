@@ -1,3 +1,6 @@
+import { SIZE as DIAL_SIZE } from './demos/dial/constants'
+import { SIZE as WALLET_SIZE } from './demos/wallet/constants'
+
 export type LabSpec = {
 	label: string
 	value: string
@@ -9,6 +12,10 @@ export type LabItem = {
 	title: string
 	summary?: string
 	specs?: LabSpec[]
+	// The demo's natural size. The grid needs it before anything renders, to
+	// give each card its height on the server (see lab-grid.tsx). Widest
+	// allowed: 368px. DemoFit warns in development if the real size differs.
+	size: { width: number; height: number }
 }
 
 export const items: LabItem[] = [
@@ -16,6 +23,7 @@ export const items: LabItem[] = [
 		id: '001',
 		slug: 'dial',
 		title: 'Dial',
+		size: DIAL_SIZE,
 		summary:
 			'Drag to turn the wheel, release to settle on a tick. Position is one continuous value; ticks and digits only read it.',
 		specs: [
@@ -31,6 +39,7 @@ export const items: LabItem[] = [
 		id: '002',
 		slug: 'wallet',
 		title: 'Wallet',
+		size: WALLET_SIZE,
 		summary:
 			'Click a card to lift it out of the case and turn it to landscape. Each stage hands off by position, not time, so a click mid-flight only changes the destination.',
 		specs: [
