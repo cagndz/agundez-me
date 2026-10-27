@@ -1,5 +1,6 @@
 import { SIZE as DIAL_SIZE } from './demos/dial/constants'
 import { SIZE as WALLET_SIZE } from './demos/wallet/constants'
+import { SIZE as INSPECT_SIZE } from './demos/inspect/constants'
 
 export type LabSpec = {
 	label: string
@@ -42,6 +43,24 @@ export const items: LabItem[] = [
 		size: WALLET_SIZE,
 		summary:
 			'Click a card to lift it out of the case and turn it to landscape. Each stage hands off by position, not time, so a click mid-flight only changes the destination.',
+		specs: [
+			{ label: 'Rise', value: '280 ms · ease-out' },
+			{ label: 'Present', value: 'Spring · 550 ms · bounce 0.2' },
+			{ label: 'Return', value: 'Spring · 420 ms · drop 320 ms' },
+			{ label: 'Render', value: 'DOM · screen-space shadow' },
+			{
+				label: 'A11y',
+				value: 'Toggle buttons · outside click · reduced motion',
+			},
+			{ label: 'Stack', value: 'React · Motion · TypeScript' },
+		],
+	},
+	{
+		id: '003',
+		slug: 'inspect',
+		title: 'Inspect',
+		size: INSPECT_SIZE,
+		summary: 'Inspect the form and click to reveal.',
 		specs: [
 			{ label: 'Rise', value: '280 ms · ease-out' },
 			{ label: 'Present', value: 'Spring · 550 ms · bounce 0.2' },
