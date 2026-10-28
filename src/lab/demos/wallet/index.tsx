@@ -7,24 +7,24 @@ import { WalletCard } from './wallet-card'
 
 const CARDS: WalletCardData[] = [
 	{
-		id: 'card-01',
-		title: 'Card 01',
-		description: 'Short description',
-		code: '01',
+		id: 'studio-pass',
+		title: 'Studio pass',
+		description: 'Level 3 · after hours',
+		code: 'S-03',
 		tone: 'dark',
 	},
 	{
-		id: 'card-02',
-		title: 'Card 02',
-		description: 'Short description',
-		code: '02',
+		id: 'library-card',
+		title: 'Library card',
+		description: 'Reading room · two books out',
+		code: 'L-27',
 		tone: 'light',
 	},
 	{
-		id: 'card-03',
-		title: 'Card 03',
-		description: 'Short description',
-		code: '03',
+		id: 'transit-pass',
+		title: 'Transit pass',
+		description: 'Zones 1–2 · monthly',
+		code: 'T-12',
 		tone: 'accent',
 	},
 ]
@@ -69,6 +69,14 @@ export function Wallet() {
 		<div
 			className='relative'
 			style={{ width: STAGE_WIDTH, height: STAGE_HEIGHT }}
+			onKeyDown={(event) => {
+				// The first Escape puts the card back; it must not also close the
+				// lab's modal. Same rule as Inspect.
+				if (event.key === 'Escape' && isAnyPresented) {
+					event.stopPropagation()
+					setPresentedId(null)
+				}
+			}}
 		>
 			<CaseBack />
 			{CARDS.map((card, index) => (
