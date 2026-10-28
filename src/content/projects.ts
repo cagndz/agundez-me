@@ -16,4 +16,9 @@ export const projects: Project[] = [
 			'A quiet dark theme. Color where it counts, gray everywhere else',
 		href: 'https://github.com/cagndz/silex',
 	},
+	{
+		name: 'Lab',
+		description: 'Interactive UI components and experiments',
+		href: '/lab',
+	},
 ]
