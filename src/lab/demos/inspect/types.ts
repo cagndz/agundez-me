@@ -9,12 +9,17 @@ export type Box = {
 
 type Direction = 'horizontal' | 'vertical'
 
+// Where a dimension's number sits: above a horizontal line, or to the left or
+// right of a vertical one.
+export type Side = 'above' | 'left' | 'right'
+
 export type Dimension = {
 	name: string
 	direction: Direction
 	x: number
 	y: number
 	length: number
+	side: Side
 }
 
 // A box placed with CSS: the keys are the CSS property names, so a Rect can be
@@ -26,9 +31,17 @@ export type Rect = {
 	height: number
 }
 
-// The three rectangles that draw one dimension.
+// A point placed with CSS, for things whose size is not known in advance (text).
+export type Point = {
+	left: number
+	top: number
+}
+
+// Everything one dimension draws: its line, a tick at each end, and where its
+// number is placed.
 export type DimensionParts = {
 	line: Rect
 	startTick: Rect
 	endTick: Rect
+	label: Point
 }

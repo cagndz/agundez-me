@@ -69,7 +69,8 @@ export const BOX_MEASURES: Box[] = [
 
 // The distances the card prints, in px from its top-left corner. (x, y) is where
 // the line starts and it runs `length` px to the right or down. The printed number
-// is the length itself, so a dimension never carries a label of its own.
+// is the length itself, so a dimension never carries a label of its own. `side` is
+// where that number sits: above a horizontal line, left or right of a vertical one.
 export const DIMENSION_MEASURES: Dimension[] = [
 	{
 		name: 'padding-left',
@@ -77,6 +78,7 @@ export const DIMENSION_MEASURES: Dimension[] = [
 		x: 0,
 		y: 64,
 		length: 16,
+		side: 'above',
 	},
 	{
 		name: 'padding-top',
@@ -84,6 +86,7 @@ export const DIMENSION_MEASURES: Dimension[] = [
 		x: 120,
 		y: 0,
 		length: 16,
+		side: 'right',
 	},
 	{
 		name: 'label-gap',
@@ -91,6 +94,7 @@ export const DIMENSION_MEASURES: Dimension[] = [
 		x: 120,
 		y: 34,
 		length: 8,
+		side: 'right',
 	},
 	{
 		name: 'field-height',
@@ -98,6 +102,7 @@ export const DIMENSION_MEASURES: Dimension[] = [
 		x: 330,
 		y: 42,
 		length: 44,
+		side: 'left',
 	},
 	{
 		name: 'helper-gap',
@@ -105,6 +110,7 @@ export const DIMENSION_MEASURES: Dimension[] = [
 		x: 280,
 		y: 86,
 		length: 8,
+		side: 'right',
 	},
 	{
 		name: 'button-gap',
@@ -112,6 +118,7 @@ export const DIMENSION_MEASURES: Dimension[] = [
 		x: 280,
 		y: 110,
 		length: 16,
+		side: 'right',
 	},
 	{
 		name: 'content-width',
@@ -119,6 +126,7 @@ export const DIMENSION_MEASURES: Dimension[] = [
 		x: 16,
 		y: 178,
 		length: 336,
+		side: 'above',
 	},
 	{
 		name: 'padding-right',
@@ -126,6 +134,7 @@ export const DIMENSION_MEASURES: Dimension[] = [
 		x: 352,
 		y: 64,
 		length: 16,
+		side: 'above',
 	},
 ]
 
@@ -136,3 +145,11 @@ export const DIMENSION_THICKNESS = 1
 // Each end of a dimension is closed by a tick, a bar across the line.
 // 7 px = the 1 px line plus 3 px on each side, so the tick is centered on it.
 export const TICK_LENGTH = 7
+
+// The number of a dimension is one line of mono text. Its line-height also centers
+// it on a vertical line: half of it above the middle, half below.
+export const LABEL_LINE_HEIGHT = 10
+
+// How far the number's box sits from a vertical line: 3 px of tick overhang,
+// the 1 px line itself and 1 px of air.
+export const LABEL_SIDE_OFFSET = 5
