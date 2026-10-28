@@ -7,20 +7,21 @@ export type Box = {
 	radius: number
 }
 
-type Direction = 'horizontal' | 'vertical'
-
-// Where a dimension's number sits: above a horizontal line, or to the left or
-// right of a vertical one.
-export type Side = 'above' | 'left' | 'right'
-
+// A measured distance. A horizontal line always has its number above it, a
+// vertical one to its left or right, so only those pairs are allowed: a typo like
+// a vertical line with its number 'above' is a type error.
 export type Dimension = {
 	name: string
-	direction: Direction
 	x: number
 	y: number
 	length: number
-	side: Side
-}
+} & (
+	| { direction: 'horizontal'; side: 'above' }
+	| { direction: 'vertical'; side: 'left' | 'right' }
+)
+
+// Where a dimension's number sits.
+export type Side = Dimension['side']
 
 // A box placed with CSS: the keys are the CSS property names, so a Rect can be
 // passed straight to `style`.
