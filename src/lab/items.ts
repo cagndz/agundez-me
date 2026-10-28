@@ -61,12 +61,12 @@ export const items: LabItem[] = [
 		title: 'Inspect',
 		size: INSPECT_SIZE,
 		summary:
-			"Hover to read the form's measurements, click to pin the whole blueprint. Position and size are motion values, so moving the pointer re-renders nothing.",
+			"Hover to read the form's measurements, click to pin the whole blueprint. Position and size are motion values, so moving the pointer never makes React render.",
 		specs: [
 			{ label: 'Follow', value: 'Spring · 160 ms · no bounce' },
 			{ label: 'Release', value: 'Spring · 300 ms · no bounce' },
 			{ label: 'Reveal', value: 'clip-path · lens to farthest corner' },
-			{ label: 'Render', value: 'Motion values · no re-render per move' },
+			{ label: 'Render', value: 'Motion values · no React render per move' },
 			{
 				label: 'A11y',
 				value: 'Keyboard · live summary · reduced motion',
