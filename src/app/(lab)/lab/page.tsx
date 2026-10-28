@@ -1,9 +1,15 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { LabGrid } from './lab-grid'
 import { LabModal } from './lab-modal'
 import { items } from '@/lab/items'
 import { stageSize } from '@/lab/card'
 import { ArrowLeft } from '@/components/icons/arrow-left'
+
+export const metadata: Metadata = {
+	title: { absolute: 'Lab' },
+	description: 'Interactive UI components and experiments by Carlos Agúndez',
+}
 
 export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 	const { c } = await searchParams
