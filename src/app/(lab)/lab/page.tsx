@@ -10,7 +10,7 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 
 	return (
 		<div className='lab-scope'>
-			<header>
+			<header className='max-w-md'>
 				<Link
 					href='/'
 					className='font-mono text-xs text-muted hover:text-foreground'
