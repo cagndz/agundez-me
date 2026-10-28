@@ -10,7 +10,7 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 	const selected = items.find((item) => item.slug === c)
 
 	return (
-		<div className='lab-scope'>
+		<div className='lab-scope group/scope'>
 			<header className='max-w-md'>
 				<Link
 					href='/'
@@ -22,7 +22,7 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 				<h1 className='mt-7 flex items-center gap-2 font-mono text-xs tracking-widest uppercase'>
 					<span
 						aria-hidden='true'
-						className='signal-flicker size-2 rounded-full bg-accent'
+						className='signal-flicker size-2 rounded-full bg-accent transition-opacity duration-150 ease-out-strong group-has-[[data-lab-cell]:focus-visible]/scope:opacity-30 group-has-[[data-lab-item]:hover]/scope:opacity-30'
 					/>
 					Lab
 				</h1>
