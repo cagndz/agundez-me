@@ -1,4 +1,4 @@
-import type { Box, Dimension } from './types'
+import type { Box, Dimension, Note } from './types'
 
 // Fixed size on purpose: the dimension lines print real pixel values, and the
 // lens math (distance to the farthest corner) needs the exact width and height.
@@ -146,10 +146,28 @@ export const DIMENSION_THICKNESS = 1
 // 7 px = the 1 px line plus 3 px on each side, so the tick is centered on it.
 export const TICK_LENGTH = 7
 
-// The number of a dimension is one line of mono text. Its line-height also centers
-// it on a vertical line: half of it above the middle, half below.
+// Every small text on the blueprint (dimension numbers and notes) is one line of
+// mono text at 9/10. The line-height also centers a number on a vertical line:
+// half of it above the middle, half below.
 export const LABEL_LINE_HEIGHT = 10
 
 // How far the number's box sits from a vertical line: 3 px of tick overhang,
 // the 1 px line itself and 1 px of air.
 export const LABEL_SIDE_OFFSET = 5
+
+// What the blueprint says about the form: type size and weight, and corner radius.
+// (x, y) is where the text starts; with `align: 'right'` it ends there instead.
+export const NOTE_MEASURES: Note[] = [
+	{ name: 'card-radius', x: 362, y: 4, text: 'R 16', align: 'right' },
+	{ name: 'label-type', x: 60, y: 20, text: '13 · MEDIUM', align: 'left' },
+	{
+		name: 'field-type',
+		x: 140,
+		y: 59,
+		text: '14 · REGULAR · R 8',
+		align: 'left',
+	},
+	{ name: 'helper-type', x: 258, y: 97, text: '12 · REGULAR', align: 'left' },
+	{ name: 'button-radius', x: 24, y: 132, text: 'R 8', align: 'left' },
+	{ name: 'button-type', x: 222, y: 143, text: '14 · MEDIUM', align: 'left' },
+]

@@ -45,3 +45,14 @@ export type DimensionParts = {
 	endTick: Rect
 	label: Point
 }
+
+type NoteAlign = 'left' | 'right'
+
+// A short technical note: what the blueprint says about an element of the form.
+export type Note = {
+	name: string
+	x: number
+	y: number
+	text: string
+	align: NoteAlign
+}
