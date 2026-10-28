@@ -56,3 +56,9 @@ export type Note = {
 	text: string
 	align: NoteAlign
 }
+
+// A point inside the card, in the card's own px (0..368, 0..186).
+export type CardPoint = {
+	x: number
+	y: number
+}

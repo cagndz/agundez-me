@@ -8,20 +8,24 @@ export const SIZE = {
 	height: 186,
 }
 
+// The middle of the card: where the keyboard pins the lens from.
+export const CENTER = { x: SIZE.width / 2, y: SIZE.height / 2 }
+
 // The lens frames one field group (label 18 + 8 + field 44 + 8 + helper 16 = 94 px).
 // Diameter 96 = 2 * 48, the nearest whole radius, leaving 1 px to spare per side.
 export const LENS_RADIUS = 48
 
 // Where each element of the form sits, in px from the card's top-left corner.
 // Boxes and text lines are listed in reading order. The widths of the four text
-// boxes (label, placeholder, helper, button-text) depend on how the font renders,
-// so they are measured in the browser.
+// boxes (label, placeholder, helper, button-text) are the rendered width of the
+// text in Geist at its size and weight, so they are not whole numbers. The button
+// text is centered: 16 + (336 - 65.56) / 2.
 export const BOX_MEASURES: Box[] = [
 	{
 		name: 'label',
 		x: 16,
 		y: 16,
-		width: 36,
+		width: 33.42,
 		height: 18,
 		radius: 0,
 	},
@@ -37,7 +41,7 @@ export const BOX_MEASURES: Box[] = [
 		name: 'placeholder',
 		x: 28,
 		y: 54,
-		width: 108,
+		width: 113.83,
 		height: 20,
 		radius: 0,
 	},
@@ -45,7 +49,7 @@ export const BOX_MEASURES: Box[] = [
 		name: 'helper',
 		x: 16,
 		y: 94,
-		width: 236,
+		width: 225.58,
 		height: 16,
 		radius: 0,
 	},
@@ -59,9 +63,9 @@ export const BOX_MEASURES: Box[] = [
 	},
 	{
 		name: 'button-text',
-		x: 152,
+		x: 151.22,
 		y: 138,
-		width: 64,
+		width: 65.56,
 		height: 20,
 		radius: 0,
 	},
@@ -157,19 +161,20 @@ export const LABEL_SIDE_OFFSET = 5
 
 // What the blueprint says about the form: type size and weight, and corner radius.
 // (x, y) is where the text starts; with `align: 'right'` it ends there instead.
+// Each note sits 10 px after the end of the text it describes.
 export const NOTE_MEASURES: Note[] = [
 	{ name: 'card-radius', x: 362, y: 4, text: 'R 16', align: 'right' },
-	{ name: 'label-type', x: 60, y: 20, text: '13 · MEDIUM', align: 'left' },
+	{ name: 'label-type', x: 59, y: 20, text: '13 · MEDIUM', align: 'left' },
 	{
 		name: 'field-type',
-		x: 140,
+		x: 152,
 		y: 59,
 		text: '14 · REGULAR · R 8',
 		align: 'left',
 	},
-	{ name: 'helper-type', x: 258, y: 97, text: '12 · REGULAR', align: 'left' },
+	{ name: 'helper-type', x: 252, y: 97, text: '12 · REGULAR', align: 'left' },
 	{ name: 'button-radius', x: 24, y: 132, text: 'R 8', align: 'left' },
-	{ name: 'button-type', x: 222, y: 143, text: '14 · MEDIUM', align: 'left' },
+	{ name: 'button-type', x: 227, y: 143, text: '14 · MEDIUM', align: 'left' },
 ]
 
 // A critically damped spring: it slides to its target with no bounce. For this
@@ -189,10 +194,16 @@ function criticallyDampedSpring(settleTime: number) {
 	} as const
 }
 
-// Following the pointer and opening: 95 % of the way in 167 ms, measured from
-// the reference video. Retargeting it keeps the velocity, so it never stutters.
-export const LENS_OPEN_SPRING = criticallyDampedSpring(0.167)
+// Following the pointer and opening: 95 % of the way in 160 ms, fast enough to
+// feel attached to the pointer. Retargeting it keeps the velocity, so it never
+// stutters.
+export const LENS_OPEN_SPRING = criticallyDampedSpring(0.16)
 
 // Closing: 95 % in 300 ms. Slower than opening on purpose; leaving should feel
 // like letting go, not like being cut off.
 export const LENS_CLOSE_SPRING = criticallyDampedSpring(0.3)
+
+// Read out when the blueprint is pinned, because everything on it is hidden from
+// assistive technology. It says what the blueprint shows, in reading order.
+export const SUMMARY =
+	'Card 368 by 186, radius 16, padding 16. Label 13 medium, then 8 to the field. Field and button 336 by 44, radius 8. Helper text 12, 8 below the field, then 16 to the button.'

@@ -1,54 +1,164 @@
 'use client'
 
 import {
+	animate,
 	motion,
 	useMotionTemplate,
 	useMotionValue,
+	useReducedMotion,
 	useSpring,
+	useTransform,
 } from 'motion/react'
+import { useRef, useState, type PointerEvent } from 'react'
 import { Blueprint } from './blueprint'
-import { LENS_OPEN_SPRING, LENS_RADIUS, SIZE } from './constants'
+import {
+	CENTER,
+	LENS_CLOSE_SPRING,
+	LENS_OPEN_SPRING,
+	LENS_RADIUS,
+	SIZE,
+	SUMMARY,
+} from './constants'
 import { Form } from './form'
-import { getCardPoint } from './utils'
+import type { CardPoint } from './types'
+import { getCardPoint, getFarthestCorner } from './utils'
 
 export function Inspect() {
-	const centerX = SIZE.width / 2
-	const centerY = SIZE.height / 2
+	const reduceMotion = useReducedMotion()
 
-	const x = useSpring(centerX, LENS_OPEN_SPRING)
-	const y = useSpring(centerY, LENS_OPEN_SPRING)
+	// Pinned changes what the card says (aria-pressed) and what is announced, so
+	// it is state. It only changes on a click or a key press, never on a move.
+	const [pinned, setPinned] = useState(false)
+
+	// Not state: nothing is drawn from these, they only remember what happened.
+	const lensShown = useRef(false)
+	const lastPointerType = useRef('mouse')
+
+	// Position and size of the lens are motion values: they change dozens of times
+	// a second and must not re-render the card.
+	const x = useSpring(CENTER.x, LENS_OPEN_SPRING)
+	const y = useSpring(CENTER.y, LENS_OPEN_SPRING)
 	const radius = useMotionValue(0)
 
-	const clipPath = useMotionTemplate`circle(${radius}px at ${x}px ${y}px)`
+	// A spring can dip a hair under 0, and a negative radius is invalid CSS: the
+	// whole clip-path would be dropped and the blueprint would flash over the card.
+	const clipRadius = useTransform(radius, (value) => Math.max(0, value))
+	const clipPath = useMotionTemplate`circle(${clipRadius}px at ${x}px ${y}px)`
+
+	// Glide to a point, or jump there when the lens is not on screen yet (it
+	// should appear where the pointer is, not fly in from where it was).
+	function moveTo(point: CardPoint, instant: boolean) {
+		if (instant || reduceMotion) {
+			x.jump(point.x)
+			y.jump(point.y)
+		} else {
+			x.set(point.x)
+			y.set(point.y)
+		}
+	}
+
+	// Growing uses the quick spring, shrinking the slower one.
+	function resizeTo(target: number) {
+		if (reduceMotion) {
+			radius.jump(target)
+			return
+		}
+		const spring = target < radius.get() ? LENS_CLOSE_SPRING : LENS_OPEN_SPRING
+		animate(radius, target, spring)
+	}
+
+	function showLens(point: CardPoint) {
+		if (pinned) return
+		moveTo(point, !lensShown.current)
+		lensShown.current = true
+		resizeTo(LENS_RADIUS)
+	}
+
+	function hideLens() {
+		if (pinned) return
+		lensShown.current = false
+		resizeTo(0)
+	}
+
+	function pin(point: CardPoint) {
+		setPinned(true)
+		moveTo(point, !lensShown.current)
+		lensShown.current = true
+		resizeTo(getFarthestCorner(point))
+	}
+
+	// With a point the lens comes back there; without one (keyboard, touch) it
+	// closes, because there is no pointer to hold it.
+	function unpin(point?: CardPoint) {
+		setPinned(false)
+		if (point) {
+			moveTo(point, false)
+			lensShown.current = true
+			resizeTo(LENS_RADIUS)
+		} else {
+			lensShown.current = false
+			resizeTo(0)
+		}
+	}
+
+	// A finger has no hover: on touch there is no lens, only tap to pin.
+	function handlePointer(e: PointerEvent<HTMLDivElement>) {
+		lastPointerType.current = e.pointerType
+		if (e.pointerType === 'touch') return
+		showLens(getCardPoint(e))
+	}
 
 	return (
-		<div
-			className='relative rounded-2xl bg-white p-4 font-sans normal-case inset-ring inset-ring-foreground/10'
-			style={{ width: SIZE.width, height: SIZE.height }}
-			onPointerMove={(e) => {
-				const point = getCardPoint(e)
-				x.set(point.x)
-				y.set(point.y)
-			}}
-			onPointerEnter={(e) => {
-				const point = getCardPoint(e)
-				x.jump(point.x)
-				y.jump(point.y)
-				radius.set(LENS_RADIUS)
-			}}
-			onPointerLeave={() => radius.set(0)}
-		>
-			<Form />
-
-			<motion.div
-				aria-hidden='true'
-				className='pointer-events-none absolute inset-0 rounded-[inherit]'
-				style={{
-					clipPath,
+		<>
+			<div
+				role='button'
+				tabIndex={0}
+				aria-pressed={pinned}
+				aria-label='Inspect layout'
+				className='relative cursor-crosshair rounded-2xl bg-white p-4 font-sans normal-case inset-ring inset-ring-foreground/10 select-none focus-visible:outline-offset-2'
+				style={{ width: SIZE.width, height: SIZE.height }}
+				onPointerEnter={handlePointer}
+				onPointerMove={handlePointer}
+				onPointerDown={(e) => {
+					lastPointerType.current = e.pointerType
+				}}
+				onPointerLeave={(e) => {
+					if (e.pointerType !== 'touch') hideLens()
+				}}
+				onClick={(e) => {
+					const point = getCardPoint(e)
+					if (!pinned) pin(point)
+					else unpin(lastPointerType.current === 'touch' ? undefined : point)
+				}}
+				onKeyDown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault()
+						if (e.repeat) return
+						if (pinned) unpin()
+						else pin(CENTER)
+					} else if (e.key === 'Escape' && pinned) {
+						// First Escape lets go of the blueprint; it must not also close the modal.
+						e.stopPropagation()
+						unpin()
+					}
 				}}
 			>
-				<Blueprint />
-			</motion.div>
-		</div>
+				<Form />
+
+				<motion.div
+					aria-hidden='true'
+					className='pointer-events-none absolute inset-0 rounded-[inherit]'
+					style={{ clipPath }}
+				>
+					<Blueprint />
+				</motion.div>
+			</div>
+
+			{/* Outside the button: a button's children are presentational, and a live
+          region inside it might never be announced. */}
+			<p aria-live='polite' className='sr-only'>
+				{pinned ? SUMMARY : ''}
+			</p>
+		</>
 	)
 }

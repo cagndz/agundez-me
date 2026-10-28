@@ -1,4 +1,4 @@
-import type { PointerEvent } from 'react'
+import type { MouseEvent } from 'react'
 import {
 	DIMENSION_THICKNESS,
 	LABEL_LINE_HEIGHT,
@@ -6,7 +6,7 @@ import {
 	SIZE,
 	TICK_LENGTH,
 } from './constants'
-import type { Dimension, DimensionParts, Point } from './types'
+import type { CardPoint, Dimension, DimensionParts, Point } from './types'
 
 // How far a tick sticks out on each side of the line, so it stays centered on it.
 const TICK_OVERHANG = (TICK_LENGTH - DIMENSION_THICKNESS) / 2
@@ -78,11 +78,20 @@ export function getDimensionParts(dimension: Dimension): DimensionParts {
 // clientX/clientY are measured from the window, so we subtract where the card is.
 // DemoFit may shrink the card on small screens: then it measures less on screen
 // than its real SIZE, and the ratio puts the point back in the card's own units.
-export function getCardPoint(e: PointerEvent<HTMLElement>) {
+export function getCardPoint(e: MouseEvent<HTMLElement>): CardPoint {
 	const rect = e.currentTarget.getBoundingClientRect()
 
 	return {
 		x: (e.clientX - rect.left) * (SIZE.width / rect.width),
 		y: (e.clientY - rect.top) * (SIZE.height / rect.height),
 	}
+}
+
+// The radius a circle centered on `point` needs to cover the whole card: the
+// distance to the farthest corner (Pythagoras: the hypotenuse of the horizontal
+// and vertical distances). Rounded up so no sliver is left at the corner.
+export function getFarthestCorner({ x, y }: CardPoint) {
+	return Math.ceil(
+		Math.hypot(Math.max(x, SIZE.width - x), Math.max(y, SIZE.height - y)),
+	)
 }
