@@ -1,4 +1,4 @@
-import type { Box } from './types'
+import type { Box, Dimension } from './types'
 
 // Fixed size on purpose: the dimension lines print real pixel values, and the
 // lens math (distance to the farthest corner) needs the exact width and height.
@@ -64,5 +64,67 @@ export const BOX_MEASURES: Box[] = [
 		width: 64,
 		height: 20,
 		radius: 0,
+	},
+]
+
+// The distances the card prints, in px from its top-left corner. (x, y) is where
+// the line starts and it runs `length` px to the right or down. The printed number
+// is the length itself, so a dimension never carries a label of its own.
+export const DIMENSION_MEASURES: Dimension[] = [
+	{
+		name: 'padding-left',
+		direction: 'horizontal',
+		x: 0,
+		y: 64,
+		length: 16,
+	},
+	{
+		name: 'padding-top',
+		direction: 'vertical',
+		x: 120,
+		y: 0,
+		length: 16,
+	},
+	{
+		name: 'label-gap',
+		direction: 'vertical',
+		x: 120,
+		y: 34,
+		length: 8,
+	},
+	{
+		name: 'field-height',
+		direction: 'vertical',
+		x: 330,
+		y: 42,
+		length: 44,
+	},
+	{
+		name: 'helper-gap',
+		direction: 'vertical',
+		x: 280,
+		y: 86,
+		length: 8,
+	},
+	{
+		name: 'button-gap',
+		direction: 'vertical',
+		x: 280,
+		y: 110,
+		length: 16,
+	},
+	{
+		name: 'content-width',
+		direction: 'horizontal',
+		x: 16,
+		y: 178,
+		length: 336,
+	},
+	{
+		name: 'padding-right',
+		direction: 'horizontal',
+		x: 352,
+		y: 64,
+		length: 16,
 	},
 ]

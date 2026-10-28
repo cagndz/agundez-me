@@ -6,3 +6,13 @@ export type Box = {
 	height: number
 	radius: number
 }
+
+type Direction = 'horizontal' | 'vertical'
+
+export type Dimension = {
+	name: string
+	direction: Direction
+	x: number
+	y: number
+	length: number
+}

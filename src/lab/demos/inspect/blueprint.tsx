@@ -1,4 +1,4 @@
-import { BOX_MEASURES } from './constants'
+import { BOX_MEASURES, DIMENSION_MEASURES } from './constants'
 
 export function Blueprint() {
 	return (
@@ -14,6 +14,18 @@ export function Blueprint() {
 						height: box.height,
 						borderRadius: box.radius,
 					}}
+				></span>
+			))}
+			{DIMENSION_MEASURES.map((dimension) => (
+				<span
+					key={dimension.name}
+					style={{
+						left: dimension.x,
+						top: dimension.y,
+						width: dimension.direction === 'horizontal' ? dimension.length : 1,
+						height: dimension.direction === 'vertical' ? dimension.length : 1,
+					}}
+					className='absolute bg-accent'
 				></span>
 			))}
 		</div>
