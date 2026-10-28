@@ -16,8 +16,9 @@ const TICK_OVERHANG = (TICK_LENGTH - DIMENSION_THICKNESS) / 2
 // Every number keeps LABEL_GAP px from the ticks:
 // - above: the point is the line's middle, over the ticks; the number's bottom
 //   edge sits there and the number is centered on it.
-// - right: the point is past the line and the tick's overhang; the number starts there.
-// - left: the point is before the tick's overhang; the number ends there.
+// - right: the point is right past the tick's overhang. The number's box starts
+//   there, and its padding (LABEL_GAP, see dimension.tsx) makes the gap.
+// - left: the same, mirrored: the number's box ends at the tick's overhang.
 function getLabelPoint({ side, x, y, length }: Dimension): Point {
 	const middle = length / 2
 
@@ -31,8 +32,8 @@ function getLabelPoint({ side, x, y, length }: Dimension): Point {
 	return {
 		left:
 			side === 'right'
-				? x + DIMENSION_THICKNESS + TICK_OVERHANG + LABEL_GAP
-				: x - TICK_OVERHANG - LABEL_GAP,
+				? x + DIMENSION_THICKNESS + TICK_OVERHANG
+				: x - TICK_OVERHANG,
 		top: y + middle - LABEL_LINE_HEIGHT / 2,
 	}
 }

@@ -1,4 +1,4 @@
-import { LABEL_LINE_HEIGHT } from './constants'
+import { LABEL_GAP, LABEL_LINE_HEIGHT } from './constants'
 import type { Dimension, Side } from './types'
 import { getDimensionParts } from './utils'
 
@@ -26,8 +26,12 @@ export function DimensionLine({ dimension }: DimensionLineProps) {
 			<span className='absolute bg-accent' style={startTick} />
 			<span className='absolute bg-accent' style={endTick} />
 			<span
-				className={`absolute bg-inherit px-0.5 font-mono text-[9px] tracking-[0.04em] whitespace-nowrap text-accent ${LABEL_SHIFT[dimension.side]}`}
-				style={{ ...label, lineHeight: `${LABEL_LINE_HEIGHT}px` }}
+				className={`absolute bg-inherit font-mono text-[9px] tracking-[0.04em] whitespace-nowrap text-accent ${LABEL_SHIFT[dimension.side]}`}
+				style={{
+					...label,
+					paddingInline: LABEL_GAP,
+					lineHeight: `${LABEL_LINE_HEIGHT}px`,
+				}}
 			>
 				{dimension.length}
 			</span>

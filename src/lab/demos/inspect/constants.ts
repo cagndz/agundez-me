@@ -155,7 +155,9 @@ export const TICK_LENGTH = 7
 // half of it above the middle, half below.
 export const LABEL_LINE_HEIGHT = 10
 
-// The gap between a tick and the box of its number, on every side.
+// The gap between a tick and its number, on every side. The number's box is
+// padded by this much and filled with the blueprint's background, so the gap
+// hides the dots behind it too.
 export const LABEL_GAP = 1
 
 // What the blueprint says about the form: type size and weight, and corner radius.
@@ -202,6 +204,8 @@ export const LENS_OPEN_SPRING = criticallyDampedSpring(0.16)
 // like letting go, not like being cut off.
 export const LENS_CLOSE_SPRING = criticallyDampedSpring(0.3)
 
+// Written by hand, so it can't follow the measures above: if one changes,
+// change it here too.
 // Read out when the blueprint is pinned, because everything on it is hidden from
 // assistive technology. It says what the blueprint shows, in reading order.
 export const SUMMARY =
