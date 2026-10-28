@@ -14,6 +14,8 @@ import { applyOrigin, applyOriginWithoutTransition } from '@/lab/origin'
 import { demos } from '@/lab/registry'
 import { DemoFit } from '@/lab/demo-fit'
 import { XMark } from '@/components/icons/x-mark'
+import { curveDuration } from '@/lab/curves'
+import { MotionCurve } from '@/lab/motion-curve'
 import './lab-modal.css'
 
 export function LabModal({
@@ -33,6 +35,12 @@ export function LabModal({
 
 	const shown = item ?? lastItem
 	const Demo = shown ? demos[shown.slug] : undefined
+
+	// Every curve of the piece shares one time axis, as long as its longest one
+	const curves = shown?.curves
+	const maxDuration = curves
+		? Math.max(...curves.map((curve) => curveDuration(curve.transition)))
+		: 0
 
 	// Was the modal opened by navigating inside the app (so there is history to
 	// go back to)? If the page loaded with ?c= already set, it never went from
@@ -103,46 +111,68 @@ export function LabModal({
 							)}
 						</div>
 					</div>
-					<aside className='lab-aside flex w-(--stage) flex-col gap-6 overflow-y-auto rounded-sm bg-(--surface) p-4 ring-1 ring-foreground/10 max-md:max-h-[calc(100dvh-3rem-var(--stage)-0.75rem)] md:w-72'>
-						<div className='flex items-start justify-between'>
-							<div className='flex flex-col gap-1'>
-								<span className='font-mono text-xs tracking-widest text-muted uppercase tabular-nums'>
-									{shown?.id}
-								</span>
-								<Dialog.Title className='font-mono text-sm tracking-widest uppercase'>
-									{shown?.title}
-								</Dialog.Title>
-							</div>
+					<aside className='lab-aside flex w-(--stage) flex-col gap-5 overflow-y-auto rounded-sm bg-(--surface) p-4 ring-1 ring-foreground/10 max-md:max-h-[calc(100dvh-3rem-var(--stage)-0.75rem)] md:w-72'>
+						<div className='-mt-1 flex items-center justify-between'>
+							{/* Same label as the card it opened from: 001 / DIAL */}
+							<Dialog.Title className='flex gap-2 font-mono text-sm uppercase'>
+								<span className='tabular-nums'>{shown?.id}</span>
+								<span aria-hidden='true'>/</span>
+								<span className='text-muted'>{shown?.title}</span>
+							</Dialog.Title>
 							<Dialog.Close
 								aria-label='Close'
-								className='-mt-2 -mr-2 flex size-8 items-center justify-center rounded-xs text-muted transition-colors duration-150 ease-out-quart hover:text-foreground active:scale-95'
+								className='-mr-2 flex size-8 items-center justify-center rounded-xs text-muted transition-colors duration-150 ease-out-strong hover:text-foreground active:scale-95'
 							>
 								<XMark className='size-4' />
 							</Dialog.Close>
 						</div>
 						{shown?.summary && (
-							<Dialog.Description className='font-mono text-xs leading-relaxed text-muted'>
+							<Dialog.Description className='text-sm text-pretty text-foreground/80'>
 								{shown.summary}
 							</Dialog.Description>
 						)}
-						{shown?.specs && (
-							<dl className='mt-auto border-t border-border font-mono text-xs'>
-								{shown.specs.map((spec) => (
-									<div
-										key={spec.label}
-										className='grid grid-cols-[5rem_1fr] gap-2 border-b border-border py-2'
-									>
-										<dt className='tracking-widest text-muted uppercase'>
-											{spec.label}
-										</dt>
-										<dd>{spec.value}</dd>
-									</div>
-								))}
-							</dl>
-						)}
+						<div className='mt-auto flex flex-col gap-3'>
+							{curves && curves.length > 0 && (
+								<div
+									className='grid gap-px border border-border bg-border'
+									style={{
+										gridTemplateColumns: `repeat(${curveColumns(curves.length)}, minmax(0, 1fr))`,
+									}}
+								>
+									{curves.map((curve) => (
+										<MotionCurve
+											key={curve.label}
+											curve={curve}
+											maxDuration={maxDuration}
+										/>
+									))}
+								</div>
+							)}
+							{shown?.specs && (
+								<dl className='grid gap-px border border-border bg-border font-mono text-xs'>
+									{shown.specs.map((spec) => (
+										<div
+											key={spec.label}
+											className='grid grid-cols-[4.5rem_1fr] gap-2 bg-(--surface) px-2.5 py-2'
+										>
+											<dt className='tracking-widest text-muted uppercase'>
+												{spec.label}
+											</dt>
+											<dd>{spec.value}</dd>
+										</div>
+									))}
+								</dl>
+							)}
+						</div>
 					</aside>
 				</Dialog.Popup>
 			</Dialog.Portal>
 		</Dialog.Root>
 	)
+}
+
+// Up to three curves in a row. Four make a 2 × 2 square instead of a row of
+// four cells too narrow to read.
+function curveColumns(count: number) {
+	return count === 4 ? 2 : Math.min(count, 3)
 }

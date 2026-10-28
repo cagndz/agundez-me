@@ -1,6 +1,22 @@
-import { SIZE as DIAL_SIZE } from './demos/dial/constants'
-import { SIZE as WALLET_SIZE } from './demos/wallet/constants'
-import { SIZE as INSPECT_SIZE } from './demos/inspect/constants'
+import type { LabCurve } from './curves'
+import {
+	RELEASE_SPRING,
+	RETURN_SPRING,
+	ROLL_TWEEN,
+	SIZE as DIAL_SIZE,
+} from './demos/dial/constants'
+import {
+	CARD_DROP,
+	CARD_PRESENT_SPRING,
+	CARD_RETURN_SPRING,
+	CARD_RISE,
+	SIZE as WALLET_SIZE,
+} from './demos/wallet/constants'
+import {
+	LENS_CLOSE_SPRING,
+	LENS_OPEN_SPRING,
+	SIZE as INSPECT_SIZE,
+} from './demos/inspect/constants'
 
 export type LabSpec = {
 	label: string
@@ -12,6 +28,10 @@ export type LabItem = {
 	slug: string
 	title: string
 	summary?: string
+	// The piece's animations, drawn as curves in the modal. Built from the
+	// demo's own constants, never typed by hand.
+	curves?: LabCurve[]
+	// Everything else worth knowing that isn't a curve
 	specs?: LabSpec[]
 	// The demo's natural size. The grid needs it before anything renders, to
 	// give each card its height on the server (see lab-grid.tsx). Widest
@@ -25,13 +45,16 @@ export const items: LabItem[] = [
 		slug: 'dial',
 		title: 'Dial',
 		size: DIAL_SIZE,
-		summary:
-			'Drag to turn the wheel, release to settle on a tick. Position is one continuous value; ticks and digits only read it.',
+		summary: 'Drag to turn the wheel, release to settle on a tick.',
+		curves: [
+			{ label: 'Release', transition: RELEASE_SPRING },
+			{ label: 'Return', transition: RETURN_SPRING },
+			{ label: 'Digits', transition: ROLL_TWEEN },
+		],
 		specs: [
-			{ label: 'Release', value: 'Spring · k 120 · ratio 0.72' },
 			{ label: 'Ends', value: 'Progressive rubber band' },
+			{ label: 'Stagger', value: '35 ms per digit' },
 			{ label: 'Render', value: 'DOM · 101 ticks · one rotation' },
-			{ label: 'Digits', value: 'Rolling · 400 ms · 35 ms stagger' },
 			{ label: 'A11y', value: 'Pointer only · reduced motion' },
 			{ label: 'Stack', value: 'React · Motion · TypeScript' },
 		],
@@ -42,11 +65,14 @@ export const items: LabItem[] = [
 		title: 'Wallet',
 		size: WALLET_SIZE,
 		summary:
-			'Click a card to lift it out of the case and turn it to landscape. Each stage hands off by position, not time, so a click mid-flight only changes the destination.',
+			'Click a card to lift it out of the case and turn it to landscape.',
+		curves: [
+			{ label: 'Rise', transition: CARD_RISE },
+			{ label: 'Present', transition: CARD_PRESENT_SPRING },
+			{ label: 'Return', transition: CARD_RETURN_SPRING },
+			{ label: 'Drop', transition: CARD_DROP },
+		],
 		specs: [
-			{ label: 'Rise', value: '280 ms · ease-out' },
-			{ label: 'Present', value: 'Spring · 550 ms · bounce 0.2' },
-			{ label: 'Return', value: 'Spring · 420 ms · drop 320 ms' },
 			{ label: 'Render', value: 'DOM · screen-space shadow' },
 			{
 				label: 'A11y',
@@ -61,10 +87,12 @@ export const items: LabItem[] = [
 		title: 'Inspect',
 		size: INSPECT_SIZE,
 		summary:
-			"Hover to read the form's measurements, click to pin the whole blueprint. Position and size are motion values, so moving the pointer never makes React render.",
+			"Hover to read the form's measurements, click to pin the whole blueprint.",
+		curves: [
+			{ label: 'Follow', transition: LENS_OPEN_SPRING },
+			{ label: 'Release', transition: LENS_CLOSE_SPRING },
+		],
 		specs: [
-			{ label: 'Follow', value: 'Spring · 160 ms · no bounce' },
-			{ label: 'Release', value: 'Spring · 300 ms · no bounce' },
 			{ label: 'Reveal', value: 'clip-path · lens to farthest corner' },
 			{ label: 'Render', value: 'Motion values · no React render per move' },
 			{
