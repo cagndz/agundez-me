@@ -26,8 +26,8 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 					/>
 					Lab
 				</h1>
-				<p className='mt-2 text-2xl tracking-tight text-balance'>
-					A small studio for playing with interface ideas.
+				<p className='mt-2 text-3xl tracking-tight text-balance'>
+					A small studio for playing with interface ideas
 				</p>
 			</header>
 			<div className='mt-11'>
