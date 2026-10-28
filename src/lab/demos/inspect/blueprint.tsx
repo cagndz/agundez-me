@@ -28,7 +28,7 @@ export function Blueprint() {
 						height: box.height,
 						borderRadius: box.radius,
 					}}
-				></span>
+				/>
 			))}
 			{DIMENSION_MEASURES.map((dimension) => (
 				<DimensionLine key={dimension.name} dimension={dimension} />
