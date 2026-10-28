@@ -7,24 +7,24 @@ import { WalletCard } from './wallet-card'
 
 const CARDS: WalletCardData[] = [
 	{
-		id: 'studio-pass',
-		title: 'Studio pass',
-		description: 'Level 3 · after hours',
-		code: 'S-03',
+		id: 'card-01',
+		title: 'Card',
+		description: 'agundez.me/lab',
+		code: '01',
 		tone: 'dark',
 	},
 	{
-		id: 'library-card',
-		title: 'Library card',
-		description: 'Reading room · two books out',
-		code: 'L-27',
+		id: 'card-02',
+		title: 'Card',
+		description: 'agundez.me/lab',
+		code: '02',
 		tone: 'light',
 	},
 	{
-		id: 'transit-pass',
-		title: 'Transit pass',
-		description: 'Zones 1–2 · monthly',
-		code: 'T-12',
+		id: 'card-03',
+		title: 'Card',
+		description: 'agundez.me/lab',
+		code: '03',
 		tone: 'accent',
 	},
 ]

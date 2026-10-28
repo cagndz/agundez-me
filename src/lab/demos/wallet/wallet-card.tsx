@@ -130,6 +130,8 @@ export function WalletCard({
 					willChange: 'transform',
 				}}
 				data-wallet-card=''
+				// The three cards share a title, so the code tells them apart: "Card 01".
+				aria-label={`${card.title} ${card.code}`}
 				aria-pressed={isPresented}
 				aria-describedby={descriptionId}
 				onClick={() => onToggle(card.id)}
@@ -159,7 +161,7 @@ export function WalletCard({
 						willChange: 'opacity, filter',
 					}}
 				>
-					{/* The title is the button's name; the code would only add noise to it. */}
+					{/* The button's name is its aria-label, so neither text is read twice. */}
 					<span className='text-[11px] font-medium'>{card.title}</span>
 					<span
 						aria-hidden='true'
