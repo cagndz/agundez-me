@@ -2,6 +2,7 @@ import {
 	DEGREES_PER_UNIT,
 	MAX,
 	MIN,
+	PAGE_STEP,
 	PX_PER_UNIT,
 	RELEASE_POWER,
 	RUBBER_RANGE,
@@ -17,6 +18,36 @@ export function pixelToPosition(pixel: number): number {
 
 export function pixelToUnit(pixel: number): number {
 	return Math.round(Math.max(MIN, Math.min(MAX, pixelToPosition(pixel))))
+}
+
+// The inverse of pixelToPosition: the offset that puts a unit under the marker.
+export function unitToPixel(unit: number): number {
+	return (MIN - unit) * PX_PER_UNIT
+}
+
+// Where a key sends the dial from `from`, or null if it isn't a slider key.
+// Same keys as a native range input (WAI-ARIA slider pattern).
+export function getKeyTarget(key: string, from: number): number | null {
+	const clamp = (unit: number) => Math.max(MIN, Math.min(MAX, unit))
+
+	switch (key) {
+		case 'ArrowRight':
+		case 'ArrowUp':
+			return clamp(from + 1)
+		case 'ArrowLeft':
+		case 'ArrowDown':
+			return clamp(from - 1)
+		case 'PageUp':
+			return clamp(from + PAGE_STEP)
+		case 'PageDown':
+			return clamp(from - PAGE_STEP)
+		case 'Home':
+			return MIN
+		case 'End':
+			return MAX
+		default:
+			return null
+	}
 }
 
 export function snapToTick(pixel: number): number {
