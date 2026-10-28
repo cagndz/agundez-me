@@ -155,9 +155,8 @@ export const TICK_LENGTH = 7
 // half of it above the middle, half below.
 export const LABEL_LINE_HEIGHT = 10
 
-// How far the number's box sits from a vertical line: 3 px of tick overhang,
-// the 1 px line itself and 1 px of air.
-export const LABEL_SIDE_OFFSET = 5
+// The gap between a tick and the box of its number, on every side.
+export const LABEL_GAP = 1
 
 // What the blueprint says about the form: type size and weight, and corner radius.
 // (x, y) is where the text starts; with `align: 'right'` it ends there instead.

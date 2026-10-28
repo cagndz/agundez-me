@@ -2,7 +2,7 @@ import type { MouseEvent } from 'react'
 import {
 	DIMENSION_THICKNESS,
 	LABEL_LINE_HEIGHT,
-	LABEL_SIDE_OFFSET,
+	LABEL_GAP,
 	SIZE,
 	TICK_LENGTH,
 } from './constants'
@@ -13,18 +13,26 @@ const TICK_OVERHANG = (TICK_LENGTH - DIMENSION_THICKNESS) / 2
 
 // The point a dimension's number is placed at. The number is shifted from this
 // point by a CSS translate (see dimension.tsx), because its width is not known here.
-// - above: the point is the line's middle, just over the ticks (the number's
-//   bottom edge meets the top of the ticks), and the number is centered on it.
-// - left / right: the point is beside the ticks, level with the line's middle.
+// Every number keeps LABEL_GAP px from the ticks:
+// - above: the point is the line's middle, over the ticks; the number's bottom
+//   edge sits there and the number is centered on it.
+// - right: the point is past the line and the tick's overhang; the number starts there.
+// - left: the point is before the tick's overhang; the number ends there.
 function getLabelPoint({ side, x, y, length }: Dimension): Point {
 	const middle = length / 2
 
 	if (side === 'above') {
-		return { left: x + middle, top: y - TICK_OVERHANG - LABEL_LINE_HEIGHT }
+		return {
+			left: x + middle,
+			top: y - TICK_OVERHANG - LABEL_GAP - LABEL_LINE_HEIGHT,
+		}
 	}
 
 	return {
-		left: side === 'right' ? x + LABEL_SIDE_OFFSET : x - LABEL_SIDE_OFFSET,
+		left:
+			side === 'right'
+				? x + DIMENSION_THICKNESS + TICK_OVERHANG + LABEL_GAP
+				: x - TICK_OVERHANG - LABEL_GAP,
 		top: y + middle - LABEL_LINE_HEIGHT / 2,
 	}
 }
