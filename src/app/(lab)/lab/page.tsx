@@ -19,7 +19,11 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 					<ArrowLeft className='size-3 transition-transform duration-150 ease-out-strong motion-safe:group-hover:-translate-x-0.5' />
 					agundez.me
 				</Link>
-				<h1 className='mt-7 font-mono text-xs tracking-widest uppercase'>
+				<h1 className='mt-7 flex items-center gap-2 font-mono text-xs tracking-widest uppercase'>
+					<span
+						aria-hidden='true'
+						className='signal-flicker size-2 rounded-full bg-accent'
+					/>
 					Lab
 				</h1>
 				<p className='mt-2 text-2xl tracking-tight text-balance'>
