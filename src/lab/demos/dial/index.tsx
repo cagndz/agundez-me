@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type KeyboardEvent } from 'react'
 import {
 	animate,
 	motion,
@@ -17,6 +17,8 @@ import {
 	MARKER_HEIGHT,
 	MARKER_TOP,
 	MARKER_WIDTH,
+	MAX,
+	MIN,
 	READOUT_GAP,
 	RELEASE_SPRING,
 	RETURN_SPRING,
@@ -32,8 +34,10 @@ import {
 	applyRubberBand,
 	pixelToDegrees,
 	pixelToPosition,
+	getKeyTarget,
 	getReleaseTarget,
 	pixelToUnit,
+	unitToPixel,
 } from './utils'
 import { Tick } from './tick'
 import { Readout } from './readout'
@@ -44,7 +48,11 @@ export function Dial() {
 	const displayX = useTransform(x, applyRubberBand)
 	const rotateDial = useTransform(displayX, pixelToDegrees)
 	const position = useTransform(displayX, pixelToPosition)
+	// value: the unit under the marker right now, frame by frame.
+	// target: the unit the dial rests on or is heading to. Keys step from it,
+	// so holding an arrow doesn't stall behind the spring.
 	const [value, setValue] = useState(INITIAL)
+	const [target, setTarget] = useState(INITIAL)
 	const [isDragging, setIsDragging] = useState(false)
 	const dragControls = useDragControls()
 	const reduceMotion = useReducedMotion()
@@ -53,19 +61,43 @@ export function Dial() {
 		setIsDragging(false)
 
 		const isOverscrolled = x.get() > 0 || x.get() < -TRAVEL
-		const target = getReleaseTarget(x.get(), info.velocity.x)
+		const targetPx = getReleaseTarget(x.get(), info.velocity.x)
+		setTarget(pixelToUnit(targetPx))
 
 		if (reduceMotion) {
-			x.set(target)
+			x.set(targetPx)
 			return
 		}
 
 		// Start the spring with the finger's own velocity so the hand-off is seamless.
-		animate(x, target, {
+		animate(x, targetPx, {
 			...(isOverscrolled ? RETURN_SPRING : RELEASE_SPRING),
 			velocity: info.velocity.x,
 		})
 	}
+
+	function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+		const next = getKeyTarget(event.key, target)
+		if (next === null) return
+
+		// Arrows and Page keys would also scroll the page.
+		event.preventDefault()
+		if (isDragging || next === target) return
+
+		setTarget(next)
+
+		if (reduceMotion) {
+			x.set(unitToPixel(next))
+			return
+		}
+
+		// Same spring as a release. A press mid-flight retargets it, and Motion
+		// starts the new spring from the current velocity, so a held key glides.
+		animate(x, unitToPixel(next), RELEASE_SPRING)
+	}
+
+	// While dragging, the finger is the truth; otherwise announce where it rests.
+	const announced = isDragging ? value : target
 
 	useMotionValueEvent(x, 'change', (latest) => {
 		setValue(pixelToUnit(latest))
@@ -73,13 +105,22 @@ export function Dial() {
 
 	return (
 		<div
-			role='group'
-			aria-label='Dial'
 			className='flex flex-col items-center select-none'
 			style={{ gap: READOUT_GAP }}
 		>
 			<Readout value={value} isDragging={isDragging} />
+			{/* The window is the slider: it's what you drag, so it's what gets
+			    focus. The ring is the lab's inset :focus-visible (lab.css). */}
 			<div
+				role='slider'
+				tabIndex={0}
+				aria-label='Dial'
+				aria-orientation='horizontal'
+				aria-valuemin={MIN}
+				aria-valuemax={MAX}
+				aria-valuenow={announced}
+				aria-valuetext={`${announced}%`}
+				onKeyDown={handleKeyDown}
 				className='relative overflow-hidden'
 				style={{ width: WINDOW_WIDTH, height: WINDOW_HEIGHT }}
 			>
@@ -112,7 +153,7 @@ export function Dial() {
 				</div>
 				<motion.div
 					aria-hidden
-					className='absolute inset-y-0 left-1/2 font-mono'
+					className='absolute inset-y-0 left-1/2'
 					style={{
 						x,
 						width: BAND_WIDTH,

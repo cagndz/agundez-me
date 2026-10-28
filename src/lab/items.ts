@@ -55,7 +55,7 @@ export const items: LabItem[] = [
 			{ label: 'Ends', value: 'Progressive rubber band' },
 			{ label: 'Stagger', value: '35 ms per digit' },
 			{ label: 'Render', value: 'DOM · 101 ticks · one rotation' },
-			{ label: 'A11y', value: 'Pointer only · reduced motion' },
+			{ label: 'A11y', value: 'Slider · keyboard · reduced motion' },
 			{ label: 'Stack', value: 'React · Motion · TypeScript' },
 		],
 	},

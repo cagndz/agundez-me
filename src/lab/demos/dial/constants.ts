@@ -11,6 +11,8 @@ const scaled = (px: number) => Math.round(px * SCALE)
 export const MIN = 0
 export const MAX = 100
 export const INITIAL = 50
+// PageUp / PageDown jump one major tick
+export const PAGE_STEP = 10
 export const DEGREES_PER_UNIT = 2.4
 export const RADIUS = 300 * SCALE
 export const WHEEL_TOP = scaled(40)

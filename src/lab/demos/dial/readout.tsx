@@ -14,9 +14,9 @@ export function Readout({ value, isDragging }: ReadoutProps) {
 	const reduceMotion = useReducedMotion()
 
 	return (
-		<div className='flex items-end'>
-			<span className='sr-only'>{value}%</span>
-			<div aria-hidden className='relative flex items-end'>
+		// Visual only: the slider below carries the value for assistive tech.
+		<div aria-hidden className='flex items-end'>
+			<div className='relative flex items-end'>
 				{getDigits(value).map((digit, i) => (
 					<DigitColumn
 						key={i}

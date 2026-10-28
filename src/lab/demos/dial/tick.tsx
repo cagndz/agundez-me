@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { motion, useTransform, type MotionValue } from 'motion/react'
 import {
 	RADIUS,
@@ -16,7 +17,13 @@ type TickProps = {
 	position: MotionValue<number>
 }
 
-export function Tick({ unit, isActive, position }: TickProps) {
+// memo: the dial re-renders every time the value changes, but only the tick
+// that gains or loses isActive needs to. The rest move through motion values.
+export const Tick = memo(function Tick({
+	unit,
+	isActive,
+	position,
+}: TickProps) {
 	const tickType = getTickType(unit)
 	const baseHeight = TICK_HEIGHTS[tickType]
 	const growth = TICK_GROW[tickType]
@@ -50,4 +57,4 @@ export function Tick({ unit, isActive, position }: TickProps) {
 			/>
 		</div>
 	)
-}
+})
