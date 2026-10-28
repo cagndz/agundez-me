@@ -171,3 +171,28 @@ export const NOTE_MEASURES: Note[] = [
 	{ name: 'button-radius', x: 24, y: 132, text: 'R 8', align: 'left' },
 	{ name: 'button-type', x: 222, y: 143, text: '14 · MEDIUM', align: 'left' },
 ]
+
+// A critically damped spring: it slides to its target with no bounce. For this
+// kind of spring, the time to cover 95 % of the way is 4.74 / ω (ω, "omega", is
+// how fast it is), so ω = 4.74 / settleTime. From ω: stiffness = ω², and the
+// damping that stops it exactly at the target is 2 × √stiffness (= 2ω).
+const SETTLE_RATIO = 4.74
+
+function criticallyDampedSpring(settleTime: number) {
+	const omega = SETTLE_RATIO / settleTime
+	const stiffness = omega ** 2
+
+	return {
+		type: 'spring',
+		stiffness,
+		damping: 2 * Math.sqrt(stiffness),
+	} as const
+}
+
+// Following the pointer and opening: 95 % of the way in 167 ms, measured from
+// the reference video. Retargeting it keeps the velocity, so it never stutters.
+export const LENS_OPEN_SPRING = criticallyDampedSpring(0.167)
+
+// Closing: 95 % in 300 ms. Slower than opening on purpose; leaving should feel
+// like letting go, not like being cut off.
+export const LENS_CLOSE_SPRING = criticallyDampedSpring(0.3)

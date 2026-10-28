@@ -1,7 +1,9 @@
+import type { PointerEvent } from 'react'
 import {
 	DIMENSION_THICKNESS,
 	LABEL_LINE_HEIGHT,
 	LABEL_SIDE_OFFSET,
+	SIZE,
 	TICK_LENGTH,
 } from './constants'
 import type { Dimension, DimensionParts, Point } from './types'
@@ -69,5 +71,18 @@ export function getDimensionParts(dimension: Dimension): DimensionParts {
 			height: DIMENSION_THICKNESS,
 		},
 		label,
+	}
+}
+
+// Where the pointer is inside the card, in the card's own px (0..368, 0..186).
+// clientX/clientY are measured from the window, so we subtract where the card is.
+// DemoFit may shrink the card on small screens: then it measures less on screen
+// than its real SIZE, and the ratio puts the point back in the card's own units.
+export function getCardPoint(e: PointerEvent<HTMLElement>) {
+	const rect = e.currentTarget.getBoundingClientRect()
+
+	return {
+		x: (e.clientX - rect.left) * (SIZE.width / rect.width),
+		y: (e.clientY - rect.top) * (SIZE.height / rect.height),
 	}
 }
