@@ -1,4 +1,5 @@
 import { BOX_MEASURES, DIMENSION_MEASURES } from './constants'
+import { DimensionLine } from './dimension'
 
 export function Blueprint() {
 	return (
@@ -17,16 +18,7 @@ export function Blueprint() {
 				></span>
 			))}
 			{DIMENSION_MEASURES.map((dimension) => (
-				<span
-					key={dimension.name}
-					style={{
-						left: dimension.x,
-						top: dimension.y,
-						width: dimension.direction === 'horizontal' ? dimension.length : 1,
-						height: dimension.direction === 'vertical' ? dimension.length : 1,
-					}}
-					className='absolute bg-accent'
-				></span>
+				<DimensionLine key={dimension.name} dimension={dimension} />
 			))}
 		</div>
 	)

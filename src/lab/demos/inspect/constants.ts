@@ -128,3 +128,11 @@ export const DIMENSION_MEASURES: Dimension[] = [
 		length: 16,
 	},
 ]
+
+// A dimension line is a thin rectangle: its short side is this thick. 1 px matches
+// the outlines' stroke, so the whole blueprint shares one hairline.
+export const DIMENSION_THICKNESS = 1
+
+// Each end of a dimension is closed by a tick, a bar across the line.
+// 7 px = the 1 px line plus 3 px on each side, so the tick is centered on it.
+export const TICK_LENGTH = 7
