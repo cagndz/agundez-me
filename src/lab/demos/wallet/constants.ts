@@ -41,7 +41,7 @@ export const CARD_PALETTES: Record<WalletCardTone, WalletCardPalette> = {
 	accent: {
 		background: 'var(--accent)',
 		foreground: '#111111',
-		muted: '#5a2200',
+		muted: '#421900',
 		edge: 'rgb(17 17 17 / 0.18)',
 	},
 }
