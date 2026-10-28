@@ -3,6 +3,7 @@ import { LabGrid } from './lab-grid'
 import { LabModal } from './lab-modal'
 import { items } from '@/lab/items'
 import { stageSize } from '@/lab/card'
+import { ArrowLeft } from '@/components/icons/arrow-left'
 
 export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 	const { c } = await searchParams
@@ -13,8 +14,9 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 			<header className='max-w-md'>
 				<Link
 					href='/'
-					className='font-mono text-xs text-muted hover:text-foreground'
+					className='group touch-target inline-flex items-center gap-1.5 font-mono text-xs text-muted transition-colors duration-150 ease-out-strong hover:text-foreground'
 				>
+					<ArrowLeft className='size-3 transition-transform duration-150 ease-out-strong motion-safe:group-hover:-translate-x-0.5' />
 					agundez.me
 				</Link>
 				<h1 className='mt-7 font-mono text-xs tracking-widest uppercase'>
