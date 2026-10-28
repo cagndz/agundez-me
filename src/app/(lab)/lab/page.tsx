@@ -7,7 +7,7 @@ import { stageSize } from '@/lab/card'
 import { ArrowLeft } from '@/components/icons/arrow-left'
 
 export const metadata: Metadata = {
-	title: 'Lab',
+	title: { absolute: 'Lab' },
 	description: 'Interactive UI components and experiments by Carlos Agúndez',
 }
 
