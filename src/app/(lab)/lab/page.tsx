@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { LabGrid } from './lab-grid'
 import { LabModal } from './lab-modal'
 import { items } from '@/lab/items'
@@ -9,17 +10,21 @@ export default async function LabPage({ searchParams }: PageProps<'/lab'>) {
 
 	return (
 		<div className='lab-scope'>
-			<h1 className='font-mono text-sm tracking-widest uppercase'>Lab / 000</h1>
-			<p className='mt-2 font-mono text-xs tracking-widest text-muted uppercase'>
-				Components, states, motion
-			</p>
-			<div className='mt-8 flex items-center gap-2 border-t border-border pt-4'>
-				<span className='signal-dot block size-2 rounded-full bg-accent' />
-				<span className='font-mono text-xs tracking-widest uppercase'>
-					Signal
-				</span>
-			</div>
-			<div className='mt-8'>
+			<header>
+				<Link
+					href='/'
+					className='font-mono text-xs text-muted hover:text-foreground'
+				>
+					agundez.me
+				</Link>
+				<h1 className='mt-7 font-mono text-xs tracking-widest uppercase'>
+					Lab
+				</h1>
+				<p className='mt-2 text-2xl tracking-tight text-balance'>
+					A small studio for playing with interface ideas.
+				</p>
+			</header>
+			<div className='mt-11'>
 				<LabGrid items={items} />
 			</div>
 			<LabModal item={selected} stageSize={stageSize(items)} />
