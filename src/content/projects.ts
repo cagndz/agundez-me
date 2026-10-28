@@ -6,6 +6,11 @@ export type Project = {
 
 export const projects: Project[] = [
 	{
+		name: 'Lab',
+		description: 'Interactive UI components and experiments',
+		href: '/lab',
+	},
+	{
 		name: 'Menubar Player',
 		description: 'An audio player for YouTube that lives in the macOS menu bar',
 		href: 'https://github.com/cagndz/menubar-player',

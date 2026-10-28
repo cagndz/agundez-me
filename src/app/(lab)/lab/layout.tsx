@@ -1,11 +1,6 @@
-import { notFound } from 'next/navigation'
 import './lab.css'
 
 export default function LabLayout({ children }: LayoutProps<'/lab'>) {
-	if (process.env.VERCEL_ENV === 'production') {
-		notFound()
-	}
-
 	// @container: the board's columns and the dots follow the page's width
 	// (lab.css). isolate: the dots sit behind the content but above the
 	// page's own background.
