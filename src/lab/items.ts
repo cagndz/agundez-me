@@ -60,15 +60,16 @@ export const items: LabItem[] = [
 		slug: 'inspect',
 		title: 'Inspect',
 		size: INSPECT_SIZE,
-		summary: 'Inspect the form and click to reveal.',
+		summary:
+			"Hover to read the form's measurements, click to pin the whole blueprint. Position and size are motion values, so moving the pointer re-renders nothing.",
 		specs: [
-			{ label: 'Rise', value: '280 ms · ease-out' },
-			{ label: 'Present', value: 'Spring · 550 ms · bounce 0.2' },
-			{ label: 'Return', value: 'Spring · 420 ms · drop 320 ms' },
-			{ label: 'Render', value: 'DOM · screen-space shadow' },
+			{ label: 'Follow', value: 'Spring · 160 ms · no bounce' },
+			{ label: 'Release', value: 'Spring · 300 ms · no bounce' },
+			{ label: 'Reveal', value: 'clip-path · lens to farthest corner' },
+			{ label: 'Render', value: 'Motion values · no re-render per move' },
 			{
 				label: 'A11y',
-				value: 'Toggle buttons · outside click · reduced motion',
+				value: 'Keyboard · live summary · reduced motion',
 			},
 			{ label: 'Stack', value: 'React · Motion · TypeScript' },
 		],
