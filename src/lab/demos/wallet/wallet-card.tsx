@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import {
 	animate,
 	motion,
 	useMotionValue,
 	useMotionValueEvent,
+	useReducedMotion,
 	useTransform,
 } from 'motion/react'
 import { CardShadow } from './card-shadow'
@@ -78,21 +79,27 @@ export function WalletCard({
 		[0, 0, 1],
 	)
 
-	const handleHoverStart = () => {
-		if (!isAnyPresented) {
-			animate(hoverLift, -CARD_HOVER_LIFT, CARD_HOVER)
-		}
-	}
+	const descriptionId = useId()
+	const reduceMotion = useReducedMotion()
+	const liftTransition = reduceMotion ? { duration: 0 } : CARD_HOVER
 
-	const handleHoverEnd = () => {
-		animate(hoverLift, 0, CARD_HOVER)
+	// The pointer over the card or keyboard focus on it: either one lifts a card
+	// resting in the case, so the keyboard gets the same cue as the mouse. Refs,
+	// not state: they only decide where hoverLift goes, nothing renders from them.
+	const isHovered = useRef(false)
+	const isFocusVisible = useRef(false)
+
+	function updateLift() {
+		const isLifted =
+			!isAnyPresented && (isHovered.current || isFocusVisible.current)
+		animate(hoverLift, isLifted ? -CARD_HOVER_LIFT : 0, liftTransition)
 	}
 
 	useEffect(() => {
 		if (isAnyPresented) {
-			animate(hoverLift, 0, CARD_HOVER)
+			animate(hoverLift, 0, reduceMotion ? { duration: 0 } : CARD_HOVER)
 		}
-	}, [hoverLift, isAnyPresented])
+	}, [hoverLift, isAnyPresented, reduceMotion])
 
 	return (
 		<motion.div
@@ -109,7 +116,10 @@ export function WalletCard({
 			<CardShadow rotate={rotate} scale={scale} />
 			<motion.button
 				type='button'
-				className='absolute size-full'
+				// The case's ring sits inside an element; here it would vanish on the
+				// dark card and hide behind the next card down. Outside, it reads on
+				// all three. Focus also lifts the card (updateLift).
+				className='absolute size-full focus-visible:outline-offset-2'
 				style={{
 					borderRadius: CARD_RADIUS,
 					background: palette.background,
@@ -120,11 +130,26 @@ export function WalletCard({
 					willChange: 'transform',
 				}}
 				data-wallet-card=''
-				aria-label={card.title}
 				aria-pressed={isPresented}
+				aria-describedby={descriptionId}
 				onClick={() => onToggle(card.id)}
-				onHoverStart={handleHoverStart}
-				onHoverEnd={handleHoverEnd}
+				onHoverStart={() => {
+					isHovered.current = true
+					updateLift()
+				}}
+				onHoverEnd={() => {
+					isHovered.current = false
+					updateLift()
+				}}
+				onFocus={(event) => {
+					// Only keyboard focus: a click also focuses the button.
+					isFocusVisible.current = event.currentTarget.matches(':focus-visible')
+					updateLift()
+				}}
+				onBlur={() => {
+					isFocusVisible.current = false
+					updateLift()
+				}}
 			>
 				<motion.div
 					className='absolute inset-x-3 top-2 flex items-center justify-between'
@@ -134,8 +159,10 @@ export function WalletCard({
 						willChange: 'opacity, filter',
 					}}
 				>
+					{/* The title is the button's name; the code would only add noise to it. */}
 					<span className='text-[11px] font-medium'>{card.title}</span>
 					<span
+						aria-hidden='true'
 						className='font-mono text-[10px]'
 						style={{ color: palette.muted }}
 					>
@@ -173,7 +200,10 @@ export function WalletCard({
 								{card.code}
 							</span>
 						</div>
+						{/* Read as the button's description. aria-describedby still reads
+						    it from inside the aria-hidden face. */}
 						<span
+							id={descriptionId}
 							className='mt-auto text-[10px] font-normal'
 							style={{ color: palette.muted }}
 						>
