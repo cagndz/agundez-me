@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, type KeyboardEvent } from 'react'
+import { useRef, useState, type KeyboardEvent } from 'react'
 import {
 	animate,
+	type AnimationPlaybackControls,
 	motion,
 	type PanInfo,
 	useDragControls,
@@ -36,6 +37,8 @@ import {
 	pixelToPosition,
 	getKeyTarget,
 	getReleaseTarget,
+	getRubberBandSlope,
+	removeRubberBand,
 	pixelToUnit,
 	unitToPixel,
 } from './utils'
@@ -56,6 +59,7 @@ export function Dial() {
 	const [isDragging, setIsDragging] = useState(false)
 	const dragControls = useDragControls()
 	const reduceMotion = useReducedMotion()
+	const returnAnimation = useRef<AnimationPlaybackControls | null>(null)
 
 	function handleDragEnd(_event: PointerEvent, info: PanInfo) {
 		setIsDragging(false)
@@ -69,11 +73,27 @@ export function Dial() {
 			return
 		}
 
+		if (isOverscrolled) {
+			// Spring the offset the eye sees, not the finger's. Springing x would
+			// spend the first stretch inside the band's flat part, where the dial
+			// barely moves, so it would hang at the edge before coming back.
+			returnAnimation.current = animate(displayX.get(), targetPx, {
+				...RETURN_SPRING,
+				velocity: info.velocity.x * getRubberBandSlope(x.get()),
+				onUpdate: (shown) => x.set(removeRubberBand(shown)),
+			})
+			return
+		}
+
 		// Start the spring with the finger's own velocity so the hand-off is seamless.
-		animate(x, targetPx, {
-			...(isOverscrolled ? RETURN_SPRING : RELEASE_SPRING),
-			velocity: info.velocity.x,
-		})
+		animate(x, targetPx, { ...RELEASE_SPRING, velocity: info.velocity.x })
+	}
+
+	// The return spring drives x from outside, so grabbing the dial or pressing
+	// a key has to stop it by hand (Motion only stops animations started on x).
+	function stopReturn() {
+		returnAnimation.current?.stop()
+		returnAnimation.current = null
 	}
 
 	function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -84,6 +104,7 @@ export function Dial() {
 		event.preventDefault()
 		if (isDragging || next === target) return
 
+		stopReturn()
 		setTarget(next)
 
 		if (reduceMotion) {
@@ -167,7 +188,10 @@ export function Dial() {
 				/>
 				<div
 					aria-hidden
-					onPointerDown={(e) => dragControls.start(e)}
+					onPointerDown={(e) => {
+						stopReturn()
+						dragControls.start(e)
+					}}
 					className='absolute inset-0 cursor-grab touch-pan-y active:cursor-grabbing'
 				/>
 				<div

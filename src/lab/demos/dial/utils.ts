@@ -99,3 +99,27 @@ export function applyRubberBand(pixel: number): number {
 	if (pixel < -TRAVEL) return -TRAVEL - rubberBand(-TRAVEL - pixel)
 	return pixel
 }
+
+// The finger overshoot that rubberBand turns into `shown`. Capped just under
+// RUBBER_RANGE, which no finger offset reaches.
+function unRubberBand(shown: number): number {
+	const capped = Math.min(shown, RUBBER_RANGE * 0.999)
+	return ((capped / (RUBBER_RANGE - capped)) * RUBBER_RANGE) / RUBBER_STIFFNESS
+}
+
+// The inverse of applyRubberBand: displayed offset in, free finger offset out.
+export function removeRubberBand(shown: number): number {
+	if (shown > 0) return unRubberBand(shown)
+	if (shown < -TRAVEL) return -TRAVEL - unRubberBand(-TRAVEL - shown)
+	return shown
+}
+
+// How many displayed pixels one finger pixel moves at `pixel`: 1 inside the
+// range, falling toward 0 the further past an end. Converts finger velocity.
+export function getRubberBandSlope(pixel: number): number {
+	const overshoot = pixel > 0 ? pixel : pixel < -TRAVEL ? -TRAVEL - pixel : 0
+	if (overshoot === 0) return 1
+	return (
+		RUBBER_STIFFNESS / ((overshoot * RUBBER_STIFFNESS) / RUBBER_RANGE + 1) ** 2
+	)
+}
