@@ -91,7 +91,7 @@ export const CARD_SHADOW_OPACITY = [0.6, 1]
 
 // Hover: a small lift that only cards resting in the case get.
 export const CARD_HOVER_LIFT = 8
-export const CARD_HOVER = { duration: 0.18, ease: [0.2, 0, 0, 1] } as const
+export const CARD_HOVER = { duration: 0.15, ease: [0.32, 0.72, 0, 1] } as const
 
 // Outer size of the whole demo, for the lab's card.
 export const SIZE = { width: STAGE_WIDTH, height: STAGE_HEIGHT }
