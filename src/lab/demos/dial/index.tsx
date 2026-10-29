@@ -15,6 +15,7 @@ import {
 import {
 	INITIAL,
 	INITIAL_OFFSET_PX,
+	KEY_SPRING,
 	MARKER_HEIGHT,
 	MARKER_TOP,
 	MARKER_WIDTH,
@@ -112,9 +113,9 @@ export function Dial() {
 			return
 		}
 
-		// Same spring as a release. A press mid-flight retargets it, and Motion
-		// starts the new spring from the current velocity, so a held key glides.
-		animate(x, unitToPixel(next), RELEASE_SPRING)
+		// A press mid-flight retargets the spring, and Motion starts the new one
+		// from the current velocity, so a held key glides without overshooting.
+		animate(x, unitToPixel(next), KEY_SPRING)
 	}
 
 	// While dragging, the finger is the truth; otherwise announce where it rests.
