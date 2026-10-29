@@ -42,6 +42,8 @@ export const IMPACT = {
 	scaleX: [1, 1.14, 0.97, 1],
 	scaleY: [1, 0.82, 1.05, 1],
 }
+// The trigger at rest, before it has squeezed out its first drop
+export const REST = { scaleX: 1, scaleY: 1 }
 export const SQUEEZE_TIMING = { duration: 0.36, times: [0, 0.3, 0.65, 1] }
 
 // The drop leaves at the top of the squeeze, then lands into the panel with

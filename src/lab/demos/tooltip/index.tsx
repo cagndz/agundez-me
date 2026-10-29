@@ -1,6 +1,6 @@
 'use client'
 
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { motion } from 'motion/react'
 import {
 	BLEED,
@@ -17,6 +17,7 @@ import {
 	PANEL_RADIUS,
 	PANEL_WIDTH,
 	REDUCED_FADE,
+	REST,
 	RISE,
 	SIZE,
 	SQUEEZE,
@@ -40,6 +41,11 @@ export function Tooltip() {
 	const filterId = `tooltip-goo-${tipId.replace(/[^a-zA-Z0-9]/g, '')}`
 	const reduceMotion = useHydratedReducedMotion()
 	const { open, show, hide, close } = useHoverIntent(CLOSE_DELAY)
+	// The trigger only takes the hit of a drop that went out. Without this it
+	// plays the impact on load, with nothing falling. Setting state during
+	// render is the pattern React documents for following a changing value.
+	const [hasOpened, setHasOpened] = useState(false)
+	if (open && !hasOpened) setHasOpened(true)
 
 	return (
 		<div className='relative font-mono text-[11px] uppercase' style={SIZE}>
@@ -56,7 +62,9 @@ export function Tooltip() {
 						className='absolute left-0 origin-bottom rounded-full bg-foreground'
 						style={TRIGGER_BOX}
 						initial={false}
-						animate={reduceMotion ? undefined : open ? SQUEEZE : IMPACT}
+						animate={
+							reduceMotion || !hasOpened ? REST : open ? SQUEEZE : IMPACT
+						}
 						transition={
 							open ? SQUEEZE_TIMING : { ...SQUEEZE_TIMING, delay: HIT }
 						}
@@ -127,10 +135,8 @@ export function Tooltip() {
 					}
 				}}
 			>
-				{/* A new key remounts the light, so it flickers on every open */}
 				<span
-					key={String(open)}
-					className={`size-2 rounded-full bg-accent ${open ? 'signal-flicker shadow-[0_0_8px_var(--color-accent)]' : ''}`}
+					className={`size-2 rounded-full bg-accent ${open ? 'shadow-[0_0_8px_var(--color-accent)]' : ''}`}
 				/>
 			</button>
 		</div>
