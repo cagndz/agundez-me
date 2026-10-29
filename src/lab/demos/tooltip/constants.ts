@@ -45,6 +45,8 @@ export const IMPACT = {
 // The trigger at rest, before it has squeezed out its first drop
 export const REST = { scaleX: 1, scaleY: 1 }
 export const SQUEEZE_TIMING = { duration: 0.36, times: [0, 0.3, 0.65, 1] }
+// The impact is a reaction, not a deliberate push: same shape, quicker
+export const IMPACT_TIMING = { duration: 0.24, times: [0, 0.3, 0.65, 1] }
 
 // The drop leaves at the top of the squeeze, then lands into the panel with
 // overshoot. Rising before swelling is what pulls a neck out of the trigger.
@@ -56,8 +58,8 @@ export const RISE = {
 } as const
 export const LAND = {
 	type: 'spring',
-	duration: 0.46,
-	bounce: 0.34,
+	duration: 0.38,
+	bounce: 0.15,
 	delay: 0.16,
 } as const
 // Closing: gather into a drop, then fall. Gravity is the one place ease-in is
@@ -72,7 +74,7 @@ export const FALL = {
 export const HIT = 0.28
 
 // The text lights up once the panel has nearly landed
-export const TEXT_DELAY = 0.24
+export const TEXT_DELAY = 0.2
 export const TEXT_IN = {
 	duration: 0.2,
 	ease: [0.23, 1, 0.32, 1],
