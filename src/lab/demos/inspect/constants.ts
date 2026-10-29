@@ -195,14 +195,20 @@ function criticallyDampedSpring(settleTime: number) {
 	} as const
 }
 
-// Opening, and moving the lens where the pointer does not drive it (pinning from
-// the keyboard): 95 % of the way in 160 ms. Retargeting it keeps the
-// velocity, so it never stutters.
+// Runs when the lens opens on hover, when a pin grows it to the whole card, and
+// when a keyboard pin moves it to the center: 95 % of the way in 160 ms.
+// Retargeting it keeps the velocity, so it never stutters.
 export const LENS_OPEN_SPRING = criticallyDampedSpring(0.16)
 
-// Closing: 95 % in 300 ms. Slower than opening on purpose; leaving should feel
-// like letting go, not like being cut off.
-export const LENS_CLOSE_SPRING = criticallyDampedSpring(0.3)
+// Runs when the pointer leaves the card and the lens closes: 95 % in 130 ms,
+// faster than opening. The pointer is already gone, so the lens gets out of the
+// way instead of lingering at the edge.
+export const LENS_HIDE_SPRING = criticallyDampedSpring(0.13)
+
+// Runs on unpin, when the circle shrinks from the whole card back to the lens
+// (or closes, without a pointer): 95 % in 300 ms. The longest change in size, so
+// it takes longer; it should feel like letting go, not like being cut off.
+export const LENS_UNPIN_SPRING = criticallyDampedSpring(0.3)
 
 // Written by hand, so it can't follow the measures above: if one changes,
 // change it here too.

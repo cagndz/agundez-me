@@ -13,9 +13,10 @@ import { useRef, useState, type PointerEvent } from 'react'
 import { Blueprint } from './blueprint'
 import {
 	CENTER,
-	LENS_CLOSE_SPRING,
+	LENS_HIDE_SPRING,
 	LENS_OPEN_SPRING,
 	LENS_RADIUS,
+	LENS_UNPIN_SPRING,
 	SIZE,
 	SUMMARY,
 } from './constants'
@@ -63,17 +64,16 @@ export function Inspect() {
 		}
 	}
 
-	// Growing uses the quick spring, shrinking the slower one. Every pointer move
-	// asks for the same size, so only a new target starts an animation: restarting
-	// one would re-estimate its velocity and make the opening wobble.
-	function resizeTo(target: number) {
+	// Each caller picks its spring (see constants.ts). Every pointer move asks for
+	// the same size, so only a new target starts an animation: restarting one
+	// would re-estimate its velocity and make the opening wobble.
+	function resizeTo(target: number, spring: typeof LENS_OPEN_SPRING) {
 		if (target === radiusTarget.current) return
 		radiusTarget.current = target
 		if (reduceMotion) {
 			radius.jump(target)
 			return
 		}
-		const spring = target < radius.get() ? LENS_CLOSE_SPRING : LENS_OPEN_SPRING
 		animate(radius, target, spring)
 	}
 
@@ -82,18 +82,18 @@ export function Inspect() {
 		// The pointer drives the lens, so it stays right under it: any glide here
 		// would leave the crosshair behind on a quick move.
 		moveTo(point, true)
-		resizeTo(LENS_RADIUS)
+		resizeTo(LENS_RADIUS, LENS_OPEN_SPRING)
 	}
 
 	function hideLens() {
 		if (pinned) return
-		resizeTo(0)
+		resizeTo(0, LENS_HIDE_SPRING)
 	}
 
 	function pin(point: CardPoint) {
 		setPinned(true)
 		moveTo(point, isLensClosed())
-		resizeTo(getFarthestCorner(point))
+		resizeTo(getFarthestCorner(point), LENS_OPEN_SPRING)
 	}
 
 	// With a point the lens comes back there; without one (keyboard, touch) it
@@ -103,9 +103,9 @@ export function Inspect() {
 		setPinned(false)
 		if (point) {
 			moveTo(point, true)
-			resizeTo(LENS_RADIUS)
+			resizeTo(LENS_RADIUS, LENS_UNPIN_SPRING)
 		} else {
-			resizeTo(0)
+			resizeTo(0, LENS_UNPIN_SPRING)
 		}
 	}
 
