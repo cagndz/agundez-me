@@ -79,6 +79,13 @@ export const CARD_DROP = { duration: 0.24, ease: [0.32, 0.72, 0, 1] } as const
 export const CARD_SETTLE = { duration: 0.3, ease: [0.32, 0.72, 0, 1] } as const
 // Degrees a returning card may still be tilted when it starts dropping into the case.
 export const CARD_UPRIGHT_TOLERANCE = 2
+// Reduced motion: a card that leaves or enters the case jumps instead of moving,
+// fading out where it was and back in where it lands, so it is clear which one went.
+// Each half takes this, about 150ms in all.
+export const CARD_REDUCED_FADE = {
+	duration: 0.075,
+	ease: [0.25, 0.1, 0.25, 1],
+} as const
 
 // Card shadow. It lives on its own layer that never turns, so light always comes from above.
 // The shape is inset to keep the blur tucked under the card's edges.

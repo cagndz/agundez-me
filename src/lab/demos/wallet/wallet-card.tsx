@@ -45,7 +45,7 @@ export function WalletCard({
 	onOutChange,
 }: WalletCardProps) {
 	const palette = CARD_PALETTES[card.tone]
-	const { y, rotate, scale, zIndex } = useWalletCardMotion({
+	const { y, rotate, scale, zIndex, opacity } = useWalletCardMotion({
 		index,
 		count,
 		isPresented,
@@ -112,6 +112,7 @@ export function WalletCard({
 				height: CARD_HEIGHT,
 				y: cardY,
 				zIndex,
+				opacity,
 				willChange: 'transform',
 			}}
 		>
