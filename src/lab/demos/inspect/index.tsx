@@ -30,8 +30,9 @@ export function Inspect() {
 	// it is state. It only changes on a click or a key press, never on a move.
 	const [pinned, setPinned] = useState(false)
 
-	// Not state: nothing is drawn from it, it only remembers what happened.
+	// Not state: nothing is drawn from these, they only remember what happened.
 	const lastPointerType = useRef('mouse')
+	const radiusTarget = useRef(0)
 
 	// Position and size of the lens are motion values: they change dozens of times
 	// a second and must not re-render the card.
@@ -62,8 +63,12 @@ export function Inspect() {
 		}
 	}
 
-	// Growing uses the quick spring, shrinking the slower one.
+	// Growing uses the quick spring, shrinking the slower one. Every pointer move
+	// asks for the same size, so only a new target starts an animation: restarting
+	// one would re-estimate its velocity and make the opening wobble.
 	function resizeTo(target: number) {
+		if (target === radiusTarget.current) return
+		radiusTarget.current = target
 		if (reduceMotion) {
 			radius.jump(target)
 			return
