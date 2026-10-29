@@ -22,6 +22,7 @@ import {
 	MAX,
 	MIN,
 	READOUT_GAP,
+	REDUCED_RETURN_TWEEN,
 	RELEASE_SPRING,
 	RETURN_SPRING,
 	TRAVEL,
@@ -66,28 +67,38 @@ export function Dial() {
 		setIsDragging(false)
 
 		const isOverscrolled = x.get() > 0 || x.get() < -TRAVEL
-		const targetPx = getReleaseTarget(x.get(), info.velocity.x)
+		// Reduced motion drops the throw: the dial rests on the nearest tick
+		// instead of jumping to where the flick would have carried it.
+		const velocity = reduceMotion ? 0 : info.velocity.x
+		const targetPx = getReleaseTarget(x.get(), velocity)
 		setTarget(pixelToUnit(targetPx))
 
-		if (reduceMotion) {
-			x.set(targetPx)
-			return
-		}
-
 		if (isOverscrolled) {
-			// Spring the offset the eye sees, not the finger's. Springing x would
+			// Animate the offset the eye sees, not the finger's. Springing x would
 			// spend the first stretch inside the band's flat part, where the dial
 			// barely moves, so it would hang at the edge before coming back.
+			// Reduced motion still animates this one: snapping back could jump
+			// the whole stretch at once, so it gets a short tween with no bounce.
 			returnAnimation.current = animate(displayX.get(), targetPx, {
-				...RETURN_SPRING,
-				velocity: info.velocity.x * getRubberBandSlope(x.get()),
+				...(reduceMotion
+					? REDUCED_RETURN_TWEEN
+					: {
+							...RETURN_SPRING,
+							velocity: velocity * getRubberBandSlope(x.get()),
+						}),
 				onUpdate: (shown) => x.set(removeRubberBand(shown)),
 			})
 			return
 		}
 
+		// Within range the nearest tick is at most half a unit away: just snap.
+		if (reduceMotion) {
+			x.set(targetPx)
+			return
+		}
+
 		// Start the spring with the finger's own velocity so the hand-off is seamless.
-		animate(x, targetPx, { ...RELEASE_SPRING, velocity: info.velocity.x })
+		animate(x, targetPx, { ...RELEASE_SPRING, velocity })
 	}
 
 	// The return spring drives x from outside, so grabbing the dial or pressing

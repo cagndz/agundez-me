@@ -78,6 +78,11 @@ export const RETURN_SPRING = {
 	stiffness: RETURN_STIFFNESS,
 	damping: 2 * Math.sqrt(RETURN_STIFFNESS),
 } as const
+// Reduced motion's way back from past an end: short, strong ease-out, no bounce.
+export const REDUCED_RETURN_TWEEN = {
+	duration: 0.15,
+	ease: [0.23, 1, 0.32, 1],
+} as const
 // Keys are a system response, not a throw: stiff and critically damped, so a
 // step settles in ~0.25s and a held key trails ~2-3 units with no overshoot
 // for the readout to roll past and back.
