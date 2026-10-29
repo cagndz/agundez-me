@@ -18,6 +18,13 @@ import {
 	LENS_UNPIN_SPRING,
 	SIZE as INSPECT_SIZE,
 } from './demos/inspect/constants'
+import {
+	FALL,
+	GATHER,
+	LAND,
+	RISE,
+	SIZE as TOOLTIP_SIZE,
+} from './demos/tooltip/constants'
 
 export type LabSpec = {
 	label: string
@@ -101,6 +108,26 @@ export const items: LabItem[] = [
 				label: 'A11y',
 				value: 'Keyboard · live summary · reduced motion',
 			},
+			{ label: 'Stack', value: 'React · Motion · TypeScript' },
+		],
+	},
+	{
+		id: '004',
+		slug: 'tooltip',
+		title: 'Tooltip',
+		size: TOOLTIP_SIZE,
+		summary:
+			'Hover the light to squeeze a drop of ink out of the button and into a readout.',
+		curves: [
+			{ label: 'Rise', transition: RISE },
+			{ label: 'Land', transition: LAND },
+			{ label: 'Gather', transition: GATHER },
+			{ label: 'Fall', transition: FALL },
+		],
+		specs: [
+			{ label: 'Goo', value: 'SVG blur + alpha threshold' },
+			{ label: 'Motion', value: 'Squash and stretch · gravity on close' },
+			{ label: 'A11y', value: 'Focus · Escape · reduced motion' },
 			{ label: 'Stack', value: 'React · Motion · TypeScript' },
 		],
 	},
