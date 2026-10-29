@@ -30,8 +30,7 @@ export function Inspect() {
 	// it is state. It only changes on a click or a key press, never on a move.
 	const [pinned, setPinned] = useState(false)
 
-	// Not state: nothing is drawn from these, they only remember what happened.
-	const lensShown = useRef(false)
+	// Not state: nothing is drawn from it, it only remembers what happened.
 	const lastPointerType = useRef('mouse')
 
 	// Position and size of the lens are motion values: they change dozens of times
@@ -44,6 +43,12 @@ export function Inspect() {
 	// whole clip-path would be dropped and the blueprint would flash over the card.
 	const clipRadius = useTransform(radius, (value) => Math.max(0, value))
 	const clipPath = useMotionTemplate`circle(${clipRadius}px at ${x}px ${y}px)`
+
+	// Whether the lens is off screen. Read from the radius, not from what was last
+	// asked: a closing lens is still on screen, and jumping it would snap it across.
+	function isLensClosed() {
+		return radius.get() < 1
+	}
 
 	// Glide to a point, or jump there when the lens is not on screen yet (it
 	// should appear where the pointer is, not fly in from where it was).
@@ -72,20 +77,17 @@ export function Inspect() {
 		// The pointer drives the lens, so it stays right under it: any glide here
 		// would leave the crosshair behind on a quick move.
 		moveTo(point, true)
-		lensShown.current = true
 		resizeTo(LENS_RADIUS)
 	}
 
 	function hideLens() {
 		if (pinned) return
-		lensShown.current = false
 		resizeTo(0)
 	}
 
 	function pin(point: CardPoint) {
 		setPinned(true)
-		moveTo(point, !lensShown.current)
-		lensShown.current = true
+		moveTo(point, isLensClosed())
 		resizeTo(getFarthestCorner(point))
 	}
 
@@ -95,10 +97,8 @@ export function Inspect() {
 		setPinned(false)
 		if (point) {
 			moveTo(point, false)
-			lensShown.current = true
 			resizeTo(LENS_RADIUS)
 		} else {
-			lensShown.current = false
 			resizeTo(0)
 		}
 	}
