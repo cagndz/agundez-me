@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import {
 	animate,
 	type AnimationPlaybackControls,
@@ -107,6 +107,8 @@ export function Dial() {
 		returnAnimation.current?.stop()
 		returnAnimation.current = null
 	}
+
+	useEffect(() => stopReturn, [])
 
 	function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
 		const next = getKeyTarget(event.key, target)
