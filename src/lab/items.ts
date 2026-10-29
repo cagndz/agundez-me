@@ -13,8 +13,9 @@ import {
 	SIZE as WALLET_SIZE,
 } from './demos/wallet/constants'
 import {
-	LENS_CLOSE_SPRING,
+	LENS_HIDE_SPRING,
 	LENS_OPEN_SPRING,
+	LENS_UNPIN_SPRING,
 	SIZE as INSPECT_SIZE,
 } from './demos/inspect/constants'
 
@@ -89,8 +90,9 @@ export const items: LabItem[] = [
 		summary:
 			"Hover to read the form's measurements, click to pin the whole blueprint.",
 		curves: [
-			{ label: 'Follow', transition: LENS_OPEN_SPRING },
-			{ label: 'Release', transition: LENS_CLOSE_SPRING },
+			{ label: 'Open', transition: LENS_OPEN_SPRING },
+			{ label: 'Hide', transition: LENS_HIDE_SPRING },
+			{ label: 'Unpin', transition: LENS_UNPIN_SPRING },
 		],
 		specs: [
 			{ label: 'Reveal', value: 'clip-path · lens to farthest corner' },

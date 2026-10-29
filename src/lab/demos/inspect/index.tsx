@@ -13,9 +13,10 @@ import { useRef, useState, type PointerEvent } from 'react'
 import { Blueprint } from './blueprint'
 import {
 	CENTER,
-	LENS_CLOSE_SPRING,
+	LENS_HIDE_SPRING,
 	LENS_OPEN_SPRING,
 	LENS_RADIUS,
+	LENS_UNPIN_SPRING,
 	SIZE,
 	SUMMARY,
 } from './constants'
@@ -31,8 +32,8 @@ export function Inspect() {
 	const [pinned, setPinned] = useState(false)
 
 	// Not state: nothing is drawn from these, they only remember what happened.
-	const lensShown = useRef(false)
 	const lastPointerType = useRef('mouse')
+	const radiusTarget = useRef(0)
 
 	// Position and size of the lens are motion values: they change dozens of times
 	// a second and must not re-render the card.
@@ -44,6 +45,12 @@ export function Inspect() {
 	// whole clip-path would be dropped and the blueprint would flash over the card.
 	const clipRadius = useTransform(radius, (value) => Math.max(0, value))
 	const clipPath = useMotionTemplate`circle(${clipRadius}px at ${x}px ${y}px)`
+
+	// Whether the lens is off screen. Read from the radius, not from what was last
+	// asked: a closing lens is still on screen, and jumping it would snap it across.
+	function isLensClosed() {
+		return radius.get() < 1
+	}
 
 	// Glide to a point, or jump there when the lens is not on screen yet (it
 	// should appear where the pointer is, not fly in from where it was).
@@ -57,47 +64,48 @@ export function Inspect() {
 		}
 	}
 
-	// Growing uses the quick spring, shrinking the slower one.
-	function resizeTo(target: number) {
+	// Each caller picks its spring (see constants.ts). Every pointer move asks for
+	// the same size, so only a new target starts an animation: restarting one
+	// would re-estimate its velocity and make the opening wobble.
+	function resizeTo(target: number, spring: typeof LENS_OPEN_SPRING) {
+		if (target === radiusTarget.current) return
+		radiusTarget.current = target
 		if (reduceMotion) {
 			radius.jump(target)
 			return
 		}
-		const spring = target < radius.get() ? LENS_CLOSE_SPRING : LENS_OPEN_SPRING
 		animate(radius, target, spring)
 	}
 
 	function showLens(point: CardPoint) {
 		if (pinned) return
-		moveTo(point, !lensShown.current)
-		lensShown.current = true
-		resizeTo(LENS_RADIUS)
+		// The pointer drives the lens, so it stays right under it: any glide here
+		// would leave the crosshair behind on a quick move.
+		moveTo(point, true)
+		resizeTo(LENS_RADIUS, LENS_OPEN_SPRING)
 	}
 
 	function hideLens() {
 		if (pinned) return
-		lensShown.current = false
-		resizeTo(0)
+		resizeTo(0, LENS_HIDE_SPRING)
 	}
 
 	function pin(point: CardPoint) {
 		setPinned(true)
-		moveTo(point, !lensShown.current)
-		lensShown.current = true
-		resizeTo(getFarthestCorner(point))
+		moveTo(point, isLensClosed())
+		resizeTo(getFarthestCorner(point), LENS_OPEN_SPRING)
 	}
 
 	// With a point the lens comes back there; without one (keyboard, touch) it
-	// closes, because there is no pointer to hold it.
+	// closes, because there is no pointer to hold it. The pointer drives it, so it
+	// jumps under it and only the radius animates.
 	function unpin(point?: CardPoint) {
 		setPinned(false)
 		if (point) {
-			moveTo(point, false)
-			lensShown.current = true
-			resizeTo(LENS_RADIUS)
+			moveTo(point, true)
+			resizeTo(LENS_RADIUS, LENS_UNPIN_SPRING)
 		} else {
-			lensShown.current = false
-			resizeTo(0)
+			resizeTo(0, LENS_UNPIN_SPRING)
 		}
 	}
 
