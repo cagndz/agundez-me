@@ -68,7 +68,13 @@ export function getTickType(unit: number): TickType {
 	}
 }
 
+// Beyond 4 sigmas the bell is below 0.0004: under a hundredth of a pixel of
+// growth. Returning exactly 0 there leaves far ticks' motion values unchanged,
+// so Motion skips their scale and opacity instead of rewriting ~170 styles a frame.
+const PROXIMITY_CUTOFF = 4 * SIGMA
+
 export function getProximity(distance: number): number {
+	if (Math.abs(distance) > PROXIMITY_CUTOFF) return 0
 	return Math.exp(-(distance * distance) / (2 * SIGMA * SIGMA))
 }
 
