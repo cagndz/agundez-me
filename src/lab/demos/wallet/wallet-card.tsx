@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useEffectEvent, useId, useRef } from 'react'
 import {
 	animate,
 	motion,
@@ -95,11 +95,13 @@ export function WalletCard({
 		animate(hoverLift, isLifted ? -CARD_HOVER_LIFT : 0, liftTransition)
 	}
 
+	// Presenting a card drops every lift; closing it restores the lift of a card
+	// that still has the pointer or keyboard focus on it.
+	const syncLift = useEffectEvent(updateLift)
+
 	useEffect(() => {
-		if (isAnyPresented) {
-			animate(hoverLift, 0, reduceMotion ? { duration: 0 } : CARD_HOVER)
-		}
-	}, [hoverLift, isAnyPresented, reduceMotion])
+		syncLift()
+	}, [isAnyPresented])
 
 	return (
 		<motion.div
