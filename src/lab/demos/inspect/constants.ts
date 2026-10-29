@@ -196,7 +196,7 @@ function criticallyDampedSpring(settleTime: number) {
 }
 
 // Opening, and moving the lens where the pointer does not drive it (pinning from
-// the keyboard, unpinning): 95 % of the way in 160 ms. Retargeting it keeps the
+// the keyboard): 95 % of the way in 160 ms. Retargeting it keeps the
 // velocity, so it never stutters.
 export const LENS_OPEN_SPRING = criticallyDampedSpring(0.16)
 

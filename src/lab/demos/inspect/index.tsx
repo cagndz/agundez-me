@@ -97,11 +97,12 @@ export function Inspect() {
 	}
 
 	// With a point the lens comes back there; without one (keyboard, touch) it
-	// closes, because there is no pointer to hold it.
+	// closes, because there is no pointer to hold it. The pointer drives it, so it
+	// jumps under it and only the radius animates.
 	function unpin(point?: CardPoint) {
 		setPinned(false)
 		if (point) {
-			moveTo(point, false)
+			moveTo(point, true)
 			resizeTo(LENS_RADIUS)
 		} else {
 			resizeTo(0)
