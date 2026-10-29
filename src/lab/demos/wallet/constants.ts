@@ -75,7 +75,7 @@ export const CARD_RETURN_SPRING = {
 	duration: 0.42,
 	bounce: 0,
 } as const
-export const CARD_DROP = { duration: 0.32, ease: [0.32, 0.72, 0, 1] } as const
+export const CARD_DROP = { duration: 0.24, ease: [0.32, 0.72, 0, 1] } as const
 export const CARD_SETTLE = { duration: 0.3, ease: [0.32, 0.72, 0, 1] } as const
 // Degrees a returning card may still be tilted when it starts dropping into the case.
 export const CARD_UPRIGHT_TOLERANCE = 2
