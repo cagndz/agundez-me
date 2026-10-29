@@ -53,9 +53,11 @@ export const MARKER_WIDTH = scaled(12)
 export const MARKER_HEIGHT = scaled(9)
 export const DIGITS = Array.from({ length: 10 }, (_, i) => i)
 export const ROLL_STAGGER = 0.035
-export const ROLL_TWEEN = {
-	duration: 0.4,
-	ease: [0.23, 1, 0.32, 1],
+// A spring, not a tween, so a roll retargeted mid-flight keeps its velocity.
+export const ROLL_SPRING = {
+	type: 'spring',
+	duration: 0.3,
+	bounce: 0,
 } as const
 export const ROLL_FADE = 1.3
 // Release feel: where the dial lands = release point + velocity * RELEASE_POWER (seconds),

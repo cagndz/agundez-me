@@ -2,7 +2,7 @@ import type { LabCurve } from './curves'
 import {
 	RELEASE_SPRING,
 	RETURN_SPRING,
-	ROLL_TWEEN,
+	ROLL_SPRING,
 	SIZE as DIAL_SIZE,
 } from './demos/dial/constants'
 import {
@@ -50,7 +50,7 @@ export const items: LabItem[] = [
 		curves: [
 			{ label: 'Release', transition: RELEASE_SPRING },
 			{ label: 'Return', transition: RETURN_SPRING },
-			{ label: 'Digits', transition: ROLL_TWEEN },
+			{ label: 'Digits', transition: ROLL_SPRING },
 		],
 		specs: [
 			{ label: 'Ends', value: 'Progressive rubber band' },
