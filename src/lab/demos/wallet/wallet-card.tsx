@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useEffectEvent, useId, useRef } from 'react'
 import {
 	animate,
 	motion,
@@ -45,7 +45,7 @@ export function WalletCard({
 	onOutChange,
 }: WalletCardProps) {
 	const palette = CARD_PALETTES[card.tone]
-	const { y, rotate, scale, zIndex } = useWalletCardMotion({
+	const { y, rotate, scale, zIndex, opacity } = useWalletCardMotion({
 		index,
 		count,
 		isPresented,
@@ -95,11 +95,13 @@ export function WalletCard({
 		animate(hoverLift, isLifted ? -CARD_HOVER_LIFT : 0, liftTransition)
 	}
 
+	// Presenting a card drops every lift; closing it restores the lift of a card
+	// that still has the pointer or keyboard focus on it.
+	const syncLift = useEffectEvent(updateLift)
+
 	useEffect(() => {
-		if (isAnyPresented) {
-			animate(hoverLift, 0, reduceMotion ? { duration: 0 } : CARD_HOVER)
-		}
-	}, [hoverLift, isAnyPresented, reduceMotion])
+		syncLift()
+	}, [isAnyPresented])
 
 	return (
 		<motion.div
@@ -110,6 +112,7 @@ export function WalletCard({
 				height: CARD_HEIGHT,
 				y: cardY,
 				zIndex,
+				opacity,
 				willChange: 'transform',
 			}}
 		>

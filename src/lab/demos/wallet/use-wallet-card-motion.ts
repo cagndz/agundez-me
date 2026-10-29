@@ -6,6 +6,7 @@ import {
 	CARD_PRESENTED_LAYER,
 	CARD_PRESENTED_ROTATION,
 	CARD_PRESENTED_SCALE,
+	CARD_REDUCED_FADE,
 	CARD_RETURN_SPRING,
 	CARD_RISE,
 	CARD_SETTLE,
@@ -37,6 +38,7 @@ export function useWalletCardMotion({
 	const rotate = useMotionValue(0)
 	const scale = useMotionValue(1)
 	const zIndex = useMotionValue(restLayer)
+	const opacity = useMotionValue(1)
 	const reduceMotion = useReducedMotion()
 
 	useEffect(() => {
@@ -52,13 +54,33 @@ export function useWalletCardMotion({
 		const isOutOfCase = zIndex.get() === CARD_PRESENTED_LAYER
 		const isClear = () => y.get() <= clearOffset
 
-		if (reduceMotion) {
+		function jump() {
 			y.jump(isPresented ? presentedOffset : restOffset)
 			rotate.jump(isPresented ? CARD_PRESENTED_ROTATION : 0)
 			scale.jump(isPresented ? CARD_PRESENTED_SCALE : 1)
 			zIndex.set(isPresented ? CARD_PRESENTED_LAYER : restLayer)
-			return
 		}
+
+		async function fadeJump() {
+			await animate(opacity, 0, CARD_REDUCED_FADE)
+			if (signal.aborted) return
+			jump()
+			animate(opacity, 1, CARD_REDUCED_FADE)
+		}
+
+		if (reduceMotion) {
+			// Only the card going in or out of the case fades. The others just sink.
+			if (isPresented !== isOutOfCase) {
+				fadeJump()
+			} else {
+				jump()
+				animate(opacity, 1, CARD_REDUCED_FADE)
+			}
+			return () => controller.abort()
+		}
+
+		// A fade cut short by turning reduced motion off must not leave the card hidden.
+		opacity.jump(1)
 
 		function present() {
 			zIndex.set(CARD_PRESENTED_LAYER)
@@ -108,6 +130,7 @@ export function useWalletCardMotion({
 		index,
 		isAnyPresented,
 		isPresented,
+		opacity,
 		reduceMotion,
 		restLayer,
 		rotate,
@@ -116,5 +139,5 @@ export function useWalletCardMotion({
 		zIndex,
 	])
 
-	return { y, rotate, scale, zIndex }
+	return { y, rotate, scale, zIndex, opacity }
 }
