@@ -69,7 +69,9 @@ export function Inspect() {
 
 	function showLens(point: CardPoint) {
 		if (pinned) return
-		moveTo(point, !lensShown.current)
+		// The pointer drives the lens, so it stays right under it: any glide here
+		// would leave the crosshair behind on a quick move.
+		moveTo(point, true)
 		lensShown.current = true
 		resizeTo(LENS_RADIUS)
 	}
