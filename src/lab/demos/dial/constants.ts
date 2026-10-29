@@ -53,9 +53,11 @@ export const MARKER_WIDTH = scaled(12)
 export const MARKER_HEIGHT = scaled(9)
 export const DIGITS = Array.from({ length: 10 }, (_, i) => i)
 export const ROLL_STAGGER = 0.035
-export const ROLL_TWEEN = {
-	duration: 0.4,
-	ease: [0.23, 1, 0.32, 1],
+// A spring, not a tween, so a roll retargeted mid-flight keeps its velocity.
+export const ROLL_SPRING = {
+	type: 'spring',
+	duration: 0.3,
+	bounce: 0,
 } as const
 export const ROLL_FADE = 1.3
 // Release feel: where the dial lands = release point + velocity * RELEASE_POWER (seconds),
@@ -77,6 +79,20 @@ export const RETURN_SPRING = {
 	type: 'spring',
 	stiffness: RETURN_STIFFNESS,
 	damping: 2 * Math.sqrt(RETURN_STIFFNESS),
+} as const
+// Reduced motion's way back from past an end: short, strong ease-out, no bounce.
+export const REDUCED_RETURN_TWEEN = {
+	duration: 0.15,
+	ease: [0.23, 1, 0.32, 1],
+} as const
+// Keys are a system response, not a throw: stiff and critically damped, so a
+// step settles in ~0.25s and a held key trails ~2-3 units with no overshoot
+// for the readout to roll past and back.
+export const KEY_STIFFNESS = 600
+export const KEY_SPRING = {
+	type: 'spring',
+	stiffness: KEY_STIFFNESS,
+	damping: 2 * Math.sqrt(KEY_STIFFNESS),
 } as const
 
 // Outer size of the whole demo (readout over window), for the lab's card.

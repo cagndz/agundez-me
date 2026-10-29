@@ -13,7 +13,7 @@ import {
 	DIGIT_WIDTH,
 	DIGITS,
 	ROLL_FADE,
-	ROLL_TWEEN,
+	ROLL_SPRING,
 } from './constants'
 
 type DigitItemProps = {
@@ -58,15 +58,20 @@ export function DigitColumn({
 		const current = pos.get()
 		const target = current + wrap(-5, 5, digit - current)
 
-		const controls = animate(
+		// A new digit can arrive mid-roll. Animating pos replaces the old roll,
+		// and the spring picks up its velocity, so the column keeps turning
+		// instead of restarting. The stagger only applies from rest: delaying a
+		// retarget would freeze the column halfway between two digits.
+		animate(
 			pos,
 			target,
-			instant ? { duration: 0 } : { ...ROLL_TWEEN, delay },
+			instant
+				? { duration: 0 }
+				: { ...ROLL_SPRING, delay: pos.isAnimating() ? 0 : delay },
 		)
-
-		// A new digit can arrive mid-roll: stop the old animation so they don't fight.
-		return () => controls.stop()
 	}, [digit, pos, delay, instant])
+
+	useEffect(() => () => pos.stop(), [pos])
 
 	return (
 		<div

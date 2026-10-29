@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import {
 	animate,
+	type AnimationPlaybackControls,
 	motion,
 	type PanInfo,
 	useDragControls,
@@ -14,12 +15,14 @@ import {
 import {
 	INITIAL,
 	INITIAL_OFFSET_PX,
+	KEY_SPRING,
 	MARKER_HEIGHT,
 	MARKER_TOP,
 	MARKER_WIDTH,
 	MAX,
 	MIN,
 	READOUT_GAP,
+	REDUCED_RETURN_TWEEN,
 	RELEASE_SPRING,
 	RETURN_SPRING,
 	TRAVEL,
@@ -36,6 +39,8 @@ import {
 	pixelToPosition,
 	getKeyTarget,
 	getReleaseTarget,
+	getRubberBandSlope,
+	removeRubberBand,
 	pixelToUnit,
 	unitToPixel,
 } from './utils'
@@ -56,25 +61,54 @@ export function Dial() {
 	const [isDragging, setIsDragging] = useState(false)
 	const dragControls = useDragControls()
 	const reduceMotion = useReducedMotion()
+	const returnAnimation = useRef<AnimationPlaybackControls | null>(null)
 
 	function handleDragEnd(_event: PointerEvent, info: PanInfo) {
 		setIsDragging(false)
 
 		const isOverscrolled = x.get() > 0 || x.get() < -TRAVEL
-		const targetPx = getReleaseTarget(x.get(), info.velocity.x)
+		// Reduced motion drops the throw: the dial rests on the nearest tick
+		// instead of jumping to where the flick would have carried it.
+		const velocity = reduceMotion ? 0 : info.velocity.x
+		const targetPx = getReleaseTarget(x.get(), velocity)
 		setTarget(pixelToUnit(targetPx))
 
+		if (isOverscrolled) {
+			// Animate the offset the eye sees, not the finger's. Springing x would
+			// spend the first stretch inside the band's flat part, where the dial
+			// barely moves, so it would hang at the edge before coming back.
+			// Reduced motion still animates this one: snapping back could jump
+			// the whole stretch at once, so it gets a short tween with no bounce.
+			returnAnimation.current = animate(displayX.get(), targetPx, {
+				...(reduceMotion
+					? REDUCED_RETURN_TWEEN
+					: {
+							...RETURN_SPRING,
+							velocity: velocity * getRubberBandSlope(x.get()),
+						}),
+				onUpdate: (shown) => x.set(removeRubberBand(shown)),
+			})
+			return
+		}
+
+		// Within range the nearest tick is at most half a unit away: just snap.
 		if (reduceMotion) {
 			x.set(targetPx)
 			return
 		}
 
 		// Start the spring with the finger's own velocity so the hand-off is seamless.
-		animate(x, targetPx, {
-			...(isOverscrolled ? RETURN_SPRING : RELEASE_SPRING),
-			velocity: info.velocity.x,
-		})
+		animate(x, targetPx, { ...RELEASE_SPRING, velocity })
 	}
+
+	// The return spring drives x from outside, so grabbing the dial or pressing
+	// a key has to stop it by hand (Motion only stops animations started on x).
+	function stopReturn() {
+		returnAnimation.current?.stop()
+		returnAnimation.current = null
+	}
+
+	useEffect(() => stopReturn, [])
 
 	function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
 		const next = getKeyTarget(event.key, target)
@@ -84,6 +118,7 @@ export function Dial() {
 		event.preventDefault()
 		if (isDragging || next === target) return
 
+		stopReturn()
 		setTarget(next)
 
 		if (reduceMotion) {
@@ -91,9 +126,9 @@ export function Dial() {
 			return
 		}
 
-		// Same spring as a release. A press mid-flight retargets it, and Motion
-		// starts the new spring from the current velocity, so a held key glides.
-		animate(x, unitToPixel(next), RELEASE_SPRING)
+		// A press mid-flight retargets the spring, and Motion starts the new one
+		// from the current velocity, so a held key glides without overshooting.
+		animate(x, unitToPixel(next), KEY_SPRING)
 	}
 
 	// While dragging, the finger is the truth; otherwise announce where it rests.
@@ -167,7 +202,10 @@ export function Dial() {
 				/>
 				<div
 					aria-hidden
-					onPointerDown={(e) => dragControls.start(e)}
+					onPointerDown={(e) => {
+						stopReturn()
+						dragControls.start(e)
+					}}
 					className='absolute inset-0 cursor-grab touch-pan-y active:cursor-grabbing'
 				/>
 				<div
