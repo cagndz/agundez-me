@@ -163,19 +163,21 @@ export const PRODUCTS: Product[] = [
 	{
 		id: 'spk',
 		name: 'Speaker',
-		spec: 'Bookshelf · 2-way',
-		price: 349,
-		shadow: [50, 86, 26],
+		spec: 'Cube · 30 W',
+		price: 249,
+		shadow: [50, 86, 30],
 		draw(ctx) {
-			const { box, front } = iso(ctx, 26, 24)
-			box(0, 0, 0, 26, 24, 52)
-			front(-13, -12, 0, () => {
-				circle(ctx, 13, 18, 9.5, TOP)
-				circle(ctx, 13, 18, 7, LEFT)
-				circle(ctx, 13, 18, 2.6, TOP)
-				circle(ctx, 13, 39, 5, TOP)
-				circle(ctx, 13, 39, 2.2, LEFT)
-				rect(ctx, 11, 4, 4, 2, TOP)
+			// A cube, not a tower: anything taller reaches the product behind
+			const { box, front } = iso(ctx, 32, 32)
+			box(0, 0, 0, 32, 32, 30)
+			box(-6, 8, 30, 5, 5, 1.6, PART)
+			box(1, 8, 30, 5, 5, 1.6, PART)
+			front(-16, -16, 0, () => {
+				circle(ctx, 16, 15.5, 11.5, TOP)
+				circle(ctx, 16, 15.5, 9, LEFT)
+				circle(ctx, 16, 15.5, 6, RIGHT)
+				circle(ctx, 16, 15.5, 3, TOP)
+				rect(ctx, 27.5, 2.5, 2, 2, TOP)
 			})
 		},
 	},

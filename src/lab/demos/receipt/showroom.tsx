@@ -30,9 +30,12 @@ const SIZE = 128
 const FLOOR = 156
 // The ring: how wide it reads, how strong the perspective is, and where the
 // horizon sits above the front product's feet
-const RADIUS = 80
+// From high up, so the products further round stand higher in the picture
+// and show above the one at the front instead of hiding behind it. The ring
+// is as wide as the card allows without cutting the side ones off.
+const RADIUS = 104
 const CAMERA = 2.4
-const HORIZON = 80
+const HORIZON = 140
 // Dragging: CSS px per product, and how far a flick carries on, in seconds
 const DRAG_STEP = 160
 const COAST = 0.18
