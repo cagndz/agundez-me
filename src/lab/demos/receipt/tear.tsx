@@ -297,7 +297,7 @@ export function TearMachine({ menu }: { menu: Menu }) {
 			/>
 
 			<motion.div
-				className='pointer-events-none absolute left-1/2 z-10 drop-shadow-[0_8px_12px_rgba(0,0,0,0.25)]'
+				className='pointer-events-none absolute left-1/2 z-10 drop-shadow-[0_4px_4px_rgba(0,0,0,0.14)]'
 				style={{ y: pullY, top: STUB, width: W, marginLeft: -W / 2 }}
 			>
 				<div ref={rollRef} className='relative'>
