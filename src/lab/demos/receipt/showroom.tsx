@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import {
 	animate,
 	useMotionValue,
@@ -123,6 +123,10 @@ export function Showroom({
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 	const rotation = useMotionValue(0)
 	const [index, setIndex] = useState(0)
+	// Announce the product at the front only once the ring has been turned,
+	// not on load
+	const [turned, setTurned] = useState(false)
+	const hintId = useId()
 	const reduce = useReducedMotion()
 	const drag = useRef({
 		active: false,
@@ -141,6 +145,7 @@ export function Showroom({
 			rotation.on('change', (r) => {
 				const next = wrap(Math.round(r))
 				setIndex((i) => (i === next ? i : next))
+				setTurned(true)
 			}),
 		[rotation],
 	)
@@ -257,11 +262,26 @@ export function Showroom({
 			if (key !== drawn) {
 				render(r)
 				drawn = key
+				frame = requestAnimationFrame(tick)
+				return
+			}
+			// Nothing moved and nothing is leaning: sleep until the ring turns
+			if (lean === 0 && leanVelocity === 0) {
+				frame = 0
+				last = 0
+				return
 			}
 			frame = requestAnimationFrame(tick)
 		}
-		frame = requestAnimationFrame(tick)
-		return () => cancelAnimationFrame(frame)
+		const wake = () => {
+			if (!frame) frame = requestAnimationFrame(tick)
+		}
+		wake()
+		const unsubscribe = rotation.on('change', wake)
+		return () => {
+			unsubscribe()
+			cancelAnimationFrame(frame)
+		}
 	}, [reduce, rotation])
 
 	const onPointerDown = (e: React.PointerEvent) => {
@@ -345,8 +365,11 @@ export function Showroom({
 			<canvas
 				ref={canvasRef}
 				tabIndex={0}
-				role='listbox'
-				aria-label={`Products. ${product.name}, €${product.price}. Arrows to turn, Enter to print.`}
+				// Enter prints the product at the front: that's what it does
+				role='button'
+				aria-roledescription='carousel'
+				aria-label={`${product.name}, €${product.price}`}
+				aria-describedby={hintId}
 				onKeyDown={onKeyDown}
 				onPointerDown={onPointerDown}
 				onPointerMove={onPointerMove}
@@ -356,6 +379,12 @@ export function Showroom({
 				className='cursor-grab touch-none outline-offset-4 active:cursor-grabbing'
 				style={{ width: WIDTH, height: HEIGHT, imageRendering: 'pixelated' }}
 			/>
+			<span id={hintId} className='sr-only'>
+				Arrows to turn, Enter to print.
+			</span>
+			<span aria-live='polite' className='sr-only'>
+				{turned ? `${product.name}, €${product.price}` : ''}
+			</span>
 		</div>
 	)
 }
