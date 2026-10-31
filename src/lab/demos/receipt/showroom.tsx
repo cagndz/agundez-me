@@ -9,7 +9,7 @@ import {
 } from 'motion/react'
 import { TURN } from './constants'
 import type { Product } from './data'
-import { DOT, ditherInk, floorShadow } from './dither'
+import { DOT, ditherInk } from './dither'
 import { PRODUCTS } from './products'
 
 // The products stand on a ring at eye level, one at the front in full detail
@@ -27,7 +27,7 @@ const W = WIDTH / DOT
 const H = HEIGHT / DOT
 // The front product's size and where its feet are, in dots
 const SIZE = 128
-// Low enough that the whole ring, from the shadow at the front to the top
+// Low enough that the whole ring, from the front product's feet to the top
 // of the product at the back, sits centred on the canvas
 const FLOOR = 138
 // The ring: how wide it reads, how strong the perspective is, and where the
@@ -214,7 +214,13 @@ export function Showroom({
 		box.width = BOX
 		box.height = BOX
 		const bctx = box.getContext('2d')
-		if (!bctx) return
+		// The same product as a solid shape. Safari has no canvas filter, so
+		// the shape is the product with black painted over what it covers
+		const shape = document.createElement('canvas')
+		shape.width = BOX
+		shape.height = BOX
+		const sctx = shape.getContext('2d')
+		if (!bctx || !sctx) return
 
 		let frame = 0
 		let last = 0
@@ -234,8 +240,7 @@ export function Showroom({
 				bctx.save()
 				bctx.translate(BOX / 2 - 50 * k, BOX - 14 - FEET * k)
 				bctx.scale(k, k)
-				floorShadow(bctx, ...item.shadow)
-				// The lean pivots on the feet, so the shadow stays put
+				// The lean pivots on the feet
 				bctx.translate(50, FEET)
 				bctx.rotate(lean)
 				bctx.translate(-50, -FEET)
@@ -251,10 +256,14 @@ export function Showroom({
 				// Away from the front, only the shape is printed, lighter the
 				// further back it stands; nearing it, the detail fades in on top
 				if (detail < 1) {
+					sctx.globalCompositeOperation = 'copy'
+					sctx.drawImage(box, 0, 0)
+					sctx.globalCompositeOperation = 'source-in'
+					sctx.fillStyle = '#000'
+					sctx.fillRect(0, 0, BOX, BOX)
 					ctx.save()
-					ctx.filter = 'brightness(0)'
 					ctx.globalAlpha = (0.4 - 0.04 * (1 - p.depth)) * (1 - detail)
-					ctx.drawImage(box, x, y)
+					ctx.drawImage(shape, x, y)
 					ctx.restore()
 				}
 				if (detail > 0) {

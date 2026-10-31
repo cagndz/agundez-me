@@ -45,21 +45,6 @@ export function linear(
 	return g
 }
 
-export function floorShadow(
-	ctx: CanvasRenderingContext2D,
-	x: number,
-	y: number,
-	w: number,
-) {
-	ctx.save()
-	ctx.filter = 'blur(6px)'
-	ctx.fillStyle = 'rgba(0,0,0,0.55)'
-	ctx.beginPath()
-	ctx.ellipse(x, y, w, w * 0.18, 0, 0, Math.PI * 2)
-	ctx.fill()
-	ctx.restore()
-}
-
 // Push the mids apart, so the subject reads against what's behind it
 function tone(r: number, g: number, b: number, alpha = 1) {
 	const lum = 1 - alpha * (1 - (0.299 * r + 0.587 * g + 0.114 * b) / 255)
@@ -117,7 +102,6 @@ export function Print({
 		ctx.save()
 		ctx.translate((w - side) / 2, (h - side) / 2)
 		ctx.scale(side / 100, side / 100)
-		floorShadow(ctx, ...product.shadow)
 		product.draw(ctx)
 		ctx.restore()
 
