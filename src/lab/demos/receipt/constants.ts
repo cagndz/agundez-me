@@ -1,6 +1,8 @@
 // The demo is a box the receipt hangs into from its top edge, with the
-// showroom underneath.
-export const SIZE = { width: 368, height: 700 }
+// showroom underneath. Tall enough for the paper showing above the edge,
+// the 505px receipt and the most it gives before tearing, so its torn
+// bottom stays in sight as you pull.
+export const SIZE = { width: 368, height: 568 }
 
 // The receipt's width
 export const PAPER_WIDTH = 296
@@ -11,11 +13,18 @@ export const FEED = { duration: 0.7, ease: [0.32, 0.72, 0, 1] } as const
 // Torn off, it drops clean out of the box: gravity is where ease-in belongs
 export const FALL = { duration: 0.55, ease: [0.55, 0, 1, 0.45] } as const
 
+// Reduced motion: no feed and no fall, the receipt fades in where it hangs
+// and out where it tore
+export const REDUCED_FADE = {
+	duration: 0.15,
+	ease: [0.32, 0.72, 0, 1],
+} as const
+
 // Let go before it tears, and the paper springs back to the roll
 export const SPRING_BACK = {
 	type: 'spring',
 	duration: 0.4,
-	bounce: 0.3,
+	bounce: 0.1,
 } as const
 
 // The ring has weight: a flick carries it on, and it snaps onto the product

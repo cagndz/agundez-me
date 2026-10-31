@@ -1,6 +1,14 @@
 'use client'
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
+import {
+	useCallback,
+	useEffect,
+	useId,
+	useRef,
+	useState,
+	type KeyboardEvent,
+	type RefObject,
+} from 'react'
 import {
 	animate,
 	useMotionValue,
@@ -9,7 +17,7 @@ import {
 } from 'motion/react'
 import { TURN } from './constants'
 import type { Product } from './data'
-import { DOT, ditherInk, floorShadow } from './dither'
+import { DOT, ditherInk } from './dither'
 import { PRODUCTS } from './products'
 
 // The products stand on a ring at eye level, one at the front in full detail
@@ -27,9 +35,9 @@ const W = WIDTH / DOT
 const H = HEIGHT / DOT
 // The front product's size and where its feet are, in dots
 const SIZE = 128
-// Low enough that the whole ring, from the shadow at the front to the top
+// Low enough that the whole ring, from the front product's feet to the top
 // of the product at the back, sits centred on the canvas
-const FLOOR = 138
+const FLOOR = 142
 // The ring: how wide it reads, how strong the perspective is, and where the
 // horizon sits above the front product's feet
 // From high up, so the products further round stand higher in the picture
@@ -129,17 +137,16 @@ function place(rotation: number): Placed[] {
 export function Showroom({
 	covered,
 	pick,
+	homeRef,
 }: {
 	// A receipt is over it: it's out of reach
 	covered: boolean
 	pick: (product: Product) => void
+	homeRef: RefObject<HTMLElement | null>
 }) {
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 	const rotation = useMotionValue(0)
 	const [index, setIndex] = useState(0)
-	// Announce the product at the front only once the ring has been turned,
-	// not on load
-	const [turned, setTurned] = useState(false)
 	const hintId = useId()
 	const reduce = useReducedMotion()
 	const drag = useRef({
@@ -155,13 +162,20 @@ export function Showroom({
 	const turning = useRef<AnimationPlaybackControls | null>(null)
 	const placed = useRef<Placed[]>([])
 	const product = PRODUCTS[index]
+	// The canvas is also where focus comes back to after a receipt
+	const setCanvas = useCallback(
+		(canvas: HTMLCanvasElement | null) => {
+			canvasRef.current = canvas
+			homeRef.current = canvas
+		},
+		[homeRef],
+	)
 
 	useEffect(
 		() =>
 			rotation.on('change', (r) => {
 				const next = wrap(Math.round(r))
 				setIndex((i) => (i === next ? i : next))
-				setTurned(true)
 			}),
 		[rotation],
 	)
@@ -214,7 +228,13 @@ export function Showroom({
 		box.width = BOX
 		box.height = BOX
 		const bctx = box.getContext('2d')
-		if (!bctx) return
+		// The same product as a solid shape. Safari has no canvas filter, so
+		// the shape is the product with black painted over what it covers
+		const shape = document.createElement('canvas')
+		shape.width = BOX
+		shape.height = BOX
+		const sctx = shape.getContext('2d')
+		if (!bctx || !sctx) return
 
 		let frame = 0
 		let last = 0
@@ -234,8 +254,7 @@ export function Showroom({
 				bctx.save()
 				bctx.translate(BOX / 2 - 50 * k, BOX - 14 - FEET * k)
 				bctx.scale(k, k)
-				floorShadow(bctx, ...item.shadow)
-				// The lean pivots on the feet, so the shadow stays put
+				// The lean pivots on the feet
 				bctx.translate(50, FEET)
 				bctx.rotate(lean)
 				bctx.translate(-50, -FEET)
@@ -251,10 +270,14 @@ export function Showroom({
 				// Away from the front, only the shape is printed, lighter the
 				// further back it stands; nearing it, the detail fades in on top
 				if (detail < 1) {
+					sctx.globalCompositeOperation = 'copy'
+					sctx.drawImage(box, 0, 0)
+					sctx.globalCompositeOperation = 'source-in'
+					sctx.fillStyle = '#000'
+					sctx.fillRect(0, 0, BOX, BOX)
 					ctx.save()
-					ctx.filter = 'brightness(0)'
 					ctx.globalAlpha = (0.4 - 0.04 * (1 - p.depth)) * (1 - detail)
-					ctx.drawImage(box, x, y)
+					ctx.drawImage(shape, x, y)
 					ctx.restore()
 				}
 				if (detail > 0) {
@@ -395,11 +418,12 @@ export function Showroom({
 			inert={covered}
 		>
 			<canvas
-				ref={canvasRef}
+				ref={setCanvas}
 				tabIndex={0}
 				// Enter prints the product at the front: that's what it does
 				role='button'
-				aria-roledescription='carousel'
+				// Named after the product at the front, so turning it is heard
+				// as the name changing, the one way it's announced
 				aria-label={`${product.name}, €${product.price}`}
 				aria-describedby={hintId}
 				onKeyDown={onKeyDown}
@@ -413,9 +437,6 @@ export function Showroom({
 			/>
 			<span id={hintId} className='sr-only'>
 				Arrows to turn, Enter to print.
-			</span>
-			<span aria-live='polite' className='sr-only'>
-				{turned ? `${product.name}, €${product.price}` : ''}
 			</span>
 		</div>
 	)

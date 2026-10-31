@@ -7,6 +7,7 @@ import {
 	useState,
 	type ReactNode,
 	type Ref,
+	type RefObject,
 } from 'react'
 import {
 	animate,
@@ -15,7 +16,7 @@ import {
 	useReducedMotion,
 	type PanInfo,
 } from 'motion/react'
-import { FALL, FEED, PAPER_WIDTH, SPRING_BACK } from './constants'
+import { FALL, FEED, PAPER_WIDTH, REDUCED_FADE, SPRING_BACK } from './constants'
 import { makeOrder, type Order, type Product } from './data'
 import { useReceiptFocus } from './hooks'
 import { Dashed, ReceiptBody } from './receipt'
@@ -124,6 +125,8 @@ export type Menu = (props: {
 	// A receipt is over it: it's dimmed and out of reach
 	covered: boolean
 	pick: (product: Product) => void
+	// Where focus goes back to once a receipt that had it is torn off
+	homeRef: RefObject<HTMLElement | null>
 }) => ReactNode
 
 export function TearMachine({ menu }: { menu: Menu }) {
@@ -144,6 +147,9 @@ export function TearMachine({ menu }: { menu: Menu }) {
 	const pullY = useMotionValue(0)
 	const progress = useMotionValue(0)
 	const reduce = useReducedMotion()
+	const homeRef = useRef<HTMLElement>(null)
+	// Focus was on the receipt when it went: hand it back to the menu
+	const refocus = useRef(false)
 
 	useLayoutEffect(() => {
 		seams.current = { last: jagged(), next: jagged() }
@@ -178,6 +184,7 @@ export function TearMachine({ menu }: { menu: Menu }) {
 		gapRef.current?.setAttribute('d', '')
 		if (reduce) {
 			pullY.set(0)
+			await animate(slip, { opacity: 0 }, REDUCED_FADE)
 		} else {
 			animate(pullY, 0, SPRING_BACK)
 			const first = side.current === 'start'
@@ -193,9 +200,22 @@ export function TearMachine({ menu }: { menu: Menu }) {
 		progress.jump(0)
 		gapRef.current?.setAttribute('d', '')
 		torn.current = false
+		// The pull button kept focus through the fall; if it still has it,
+		// focus follows the menu, not the dialog the demo sits in. Moved
+		// elsewhere meanwhile, it stays there.
+		refocus.current = slip.contains(document.activeElement)
 		setOrder(null)
 		setFalling(false)
 	}
+
+	// Once the slip is gone and the menu is in reach again. In the same
+	// commit that drops the button, before the dialog around the demo finds
+	// focus lost and takes it itself.
+	useLayoutEffect(() => {
+		if (order || !refocus.current) return
+		refocus.current = false
+		homeRef.current?.focus({ preventScroll: true })
+	}, [order])
 
 	// From the button or Escape: the same tear, run for you
 	const finish = async (duration = 0.45) => {
@@ -245,12 +265,16 @@ export function TearMachine({ menu }: { menu: Menu }) {
 		const height = slip.offsetHeight
 		slip.style.clipPath = slipClip(height, seams.current.last)
 		const lift = height - EDGE
-		roll.style.transform = `translateY(${-lift}px)`
-		const controls = animate(
-			roll,
-			{ y: [-lift, 0] },
-			reduce ? { duration: 0 } : FEED,
-		)
+		if (reduce) {
+			// Already hanging, faded out until the first frame
+			roll.style.transform = 'none'
+			slip.style.opacity = '0'
+		} else {
+			roll.style.transform = `translateY(${-lift}px)`
+		}
+		const controls = reduce
+			? animate(slip, { opacity: [0, 1] }, REDUCED_FADE)
+			: animate(roll, { y: [-lift, 0] }, FEED)
 		controls.then(() => setFed(true))
 		return () => controls.stop()
 	}, [order, reduce])
@@ -260,7 +284,11 @@ export function TearMachine({ menu }: { menu: Menu }) {
 
 	return (
 		<div className='absolute inset-0 overflow-hidden rounded-sm text-foreground'>
-			{menu({ covered, pick: (product) => setOrder(makeOrder(product)) })}
+			{menu({
+				covered,
+				pick: (product) => setOrder(makeOrder(product)),
+				homeRef,
+			})}
 
 			<div
 				aria-hidden='true'
@@ -303,12 +331,14 @@ export function TearMachine({ menu }: { menu: Menu }) {
 											onClick={() => {
 												if (!panned.current) finish()
 											}}
-											disabled={!fed}
+											// Still enabled as it falls, so focus stays on it
+											// instead of dropping out of the demo
+											disabled={!fed && !falling}
 											reduce={!!reduce}
 										/>
 									}
 								/>
-								<div className='px-6 pb-4'>
+								<div className='px-6 pb-3'>
 									<Dashed />
 								</div>
 							</motion.div>
@@ -365,7 +395,7 @@ function PullButton({
 			onClick={onClick}
 			disabled={disabled}
 			aria-label='Tear off the receipt'
-			className='flex w-full cursor-[inherit] flex-col items-center gap-3 uppercase outline-offset-4'
+			className='flex w-full cursor-[inherit] flex-col items-center gap-2 uppercase outline-offset-4'
 		>
 			<span className='flex w-full items-center gap-3'>
 				<span className='flex-1 border-t border-dashed border-foreground/25' />

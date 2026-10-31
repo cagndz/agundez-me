@@ -16,9 +16,6 @@ export function Dashed() {
 	)
 }
 
-const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
-const MONTHS = 'JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC'.split(' ')
-
 export function ReceiptBody({
 	order,
 	action,
@@ -26,57 +23,63 @@ export function ReceiptBody({
 	order: Order
 	action?: ReactNode
 }) {
-	const now = new Date()
-	const stamp = `${DAYS[now.getDay()]}–${MONTHS[now.getMonth()]} ${order.time}`
 	const { product } = order
 
 	return (
-		<div className='px-6 pt-6 pb-7 text-[11px] leading-none normal-case'>
+		<div className='px-6 pt-5 pb-3 text-[11px] leading-none normal-case'>
 			<div className='flex items-center justify-between'>
 				<span className='font-semibold tabular-nums'>{order.number}</span>
 				<span className='text-[13px]'>Order Receipt</span>
 			</div>
-			<div className='my-5'>
+			<div className='my-3'>
 				<Dashed />
 			</div>
 
 			<div className='text-[22px] font-bold tracking-tight uppercase'>
 				{product.name}
 			</div>
-			<div className='mt-2.5 flex justify-between text-muted uppercase'>
+			<div className='mt-2 flex justify-between gap-4 text-muted uppercase'>
 				<span>{product.spec}</span>
-				<span>{order.date}</span>
+				<span className='whitespace-nowrap tabular-nums'>
+					{order.date} {order.time}
+				</span>
 			</div>
 
 			<Print
 				product={product}
 				width={PAPER_WIDTH - 48}
-				height={168}
-				className='mt-5'
+				height={120}
+				className='mt-4'
 			/>
 
-			<dl className='mt-5 grid grid-cols-3 gap-y-5 uppercase'>
+			<dl className='mt-4 grid grid-cols-3 uppercase'>
 				<Stat label='Net' value={eur(order.subtotal)} />
 				<Stat label='VAT 21%' value={eur(order.vat)} align='center' />
 				<Stat label='Shipping' value='Free' align='right' />
-				<Stat label='Total' value={eur(order.total)} />
 			</dl>
 
-			<div className='mt-6'>
+			<div className='my-3'>
+				<Dashed />
+			</div>
+			{/* What it all comes to: the line you look for on a receipt */}
+			<dl className='flex items-baseline justify-between font-bold uppercase'>
+				<dt className='text-[13px]'>Total</dt>
+				<dd className='text-[20px] tabular-nums'>{eur(order.total)}</dd>
+			</dl>
+			<div className='mt-4'>
 				<Dashed />
 			</div>
 
-			<div className='mt-6 flex flex-col items-center gap-1.5 text-center font-semibold uppercase'>
-				<span>Paid · Visa 4821</span>
-				<span className='tabular-nums'>{stamp}</span>
-			</div>
 			<div className='mt-4 text-center font-semibold uppercase'>
+				Paid · Visa 4821
+			</div>
+			<div className='mt-1.5 text-center font-semibold uppercase'>
 				It ships tomorrow.
 			</div>
-			<div className='mt-4 text-center text-[9px] text-foreground/35 uppercase'>
+			<div className='mt-2.5 text-center text-[9px] text-foreground/35 uppercase'>
 				Printed locally via agundez.me
 			</div>
-			{action && <div className='mt-5 flex justify-center'>{action}</div>}
+			{action && <div className='mt-3 flex justify-center'>{action}</div>}
 		</div>
 	)
 }

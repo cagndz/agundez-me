@@ -7,8 +7,6 @@ export type Product = {
 	price: number
 	// Drawn on a 100×100 board, standing on y = 86
 	draw: Draw
-	// Its shadow on the floor: centre x, y and half-width
-	shadow: [number, number, number]
 }
 
 export type Order = {

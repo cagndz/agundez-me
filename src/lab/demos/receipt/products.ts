@@ -148,7 +148,6 @@ export const PRODUCTS: Product[] = [
 		name: 'Keyboard',
 		spec: '75% · Hot-swap',
 		price: 169,
-		shadow: [50, 82, 40],
 		draw(ctx) {
 			const { box } = iso(ctx, 60, 22)
 			box(0, 0, 0, 60, 22, 7)
@@ -165,7 +164,6 @@ export const PRODUCTS: Product[] = [
 		name: 'Speaker',
 		spec: 'Cube · 30 W',
 		price: 249,
-		shadow: [50, 86, 30],
 		draw(ctx) {
 			// A cube, not a tower: anything taller reaches the product behind
 			const { box, front } = iso(ctx, 32, 32)
@@ -186,7 +184,6 @@ export const PRODUCTS: Product[] = [
 		name: 'Drum machine',
 		spec: '16 pads · 64 steps',
 		price: 299,
-		shadow: [50, 84, 38],
 		draw(ctx) {
 			const { box, cylinder, front } = iso(ctx, 44, 40)
 			box(0, 0, 0, 44, 40, 10)
@@ -213,7 +210,6 @@ export const PRODUCTS: Product[] = [
 		name: 'Turntable',
 		spec: '33/45 · Belt drive',
 		price: 459,
-		shadow: [50, 82, 40],
 		draw(ctx) {
 			const { box, cylinder, top, p } = iso(ctx, 46, 40)
 			box(0, 0, 0, 46, 40, 9)
