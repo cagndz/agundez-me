@@ -1,6 +1,7 @@
 'use client'
 
 import {
+	useCallback,
 	useEffect,
 	useId,
 	useRef,
@@ -146,9 +147,6 @@ export function Showroom({
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 	const rotation = useMotionValue(0)
 	const [index, setIndex] = useState(0)
-	// Announce the product at the front only once the ring has been turned,
-	// not on load
-	const [turned, setTurned] = useState(false)
 	const hintId = useId()
 	const reduce = useReducedMotion()
 	const drag = useRef({
@@ -164,13 +162,20 @@ export function Showroom({
 	const turning = useRef<AnimationPlaybackControls | null>(null)
 	const placed = useRef<Placed[]>([])
 	const product = PRODUCTS[index]
+	// The canvas is also where focus comes back to after a receipt
+	const setCanvas = useCallback(
+		(canvas: HTMLCanvasElement | null) => {
+			canvasRef.current = canvas
+			homeRef.current = canvas
+		},
+		[homeRef],
+	)
 
 	useEffect(
 		() =>
 			rotation.on('change', (r) => {
 				const next = wrap(Math.round(r))
 				setIndex((i) => (i === next ? i : next))
-				setTurned(true)
 			}),
 		[rotation],
 	)
@@ -413,14 +418,12 @@ export function Showroom({
 			inert={covered}
 		>
 			<canvas
-				ref={(canvas) => {
-					canvasRef.current = canvas
-					homeRef.current = canvas
-				}}
+				ref={setCanvas}
 				tabIndex={0}
 				// Enter prints the product at the front: that's what it does
 				role='button'
-				aria-roledescription='carousel'
+				// Named after the product at the front, so turning it is heard
+				// as the name changing, the one way it's announced
 				aria-label={`${product.name}, €${product.price}`}
 				aria-describedby={hintId}
 				onKeyDown={onKeyDown}
@@ -434,9 +437,6 @@ export function Showroom({
 			/>
 			<span id={hintId} className='sr-only'>
 				Arrows to turn, Enter to print.
-			</span>
-			<span aria-live='polite' className='sr-only'>
-				{turned ? `${product.name}, €${product.price}` : ''}
 			</span>
 		</div>
 	)
