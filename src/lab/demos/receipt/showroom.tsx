@@ -55,11 +55,14 @@ const FEET = 86
 const BOX = 180
 // Anything this close to the front counts as the front one
 const FRONT = 0.98
+// Coming round to the front, a product goes from silhouette to full detail
+// over the last stretch of the way, instead of switching on arrival
+const DETAIL_FROM = 0.5
 
 // Each product is a detent: near it the ring resists the drag, past halfway
 // it gives and falls toward the next one. 0 is no resistance; 1 doesn't move
 // at all on leaving a product.
-const DETENT = 0.7
+const DETENT = 0.4
 
 const wrap = (i: number) => ((i % N) + N) % N
 
@@ -69,6 +72,11 @@ function detent(raw: number) {
 	const a = Math.abs(raw - n)
 	// Flat leaving the product, steep at the halfway point; both meet at 0.5
 	return n + Math.sign(raw - n) * ((1 - DETENT) * a + 2 * DETENT * a * a)
+}
+
+/** How fast the ring moves for the drag, at a point of the drag. */
+function detentSlope(raw: number) {
+	return 1 - DETENT + 4 * DETENT * Math.abs(raw - Math.round(raw))
 }
 
 /** The drag that would have the ring where it is: detent, undone. */
@@ -139,6 +147,8 @@ export function Showroom({
 		start: 0,
 		// Recent pointer positions, to read the flick from
 		samples: [] as { x: number; t: number }[],
+		// Where the drag has taken the ring, before the detent
+		raw: 0,
 	})
 	const turning = useRef<AnimationPlaybackControls | null>(null)
 	const placed = useRef<Placed[]>([])
@@ -229,15 +239,28 @@ export function Showroom({
 				bctx.translate(-50, -FEET)
 				item.draw(bctx)
 				bctx.restore()
-				ctx.save()
+				const x = p.x - BOX / 2
+				const y = p.y - (BOX - 14)
+				const t = Math.min(
+					1,
+					Math.max(0, (p.depth - DETAIL_FROM) / (1 - DETAIL_FROM)),
+				)
+				const detail = t * t * (3 - 2 * t)
 				// Away from the front, only the shape is printed, lighter the
-				// further back it stands
-				if (p.depth < FRONT) {
+				// further back it stands; nearing it, the detail fades in on top
+				if (detail < 1) {
+					ctx.save()
 					ctx.filter = 'brightness(0)'
-					ctx.globalAlpha = 0.5 - 0.15 * (1 - p.depth)
+					ctx.globalAlpha = (0.5 - 0.15 * (1 - p.depth)) * (1 - detail)
+					ctx.drawImage(box, x, y)
+					ctx.restore()
 				}
-				ctx.drawImage(box, p.x - BOX / 2, p.y - (BOX - 14))
-				ctx.restore()
+				if (detail > 0) {
+					ctx.save()
+					ctx.globalAlpha = detail
+					ctx.drawImage(box, x, y)
+					ctx.restore()
+				}
 			}
 			const image = ctx.getImageData(0, 0, W, H)
 			ditherInk(image)
@@ -299,6 +322,7 @@ export function Showroom({
 			// Picked up mid-turn, the drag carries on from where the ring is
 			start: undetent(rotation.get()),
 			samples: [{ x: e.clientX, t: e.timeStamp }],
+			raw: undetent(rotation.get()),
 		}
 	}
 	// A drag that ends without a release we can read (let go outside the
@@ -322,7 +346,8 @@ export function Showroom({
 		if (!d.moved) return
 		d.samples.push({ x: e.clientX, t: e.timeStamp })
 		while (e.timeStamp - d.samples[0].t > SAMPLE * 1000) d.samples.shift()
-		rotation.set(detent(d.start - dx / DRAG_STEP))
+		d.raw = d.start - dx / DRAG_STEP
+		rotation.set(detent(d.raw))
 	}
 	const onPointerUp = (e: React.PointerEvent) => {
 		const d = drag.current
@@ -332,7 +357,9 @@ export function Showroom({
 			// Where the flick would carry it, to the nearest product, keeping
 			// the speed it was let go at
 			const r = rotation.get()
-			const velocity = flick(d.samples, e.timeStamp)
+			// The speed the ring itself had on screen, not the pointer's: the
+			// detent had it slower near a product and faster past halfway
+			const velocity = flick(d.samples, e.timeStamp) * detentSlope(d.raw)
 			// Never past the product next to the one the drag started from,
 			// unless the drag itself already went further
 			const from = Math.round(d.start)

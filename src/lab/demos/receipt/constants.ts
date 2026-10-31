@@ -20,4 +20,4 @@ export const SPRING_BACK = {
 
 // The ring has weight: a flick carries it on, and it snaps onto the product
 // without overshooting
-export const TURN = { type: 'spring', stiffness: 220, damping: 30 } as const
+export const TURN = { type: 'spring', stiffness: 170, damping: 26 } as const
