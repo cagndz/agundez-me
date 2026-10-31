@@ -33,8 +33,13 @@ const RADIUS = 80
 const CAMERA = 2.4
 const HORIZON = 80
 // Dragging: CSS px per product, and how far a flick carries on, in seconds
-const DRAG_STEP = 140
+const DRAG_STEP = 160
 const COAST = 0.18
+// A flick is read over the last moments of the drag, not the last event, and
+// it has a top speed, in products per second: however hard you throw it, the
+// ring lands on the product next to the one the drag started from
+const SAMPLE = 0.1
+const MAX_VELOCITY = 5
 // Products lean against the turn, as if their feet were dragged along, and
 // come back upright once it stops, without rocking
 const LEAN = 0.06
@@ -47,7 +52,40 @@ const BOX = 180
 // Anything this close to the front counts as the front one
 const FRONT = 0.98
 
+// Each product is a detent: near it the ring resists the drag, past halfway
+// it gives and falls toward the next one. 0 is no resistance; 1 doesn't move
+// at all on leaving a product.
+const DETENT = 0.7
+
 const wrap = (i: number) => ((i % N) + N) % N
+
+/** Where the ring is, for where the drag has taken it. */
+function detent(raw: number) {
+	const n = Math.round(raw)
+	const a = Math.abs(raw - n)
+	// Flat leaving the product, steep at the halfway point; both meet at 0.5
+	return n + Math.sign(raw - n) * ((1 - DETENT) * a + 2 * DETENT * a * a)
+}
+
+/** The drag that would have the ring where it is: detent, undone. */
+function undetent(rotation: number) {
+	const n = Math.round(rotation)
+	const e = Math.abs(rotation - n)
+	const b = 1 - DETENT
+	const a = (Math.sqrt(b * b + 8 * DETENT * e) - b) / (4 * DETENT)
+	return n + Math.sign(rotation - n) * a
+}
+
+/** The ring's speed at release, in products per second. A pointer held still
+ * before letting go throws nothing. */
+function flick(samples: { x: number; t: number }[], now: number) {
+	const first = samples[0]
+	const last = samples[samples.length - 1]
+	if (!first || now - last.t > SAMPLE * 1000) return 0
+	const dt = Math.max(last.t - first.t, 16) / 1000
+	const velocity = -(last.x - first.x) / DRAG_STEP / dt
+	return Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, velocity))
+}
 
 type Placed = {
 	index: number
@@ -91,10 +129,8 @@ export function Showroom({
 		moved: false,
 		startX: 0,
 		start: 0,
-		lastX: 0,
-		lastT: 0,
-		// Products per second
-		velocity: 0,
+		// Recent pointer positions, to read the flick from
+		samples: [] as { x: number; t: number }[],
 	})
 	const turning = useRef<AnimationPlaybackControls | null>(null)
 	const placed = useRef<Placed[]>([])
@@ -237,23 +273,33 @@ export function Showroom({
 			active: true,
 			moved: false,
 			startX: e.clientX,
-			start: rotation.get(),
-			lastX: e.clientX,
-			lastT: e.timeStamp,
-			velocity: 0,
+			// Picked up mid-turn, the drag carries on from where the ring is
+			start: undetent(rotation.get()),
+			samples: [{ x: e.clientX, t: e.timeStamp }],
 		}
 	}
+	// A drag that ends without a release we can read (let go outside the
+	// window, capture lost, the browser took the gesture): settle on the
+	// nearest product, or the ring is left between two and keeps following
+	// the pointer
+	const abandon = () => {
+		const d = drag.current
+		if (!d.active) return
+		d.active = false
+		if (d.moved) turnTo(Math.round(rotation.get()))
+	}
+
 	const onPointerMove = (e: React.PointerEvent) => {
 		const d = drag.current
 		if (!d.active) return
+		// No button held: the release never reached us
+		if (e.pointerType === 'mouse' && e.buttons === 0) return abandon()
 		const dx = e.clientX - d.startX
 		if (Math.abs(dx) > 4) d.moved = true
 		if (!d.moved) return
-		const dt = Math.max(e.timeStamp - d.lastT, 1) / 1000
-		d.velocity = -(e.clientX - d.lastX) / DRAG_STEP / dt
-		d.lastX = e.clientX
-		d.lastT = e.timeStamp
-		rotation.set(d.start - dx / DRAG_STEP)
+		d.samples.push({ x: e.clientX, t: e.timeStamp })
+		while (e.timeStamp - d.samples[0].t > SAMPLE * 1000) d.samples.shift()
+		rotation.set(detent(d.start - dx / DRAG_STEP))
 	}
 	const onPointerUp = (e: React.PointerEvent) => {
 		const d = drag.current
@@ -262,8 +308,14 @@ export function Showroom({
 		if (d.moved) {
 			// Where the flick would carry it, to the nearest product, keeping
 			// the speed it was let go at
-			const coast = rotation.get() + d.velocity * COAST
-			turnTo(Math.round(coast), d.velocity)
+			const r = rotation.get()
+			const velocity = flick(d.samples, e.timeStamp)
+			// Never past the product next to the one the drag started from,
+			// unless the drag itself already went further
+			const from = Math.round(d.start)
+			const reach = Math.max(1, Math.abs(Math.round(r) - from))
+			const target = Math.round(r + velocity * COAST)
+			turnTo(Math.max(from - reach, Math.min(from + reach, target)), velocity)
 			return
 		}
 		const target = hit(e.clientX, e.clientY)
@@ -287,7 +339,7 @@ export function Showroom({
 
 	return (
 		<div
-			className='absolute inset-0 flex flex-col items-center justify-center gap-5'
+			className='absolute inset-0 flex items-center justify-center'
 			inert={covered}
 		>
 			<canvas
@@ -299,22 +351,11 @@ export function Showroom({
 				onPointerDown={onPointerDown}
 				onPointerMove={onPointerMove}
 				onPointerUp={onPointerUp}
-				onPointerCancel={() => {
-					const d = drag.current
-					if (!d.active) return
-					d.active = false
-					if (d.moved) turnTo(Math.round(rotation.get()))
-				}}
+				onPointerCancel={abandon}
+				onLostPointerCapture={abandon}
 				className='cursor-grab touch-none outline-offset-4 active:cursor-grabbing'
 				style={{ width: WIDTH, height: HEIGHT, imageRendering: 'pixelated' }}
 			/>
-			<div
-				className='flex items-baseline justify-between text-[13px] leading-none uppercase'
-				style={{ width: WIDTH - 40 }}
-			>
-				<span className='font-bold'>{product.name}</span>
-				<span className='tabular-nums'>€{product.price}</span>
-			</div>
 		</div>
 	)
 }

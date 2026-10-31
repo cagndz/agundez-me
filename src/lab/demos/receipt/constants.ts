@@ -18,6 +18,6 @@ export const SPRING_BACK = {
 	bounce: 0.3,
 } as const
 
-// The ring has weight: a flick carries it on, and it settles on the product
+// The ring has weight: a flick carries it on, and it snaps onto the product
 // without overshooting
-export const TURN = { type: 'spring', stiffness: 140, damping: 26 } as const
+export const TURN = { type: 'spring', stiffness: 220, damping: 30 } as const
