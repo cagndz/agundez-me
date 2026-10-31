@@ -25,6 +25,13 @@ import {
 	RISE,
 	SIZE as TOOLTIP_SIZE,
 } from './demos/tooltip/constants'
+import {
+	FALL as RECEIPT_FALL,
+	FEED,
+	SIZE as RECEIPT_SIZE,
+	SPRING_BACK,
+	TURN,
+} from './demos/receipt/constants'
 
 export type LabSpec = {
 	label: string
@@ -128,6 +135,26 @@ export const items: LabItem[] = [
 			{ label: 'Goo', value: 'SVG blur + alpha threshold' },
 			{ label: 'Motion', value: 'Squash and stretch · gravity on close' },
 			{ label: 'A11y', value: 'Focus · Escape · reduced motion' },
+			{ label: 'Stack', value: 'React · Motion · TypeScript' },
+		],
+	},
+	{
+		id: '005',
+		slug: 'receipt',
+		title: 'Receipt',
+		size: RECEIPT_SIZE,
+		summary:
+			'Turn the ring to choose, tap to print, then pull the receipt until it tears.',
+		curves: [
+			{ label: 'Turn', transition: TURN },
+			{ label: 'Feed', transition: FEED },
+			{ label: 'Spring back', transition: SPRING_BACK },
+			{ label: 'Fall', transition: RECEIPT_FALL },
+		],
+		specs: [
+			{ label: 'Render', value: 'Canvas · 8×8 Bayer dither to 1-bit' },
+			{ label: 'Tear', value: 'clip-path · starts at the nearest corner' },
+			{ label: 'A11y', value: 'Arrows · Enter · Escape · reduced motion' },
 			{ label: 'Stack', value: 'React · Motion · TypeScript' },
 		],
 	},
