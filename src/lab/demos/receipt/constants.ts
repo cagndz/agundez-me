@@ -17,7 +17,7 @@ export const FALL = { duration: 0.55, ease: [0.55, 0, 1, 0.45] } as const
 export const SPRING_BACK = {
 	type: 'spring',
 	duration: 0.4,
-	bounce: 0.3,
+	bounce: 0.1,
 } as const
 
 // The ring has weight: a flick carries it on, and it snaps onto the product
