@@ -251,7 +251,7 @@ export function Showroom({
 				if (detail < 1) {
 					ctx.save()
 					ctx.filter = 'brightness(0)'
-					ctx.globalAlpha = (0.5 - 0.15 * (1 - p.depth)) * (1 - detail)
+					ctx.globalAlpha = (0.4 - 0.04 * (1 - p.depth)) * (1 - detail)
 					ctx.drawImage(box, x, y)
 					ctx.restore()
 				}
