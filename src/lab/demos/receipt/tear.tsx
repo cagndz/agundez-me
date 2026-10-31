@@ -16,7 +16,7 @@ import {
 	useReducedMotion,
 	type PanInfo,
 } from 'motion/react'
-import { FALL, FEED, PAPER_WIDTH, SPRING_BACK } from './constants'
+import { FALL, FEED, PAPER_WIDTH, REDUCED_FADE, SPRING_BACK } from './constants'
 import { makeOrder, type Order, type Product } from './data'
 import { useReceiptFocus } from './hooks'
 import { Dashed, ReceiptBody } from './receipt'
@@ -184,6 +184,7 @@ export function TearMachine({ menu }: { menu: Menu }) {
 		gapRef.current?.setAttribute('d', '')
 		if (reduce) {
 			pullY.set(0)
+			await animate(slip, { opacity: 0 }, REDUCED_FADE)
 		} else {
 			animate(pullY, 0, SPRING_BACK)
 			const first = side.current === 'start'
@@ -264,12 +265,16 @@ export function TearMachine({ menu }: { menu: Menu }) {
 		const height = slip.offsetHeight
 		slip.style.clipPath = slipClip(height, seams.current.last)
 		const lift = height - EDGE
-		roll.style.transform = `translateY(${-lift}px)`
-		const controls = animate(
-			roll,
-			{ y: [-lift, 0] },
-			reduce ? { duration: 0 } : FEED,
-		)
+		if (reduce) {
+			// Already hanging, faded out until the first frame
+			roll.style.transform = 'none'
+			slip.style.opacity = '0'
+		} else {
+			roll.style.transform = `translateY(${-lift}px)`
+		}
+		const controls = reduce
+			? animate(slip, { opacity: [0, 1] }, REDUCED_FADE)
+			: animate(roll, { y: [-lift, 0] }, FEED)
 		controls.then(() => setFed(true))
 		return () => controls.stop()
 	}, [order, reduce])
