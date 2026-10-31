@@ -27,7 +27,9 @@ const W = WIDTH / DOT
 const H = HEIGHT / DOT
 // The front product's size and where its feet are, in dots
 const SIZE = 128
-const FLOOR = 156
+// Low enough that the whole ring, from the shadow at the front to the top
+// of the product at the back, sits centred on the canvas
+const FLOOR = 138
 // The ring: how wide it reads, how strong the perspective is, and where the
 // horizon sits above the front product's feet
 // From high up, so the products further round stand higher in the picture
