@@ -1,16 +1,15 @@
+import type { Draw } from './dither'
+
 export type Product = {
 	id: string
 	name: string
 	spec: string
 	price: number
+	// Drawn on a 100×100 board, standing on y = 86
+	draw: Draw
+	// Its shadow on the floor: centre x, y and half-width
+	shadow: [number, number, number]
 }
-
-export const PRODUCTS: Product[] = [
-	{ id: 'ear', name: 'Ear buds', spec: 'ANC · 38h case', price: 149 },
-	{ id: 'phn', name: 'Phone', spec: '256 GB · Graphite', price: 699 },
-	{ id: 'wch', name: 'Watch', spec: '42 mm · Steel', price: 229 },
-	{ id: 'spk', name: 'Speaker', spec: '60 W · Stereo', price: 289 },
-]
 
 export type Order = {
 	number: string

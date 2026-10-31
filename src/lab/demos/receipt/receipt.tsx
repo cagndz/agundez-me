@@ -49,7 +49,7 @@ export function ReceiptBody({
 			</div>
 
 			<Print
-				scene={product.id}
+				product={product}
 				width={PAPER_WIDTH - 48}
 				height={168}
 				className='mt-5'

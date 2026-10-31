@@ -8,8 +8,9 @@ import {
 	type AnimationPlaybackControls,
 } from 'motion/react'
 import { TURN } from './constants'
-import { PRODUCTS, type Product } from './data'
-import { DOT, SHADOWS, ditherInk, drawProduct, floorShadow } from './dither'
+import type { Product } from './data'
+import { DOT, ditherInk, floorShadow } from './dither'
+import { PRODUCTS } from './products'
 
 // The products stand on a ring at eye level, one at the front in full detail
 // and the rest around and behind it as silhouettes, printed straight onto the
@@ -213,18 +214,17 @@ export function Showroom({
 			placed.current = items
 			for (const p of items) {
 				const k = (SIZE * p.scale) / 100
-				const scene = PRODUCTS[p.index].id
+				const item = PRODUCTS[p.index]
 				bctx.clearRect(0, 0, BOX, BOX)
 				bctx.save()
 				bctx.translate(BOX / 2 - 50 * k, BOX - 14 - FEET * k)
 				bctx.scale(k, k)
-				const shadow = SHADOWS[scene]
-				if (shadow) floorShadow(bctx, ...shadow)
+				floorShadow(bctx, ...item.shadow)
 				// The lean pivots on the feet, so the shadow stays put
 				bctx.translate(50, FEET)
 				bctx.rotate(lean)
 				bctx.translate(-50, -FEET)
-				drawProduct(bctx, scene)
+				item.draw(bctx)
 				bctx.restore()
 				ctx.save()
 				// Away from the front, only the shape is printed, lighter the
