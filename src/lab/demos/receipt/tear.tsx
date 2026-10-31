@@ -333,7 +333,7 @@ export function TearMachine({ menu }: { menu: Menu }) {
 										/>
 									}
 								/>
-								<div className='px-6 pb-4'>
+								<div className='px-6 pb-3'>
 									<Dashed />
 								</div>
 							</motion.div>
@@ -390,7 +390,7 @@ function PullButton({
 			onClick={onClick}
 			disabled={disabled}
 			aria-label='Tear off the receipt'
-			className='flex w-full cursor-[inherit] flex-col items-center gap-3 uppercase outline-offset-4'
+			className='flex w-full cursor-[inherit] flex-col items-center gap-2 uppercase outline-offset-4'
 		>
 			<span className='flex w-full items-center gap-3'>
 				<span className='flex-1 border-t border-dashed border-foreground/25' />

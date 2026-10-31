@@ -1,6 +1,8 @@
 // The demo is a box the receipt hangs into from its top edge, with the
-// showroom underneath.
-export const SIZE = { width: 368, height: 700 }
+// showroom underneath. Tall enough for the paper showing above the edge,
+// the 505px receipt and the most it gives before tearing, so its torn
+// bottom stays in sight as you pull.
+export const SIZE = { width: 368, height: 568 }
 
 // The receipt's width
 export const PAPER_WIDTH = 296

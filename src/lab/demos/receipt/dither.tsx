@@ -68,6 +68,13 @@ export function ditherInk(image: ImageData) {
 	}
 }
 
+// Where the products stand on their 100×100 board, all of them together,
+// measured from their drawings: the print frames this, not the whole board,
+// so they fill it at one scale and on one floor
+const FRAME = { x: 12, y: 23, width: 76, height: 64 }
+// Room left around the frame, as a share of the print
+const FRAME_FILL = 0.84
+
 /** The product shot on the receipt: the object on a lit wall, dithered. */
 export function Print({
 	product,
@@ -98,10 +105,13 @@ export function Print({
 		])
 		ctx.fillRect(0, 0, w, h)
 
-		const side = Math.min(w, h)
+		const k = Math.min(w / FRAME.width, h / FRAME.height) * FRAME_FILL
 		ctx.save()
-		ctx.translate((w - side) / 2, (h - side) / 2)
-		ctx.scale(side / 100, side / 100)
+		ctx.translate(
+			(w - FRAME.width * k) / 2 - FRAME.x * k,
+			(h - FRAME.height * k) / 2 - FRAME.y * k,
+		)
+		ctx.scale(k, k)
 		product.draw(ctx)
 		ctx.restore()
 
