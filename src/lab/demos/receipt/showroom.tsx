@@ -406,7 +406,7 @@ export function Showroom({
 				onPointerUp={onPointerUp}
 				onPointerCancel={abandon}
 				onLostPointerCapture={abandon}
-				className='cursor-grab touch-none outline-offset-4 active:cursor-grabbing'
+				className='cursor-grab touch-pan-y outline-offset-4 active:cursor-grabbing'
 				style={{ width: WIDTH, height: HEIGHT, imageRendering: 'pixelated' }}
 			/>
 			<span id={hintId} className='sr-only'>
