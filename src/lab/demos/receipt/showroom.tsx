@@ -1,6 +1,13 @@
 'use client'
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
+import {
+	useEffect,
+	useId,
+	useRef,
+	useState,
+	type KeyboardEvent,
+	type RefObject,
+} from 'react'
 import {
 	animate,
 	useMotionValue,
@@ -129,10 +136,12 @@ function place(rotation: number): Placed[] {
 export function Showroom({
 	covered,
 	pick,
+	homeRef,
 }: {
 	// A receipt is over it: it's out of reach
 	covered: boolean
 	pick: (product: Product) => void
+	homeRef: RefObject<HTMLElement | null>
 }) {
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 	const rotation = useMotionValue(0)
@@ -404,7 +413,10 @@ export function Showroom({
 			inert={covered}
 		>
 			<canvas
-				ref={canvasRef}
+				ref={(canvas) => {
+					canvasRef.current = canvas
+					homeRef.current = canvas
+				}}
 				tabIndex={0}
 				// Enter prints the product at the front: that's what it does
 				role='button'

@@ -7,6 +7,7 @@ import {
 	useState,
 	type ReactNode,
 	type Ref,
+	type RefObject,
 } from 'react'
 import {
 	animate,
@@ -124,6 +125,8 @@ export type Menu = (props: {
 	// A receipt is over it: it's dimmed and out of reach
 	covered: boolean
 	pick: (product: Product) => void
+	// Where focus goes back to once a receipt that had it is torn off
+	homeRef: RefObject<HTMLElement | null>
 }) => ReactNode
 
 export function TearMachine({ menu }: { menu: Menu }) {
@@ -144,6 +147,9 @@ export function TearMachine({ menu }: { menu: Menu }) {
 	const pullY = useMotionValue(0)
 	const progress = useMotionValue(0)
 	const reduce = useReducedMotion()
+	const homeRef = useRef<HTMLElement>(null)
+	// Focus was on the receipt when it went: hand it back to the menu
+	const refocus = useRef(false)
 
 	useLayoutEffect(() => {
 		seams.current = { last: jagged(), next: jagged() }
@@ -193,9 +199,22 @@ export function TearMachine({ menu }: { menu: Menu }) {
 		progress.jump(0)
 		gapRef.current?.setAttribute('d', '')
 		torn.current = false
+		// The pull button kept focus through the fall; if it still has it,
+		// focus follows the menu, not the dialog the demo sits in. Moved
+		// elsewhere meanwhile, it stays there.
+		refocus.current = slip.contains(document.activeElement)
 		setOrder(null)
 		setFalling(false)
 	}
+
+	// Once the slip is gone and the menu is in reach again. In the same
+	// commit that drops the button, before the dialog around the demo finds
+	// focus lost and takes it itself.
+	useLayoutEffect(() => {
+		if (order || !refocus.current) return
+		refocus.current = false
+		homeRef.current?.focus({ preventScroll: true })
+	}, [order])
 
 	// From the button or Escape: the same tear, run for you
 	const finish = async (duration = 0.45) => {
@@ -260,7 +279,11 @@ export function TearMachine({ menu }: { menu: Menu }) {
 
 	return (
 		<div className='absolute inset-0 overflow-hidden rounded-sm text-foreground'>
-			{menu({ covered, pick: (product) => setOrder(makeOrder(product)) })}
+			{menu({
+				covered,
+				pick: (product) => setOrder(makeOrder(product)),
+				homeRef,
+			})}
 
 			<div
 				aria-hidden='true'
@@ -303,7 +326,9 @@ export function TearMachine({ menu }: { menu: Menu }) {
 											onClick={() => {
 												if (!panned.current) finish()
 											}}
-											disabled={!fed}
+											// Still enabled as it falls, so focus stays on it
+											// instead of dropping out of the demo
+											disabled={!fed && !falling}
 											reduce={!!reduce}
 										/>
 									}
