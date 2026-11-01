@@ -108,29 +108,3 @@
 	scrollbar-color: color-mix(in oklab, var(--color-muted) 40%, transparent)
 		transparent;
 }
-
-@layer components {
-	@keyframes reveal {
-		from {
-			opacity: 0.01;
-			transform: translateY(10px);
-			filter: blur(2px);
-		}
-		to {
-			opacity: 1;
-			transform: none;
-			filter: blur(0);
-		}
-	}
-
-	.orchestration > * {
-		animation: reveal 600ms ease both;
-		animation-delay: calc((sibling-index() - 1) * 120ms);
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.orchestration > * {
-			animation: none;
-		}
-	}
-}
