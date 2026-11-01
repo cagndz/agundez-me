@@ -6,24 +6,32 @@ const GLYPHS = 'abcdefghijklmnopqrstuvwxyz#%&*@!$_^+'
 
 // Text that decodes from noise, left to right. The server renders the real
 // text and the noise only starts on the client, so hydration always matches
-// and the text reads without JavaScript. Changing `run` plays it again.
+// and the text reads without JavaScript. Changing `run` plays it again;
+// `intro={false}` skips the first play, so it only runs on a change.
 export function Scramble({
 	text,
 	run = 0,
 	delay = 0,
 	duration = 520,
+	intro = true,
 }: {
 	text: string
 	run?: number
 	delay?: number
 	duration?: number
+	intro?: boolean
 }) {
 	// The noise is kept with the text it belongs to: when the text changes
 	// and no animation runs (reduced motion), the new text shows as is.
 	const [frame, setFrame] = useState({ text, out: text })
 	const out = frame.text === text ? frame.out : text
 
+	// What it showed on mount. Comparing against it (not a "has run" flag)
+	// keeps this right when Strict Mode runs effects twice.
+	const [initial] = useState(text)
+
 	useEffect(() => {
+		if (!intro && run === 0 && text === initial) return
 		if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
 		const chars = [...text]
 		// Each character lands at its own time: left to right, with a little
@@ -57,6 +65,8 @@ export function Scramble({
 		}
 		raf = requestAnimationFrame(tick)
 		return () => cancelAnimationFrame(raf)
+		// intro only matters on mount
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [text, run, delay, duration])
 
 	return (

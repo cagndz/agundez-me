@@ -30,6 +30,11 @@ const theme = {
 // beat before going back to the name keeps it from flashing in between.
 const SETTLE = 90
 
+// The entrance plays once per visit: coming back from a post or the lab
+// with client navigation keeps the page as it was. A full reload plays it
+// again, since this lives in the module.
+let introPlayed = false
+
 const WIDE = '(min-width: 1024px) and (hover: hover) and (pointer: fine)'
 
 function useWide() {
@@ -49,8 +54,12 @@ export function Home({ posts }: { posts: Post[] }) {
 	const [row, setRow] = useState<Row | null>(null)
 	const [run, setRun] = useState(0)
 	const leave = useRef<ReturnType<typeof setTimeout>>(undefined)
+	const [intro] = useState(() => !introPlayed)
 
-	useEffect(() => () => clearTimeout(leave.current), [])
+	useEffect(() => {
+		introPlayed = true
+		return () => clearTimeout(leave.current)
+	}, [])
 
 	const hover = (r: Row | null) => {
 		if (!wide) return
@@ -97,15 +106,16 @@ export function Home({ posts }: { posts: Post[] }) {
 							text={shown ? shown.name : 'carlos agúndez'}
 							run={run}
 							duration={420}
+							intro={intro}
 						/>
 					</h1>
 					<p className='mt-4 h-4 font-mono text-xs tabular-nums opacity-80'>
-						<Scramble text={sub} run={run} duration={300} />
+						<Scramble text={sub} run={run} duration={300} intro={intro} />
 					</p>
 				</div>
 			</header>
 			<main className='px-6 py-4 lg:px-8 lg:py-12'>
-				<WorkTable posts={posts} onHover={hover} />
+				<WorkTable posts={posts} onHover={hover} intro={intro} />
 			</main>
 		</div>
 	)

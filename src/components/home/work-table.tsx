@@ -32,10 +32,12 @@ function RowLine({
 	row,
 	index,
 	onHover,
+	intro,
 }: {
 	row: Row
 	index: number
 	onHover: (row: Row | null) => void
+	intro: boolean
 }) {
 	const { copied, copy } = useCopy()
 	const external = row.href && !row.href.startsWith('/')
@@ -51,7 +53,7 @@ function RowLine({
 			{/* Only the name underlines: it's what the link is. The meta just
 			    comes up to full strength. The name decodes once on the way in. */}
 			<span className='min-w-0 decoration-1 underline-offset-4 group-hover/row:underline group-focus-visible/row:underline lg:truncate'>
-				<Scramble text={row.name} delay={120 + index * 45} />
+				<Scramble text={row.name} delay={120 + index * 45} intro={intro} />
 			</span>
 			<span className='shrink-0 tabular-nums opacity-70 transition-opacity duration-150 group-hover/row:opacity-100 group-focus-visible/row:opacity-100'>
 				{row.copy ? (
@@ -105,9 +107,11 @@ function RowLine({
 export function WorkTable({
 	posts,
 	onHover,
+	intro,
 }: {
 	posts: Post[]
 	onHover: (row: Row | null) => void
+	intro: boolean
 }) {
 	let index = 0
 	return sections(posts).map((s) => (
@@ -122,7 +126,7 @@ export function WorkTable({
 			<ul>
 				{s.rows.map((r) => (
 					<li key={r.id}>
-						<RowLine row={r} index={index++} onHover={onHover} />
+						<RowLine row={r} index={index++} onHover={onHover} intro={intro} />
 					</li>
 				))}
 			</ul>
