@@ -38,14 +38,12 @@ export default async function Image() {
 			<div
 				style={{
 					display: 'flex',
-					justifyContent: 'space-between',
 					fontFamily: 'Geist Mono',
 					fontSize: 24,
 					opacity: 0.8,
 				}}
 			>
 				<span>design engineer</span>
-				<span>agundez.me</span>
 			</div>
 			<div
 				style={{
