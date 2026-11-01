@@ -61,12 +61,16 @@ export default async function Image() {
 				<div
 					style={{
 						marginTop: 28,
+						display: 'flex',
+						flexDirection: 'column',
+						gap: 6,
 						fontFamily: 'Geist Mono',
 						fontSize: 22,
 						opacity: 0.8,
 					}}
 				>
-					design engineer
+					<span>design engineer</span>
+					<span>based in spain</span>
 				</div>
 			</div>
 
