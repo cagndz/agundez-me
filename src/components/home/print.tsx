@@ -529,8 +529,9 @@ export function Print({
 					let v = mix(from[i], to[i])
 					if (pa > 0.01) {
 						const d2 = (x - px) ** 2 + (y - py) ** 2
-						// The loupe only darkens ink that's there; empty paper stays empty.
-						v += 0.6 * pa * Math.exp(-d2 / (2 * sigma * sigma)) * v
+						// The loupe works on the whole block: it darkens the ink that's
+						// there, and raises a faint dot field from the empty paper.
+						v += 0.45 * pa * Math.exp(-d2 / (2 * sigma * sigma)) * (0.25 + v)
 					}
 					const bx = Math.floor(x / DOT) % 8
 					const by = Math.floor(y / DOT) % 8
