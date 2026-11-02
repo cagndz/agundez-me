@@ -120,7 +120,7 @@ export function WorkTable({
 			aria-labelledby={`${s.id}-heading`}
 			className='grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-5 border-b border-(--ink)/20 py-6 last:border-0 lg:grid-cols-[7rem_minmax(0,1fr)] lg:gap-x-6'
 		>
-			<h2 id={`${s.id}-heading`} className='text-right font-semibold'>
+			<h2 id={`${s.id}-heading`} className='font-semibold'>
 				{s.label}
 			</h2>
 			<ul>
