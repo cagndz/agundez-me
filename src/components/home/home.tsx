@@ -61,18 +61,24 @@ export function Home({ posts }: { posts: Post[] }) {
 		return () => clearTimeout(leave.current)
 	}, [])
 
+	// What's on show, kept outside render so the handlers can compare against
+	// it. A click focuses the row it's already hovering (and blurs it on the
+	// way out); those repeat events must not decode the name again.
+	const current = useRef<string | null>(null)
+
+	const show = (r: Row | null) => {
+		const id = r ? r.id : null
+		if (id === current.current) return
+		current.current = id
+		setRow(r)
+		setRun((n) => n + 1)
+	}
+
 	const hover = (r: Row | null) => {
 		if (!wide) return
 		clearTimeout(leave.current)
-		if (r) {
-			setRow(r)
-			setRun((n) => n + 1)
-			return
-		}
-		leave.current = setTimeout(() => {
-			setRow(null)
-			setRun((n) => n + 1)
-		}, SETTLE)
+		if (r) return show(r)
+		leave.current = setTimeout(() => show(null), SETTLE)
 	}
 
 	// Leaving the wide layout drops whatever was on show.
