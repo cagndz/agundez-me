@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { type RefObject, useEffect, useRef } from 'react'
 
 // Each thing on the page as an object, drawn the way the Lab's receipt draws
 // its products: isometric solids in three flat tones (light top, mid left,
@@ -8,9 +8,9 @@ import { useEffect, useRef } from 'react'
 // anchored to the bottom left and cut by the edges.
 
 export type Shape =
-	| 'mat'
+	| 'tubes'
 	| 'cassette'
-	| 'swatches'
+	| 'laptop'
 	| 'layers'
 	| 'openbox'
 	| 'envelope'
@@ -161,90 +161,47 @@ const MARKS: Record<'x' | 'github' | 'linkedin', [number, string]> = {
 	],
 }
 
-function mark(ctx: Ctx, kind: keyof typeof MARKS) {
-	const [box, d] = MARKS[kind]
-	const size = 56
-	ctx.save()
-	ctx.translate(50 - size / 2, 58 - size / 2)
-	ctx.scale(size / box, size / box)
-	const path = new Path2D(d)
-	const g = ctx.createLinearGradient(0, 0, box, box)
-	g.addColorStop(0, '#9a9a9a')
-	g.addColorStop(1, '#4a4a4a')
-	ctx.fillStyle = g
-	ctx.fill(path)
-	ctx.restore()
+// The places to find me, as objects like the rest: a key, the mark printed
+// on its top
+function tile(ctx: Ctx, kind: keyof typeof MARKS) {
+	const { box, top } = iso(ctx, 40, 40)
+	box(0, 0, 0, 40, 40, 22, ['#e6e6e6', '#9a9a9a', '#5a5a5a'])
+	top(-20, -20, 22, () => {
+		// The top face turns whatever is drawn on it by 45°. Laying the mark
+		// along the face's diagonals keeps it upright on screen, foreshortened
+		// like a legend seen on a key from above.
+		const [size, d] = MARKS[kind]
+		const k = 13.5 / size
+		ctx.save()
+		ctx.translate(20, 20)
+		ctx.transform(k, -k, -k, -k, 0, 0)
+		ctx.translate(-size / 2, -size / 2)
+		ctx.fillStyle = '#262626'
+		ctx.fill(new Path2D(d))
+		ctx.restore()
+	})
 }
 
 const ART: Record<Shape, (ctx: Ctx) => void> = {
-	x: (ctx) => mark(ctx, 'x'),
-	github: (ctx) => mark(ctx, 'github'),
-	linkedin: (ctx) => mark(ctx, 'linkedin'),
+	x: (ctx) => tile(ctx, 'x'),
+	github: (ctx) => tile(ctx, 'github'),
+	linkedin: (ctx) => tile(ctx, 'linkedin'),
 	none: () => {},
-	// A cutting mat with a bézier on it, handles out, and a pen across
-	mat(ctx) {
-		const { box, top } = iso(ctx, 64, 46)
-		box(0, 0, 0, 64, 46, 2)
-		top(-32, -23, 2, () => {
-			for (let i = 1; i < 8; i++)
-				line(
-					ctx,
-					[
-						[i * 8, 2],
-						[i * 8, 44],
-					],
-					'#bcbcbc',
-					0.35,
-				)
-			for (let i = 1; i < 6; i++)
-				line(
-					ctx,
-					[
-						[2, i * 8],
-						[62, i * 8],
-					],
-					'#bcbcbc',
-					0.35,
-				)
-			ctx.strokeStyle = RIGHT
-			ctx.lineWidth = 1.4
-			ctx.beginPath()
-			ctx.moveTo(8, 34)
-			ctx.bezierCurveTo(14, 4, 46, 44, 56, 12)
-			ctx.stroke()
-			line(
-				ctx,
-				[
-					[8, 34],
-					[14, 4],
-				],
-				LEFT,
-				0.6,
-			)
-			line(
-				ctx,
-				[
-					[56, 12],
-					[46, 44],
-				],
-				LEFT,
-				0.6,
-			)
-			for (const [x, y] of [
-				[8, 34],
-				[56, 12],
-			])
-				rect(ctx, x - 1.6, y - 1.6, 3.2, 3.2, RIGHT)
-			for (const [x, y] of [
-				[14, 4],
-				[46, 44],
-			])
-				ring(ctx, x, y, 1.4, LEFT)
-		})
-		// The pen, lying across the mat: a body, a ferrule, a tip
-		box(4, 12, 2, 34, 3.2, 3.2, PART)
-		box(-15, 12, 2, 4, 3.2, 3.2)
-		box(-19, 12, 2, 4, 2, 2, ['#555', '#333', '#111'])
+	// Lab: a rack of test tubes, each filled to a different level
+	tubes(ctx) {
+		const { box, cylinder } = iso(ctx, 52, 16)
+		const GLASS: Tones = ['#c8c8c8', '#ececec', '#d2d2d2']
+		const LIQUID: Tones = ['#5a5a5a', '#3a3a3a', '#1c1c1c']
+		// Back to front, so the nearer tube covers the one behind it
+		for (const [x, level] of [
+			[16, 12],
+			[0, 24],
+			[-16, 6],
+		]) {
+			cylinder(x, 0, 6, 5.2, 36, GLASS)
+			cylinder(x, 0, 6, 5, level, LIQUID)
+		}
+		box(0, 0, 0, 52, 16, 8, ['#b4b4b4', '#6a6a6a', '#8e8e8e'])
 	},
 	// A cassette, standing: a label, a window, two reels
 	cassette(ctx) {
@@ -262,16 +219,28 @@ const ART: Record<Shape, (ctx: Ctx) => void> = {
 			rect(ctx, 24, 2, 8, 2, LEFT)
 		})
 	},
-	// Swatches stacked; the top one a page of code with one line inked
-	swatches(ctx) {
-		const { box, top } = iso(ctx, 48, 34)
-		box(4, 4, 0, 48, 34, 2.4, ['#bdbdbd', '#6e6e6e', '#222'])
-		box(2, 2, 7, 48, 34, 2.4, ['#c9c9c9', '#7a7a7a', '#2a2a2a'])
-		box(0, 0, 14, 48, 34, 2.4)
-		top(-24, -17, 16.4, () => {
-			;[30, 18, 36, 22, 28, 14, 32].forEach((l, i) =>
-				rect(ctx, 5, 4 + i * 4, l, 1.5, i === 2 ? RIGHT : LEFT),
+	// Silex: a laptop with a dark theme on it, one line in colour
+	laptop(ctx) {
+		const { box, front, top } = iso(ctx, 56, 40)
+		box(0, 19, 3, 56, 2.5, 34, ['#bdbdbd', '#6e6e6e', '#1c1c1c'])
+		front(-28, 17.75, 3, () => {
+			;[18, 30, 14, 34, 24, 20, 28].forEach((l, i) =>
+				rect(
+					ctx,
+					5 + (i % 3 === 1 ? 4 : 0),
+					28 - i * 3.6,
+					l,
+					1.6,
+					i === 3 ? '#f4f4f4' : '#5e5e5e',
+				),
 			)
+		})
+		box(0, 0, 0, 56, 40, 3, ['#d6d6d6', '#8a8a8a', '#4a4a4a'])
+		top(-28, -20, 3, () => {
+			for (let r = 0; r < 4; r++)
+				for (let c = 0; c < 12; c++)
+					rect(ctx, 5 + c * 3.9, 20 + r * 3.9, 3, 3, '#9a9a9a')
+			rect(ctx, 20, 4, 16, 10, '#c4c4c4')
 		})
 	},
 	// Compositor layers: three panes floating apart, one element promoted
@@ -303,41 +272,29 @@ const ART: Record<Shape, (ctx: Ctx) => void> = {
 			rect(ctx, 2.5, 30, 35, 7.5, '#6a6a6a')
 		})
 	},
-	// An envelope, flap and stamp
+	// Email: an envelope standing, a letter pulled half out of it
 	envelope(ctx) {
-		const { box, top } = iso(ctx, 58, 38)
-		box(0, 0, 0, 58, 38, 3)
-		top(-29, -19, 3, () => {
+		const { box, front } = iso(ctx, 52, 6)
+		box(0, 1, 6, 44, 1.5, 26, ['#f6f6f6', '#d0d0d0', '#f4f4f4'])
+		front(-22, 0.25, 6, () => {
+			;[30, 22, 34, 18].forEach((l, i) =>
+				rect(ctx, 5, 22 - i * 3.4, l, 1.3, '#3a3a3a'),
+			)
+		})
+		box(0, -2, 0, 52, 3, 20, ['#9a9a9a', '#5a5a5a', '#a4a4a4'])
+		front(-26, -3.5, 0, () => {
 			line(
 				ctx,
 				[
-					[1, 37],
-					[29, 16],
-					[57, 37],
+					[0.5, 19.5],
+					[26, 7],
+					[51.5, 19.5],
 				],
-				LEFT,
-				0.9,
+				'#f0f0f0',
+				1.4,
 			)
-			line(
-				ctx,
-				[
-					[1, 1],
-					[24, 18],
-				],
-				'#b0b0b0',
-				0.6,
-			)
-			line(
-				ctx,
-				[
-					[57, 1],
-					[34, 18],
-				],
-				'#b0b0b0',
-				0.6,
-			)
-			rect(ctx, 46, 4, 8, 9, RIGHT)
-			rect(ctx, 47.5, 5.5, 5, 6, LEFT)
+			rect(ctx, 42, 3, 6, 6.5, '#e8e8e8')
+			rect(ctx, 43.2, 4.2, 3.6, 4.1, '#2a2a2a')
 		})
 	},
 }
@@ -391,19 +348,22 @@ function bounds(shape: Shape) {
 	return b
 }
 
+// Every object fits the same square box, scaled by its longer side, so all
+// of them read at one size; nearly square drawings keep width and height
+// close too. Each is cut by the block's edges by the same share of itself.
+const BOX = 0.42
+const CUT_X = 0.14
+const CUT_Y = 0.2
+
 function place(ctx: Ctx, w: number, h: number, shape: Shape) {
 	const b = bounds(shape)
-	// Two limits, whichever is tighter: the same ink area for all, and never
-	// wider or taller than a fixed box. Small, so it stays in the background.
-	const m = Math.min(w, h)
-	const k = Math.min(
-		(m * 0.3) / Math.sqrt(b.area),
-		(m * 0.46) / Math.max(b.x1 - b.x0, b.y1 - b.y0),
-	)
-	const size = Math.max(b.x1 - b.x0, b.y1 - b.y0) * k
-	// The left edge cuts 14% of it off, the bottom edge 20%
-	ctx.translate(-size * 0.14 - b.x0 * k, h + size * 0.2 - b.y1 * k)
+	const bw = b.x1 - b.x0
+	const bh = b.y1 - b.y0
+	const k = (Math.min(w, h) * BOX) / Math.max(bw, bh)
+	ctx.translate(-bw * k * CUT_X - b.x0 * k, h + bh * k * CUT_Y - b.y1 * k)
 	ctx.scale(k, k)
+	// What stays on screen once the edges have cut it
+	return Math.min(w, bw * k * (1 - CUT_X)) * Math.min(h, bh * k * (1 - CUT_Y))
 }
 
 // ── Sampling ─────────────────────────────────────────────────────────
@@ -416,7 +376,7 @@ function sample(shape: Shape, w: number, h: number, sx: number, sy: number) {
 	c.width = Math.max(1, Math.round(w))
 	c.height = Math.max(1, Math.round(h))
 	const ctx = c.getContext('2d', { willReadFrequently: true })!
-	place(ctx, w, h, shape)
+	const visible = place(ctx, w, h, shape)
 	ART[shape](ctx)
 	const data = ctx.getImageData(0, 0, c.width, c.height).data
 	const out: number[] = []
@@ -429,8 +389,21 @@ function sample(shape: Shape, w: number, h: number, sx: number, sy: number) {
 			out.push(a === 0 ? 0 : a * (1 - tone(lum)))
 		}
 	}
-	return out
+	// The same amount of ink for every object: its tones are scaled until
+	// the lit dots cover INK of its visible box. Relative tones are kept, so
+	// the faces still read apart.
+	const target = (INK * visible) / (sx * sy)
+	let gain = 1
+	for (let n = 0; n < 6; n++) {
+		let sum = 0
+		for (const v of out) sum += Math.min(1, v * gain)
+		if (!sum) break
+		gain = Math.min(4, Math.max(0.4, gain * (target / sum)))
+	}
+	return out.map((v) => Math.min(1, v * gain))
 }
+
+const INK = 0.3
 
 // 8×8 Bayer thresholds, 0–1
 const BAYER = (() => {
@@ -454,20 +427,42 @@ const DOT = 3
 
 // ── The print ────────────────────────────────────────────────────────
 
+// The loupe, as a share of the block's shorter side
+const RADIUS = 0.12
+// Each dot sits on a spring to where the loupe pushes it: one small
+// overshoot, at rest in ~400ms, no wobble once the pointer has gone
+const K = 180
+const C = 20
+
 /** An object printed as a 1-bit ordered dither in one ink. A new object
  * takes over fast: the old one leaves in ~120ms while the new one arrives
- * right behind it. Pixels swell under the pointer, like a loupe. */
+ * right behind it.
+ *
+ * Over the block, the pointer is a loupe: a field of dots rises from the
+ * paper around it and it pushes a crater into them, harder the faster it
+ * moves. Near the type in `text`, the type is printed too, in dots the
+ * crater pushes like the rest: solid at the loupe's rim, where they take
+ * over from the real type (`onLens` says where, to mask it out), thinning
+ * toward the centre. */
 export function Print({
 	shape,
 	color,
+	text,
+	onLens,
 	className = '',
 }: {
 	shape: Shape
 	color: string
+	text?: RefObject<HTMLElement | null>
+	onLens?: (x: number, y: number, r: number) => void
 	className?: string
 }) {
 	const canvas = useRef<HTMLCanvasElement>(null)
 	const api = useRef<{ set: (s: Shape) => void }>({ set: () => {} })
+	const lensCb = useRef(onLens)
+	useEffect(() => {
+		lensCb.current = onLens
+	})
 
 	useEffect(() => {
 		const c = canvas.current
@@ -476,17 +471,34 @@ export function Print({
 		const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
 		let w = 0
 		let h = 0
+		let cols = 0
+		let rows = 0
 		let cache = new Map<Shape, number[]>()
 		let from: number[] = []
 		let to: number[] = []
 		let current: Shape = shape
 		let t = 1
+		// Per dot: offset and velocity
+		let ox = new Float32Array(0)
+		let oy = new Float32Array(0)
+		let vx = new Float32Array(0)
+		let vy = new Float32Array(0)
+		// Raw pointer, where the field is centred, its speed, its presence
 		let px = 0
 		let py = 0
+		let sx = 0
+		let sy = 0
+		let lastPx = 0
+		let lastPy = 0
+		let speed = 0
 		let pa = 0
 		let inside = false
 		let raf = 0
 		let last = 0
+		// The type as dot coverage per cell, and its box
+		let glyph = new Float32Array(0)
+		let tb = { x0: 0, y0: 0, x1: 0, y1: 0 }
+		let glyphDirty = true
 
 		const get = (s: Shape) => {
 			let v = cache.get(s)
@@ -512,34 +524,177 @@ export function Print({
 			c.width = w * dpr
 			c.height = h * dpr
 			ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+			cols = 0
+			for (let x = DOT / 2; x < w; x += DOT) cols++
+			rows = 0
+			for (let y = DOT / 2; y < h; y += DOT) rows++
+			const n = cols * rows
+			ox = new Float32Array(n)
+			oy = new Float32Array(n)
+			vx = new Float32Array(n)
+			vy = new Float32Array(n)
 			cache = new Map()
 			to = from = w && h ? get(current) : []
 			t = 1
+			glyphDirty = true
+		}
+
+		// The type rasterised to the dot grid. Each character is drawn where
+		// the layout put it (a Range per character), so kerning is kept and
+		// the DOM never has to be split into letters.
+		const buildGlyph = () => {
+			glyphDirty = false
+			glyph = new Float32Array(cols * rows)
+			tb = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity }
+			const root = text?.current
+			if (!root || !w || !h) return
+			const off = document.createElement('canvas')
+			off.width = w
+			off.height = h
+			const g = off.getContext('2d', { willReadFrequently: true })!
+			g.fillStyle = '#fff'
+			const base = c.getBoundingClientRect()
+			const range = document.createRange()
+			const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+			for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+				const el = n.parentElement
+				if (!el || el.closest('.sr-only')) continue
+				const cs = getComputedStyle(el)
+				if (cs.visibility === 'hidden' || cs.display === 'none') continue
+				g.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`
+				const s = n.textContent ?? ''
+				for (let k = 0; k < s.length; k++) {
+					if (!s[k].trim()) continue
+					range.setStart(n, k)
+					range.setEnd(n, k + 1)
+					const r = range.getBoundingClientRect()
+					if (!r.width) continue
+					// A character's box is the font's content area: its top sits
+					// one ascent above the baseline
+					const asc = g.measureText(s[k]).fontBoundingBoxAscent
+					const x = r.left - base.left
+					const y = r.top - base.top
+					tb.x0 = Math.min(tb.x0, x)
+					tb.y0 = Math.min(tb.y0, y)
+					tb.x1 = Math.max(tb.x1, x + r.width)
+					tb.y1 = Math.max(tb.y1, y + r.height)
+					g.fillText(s[k], x, y + asc)
+				}
+			}
+			const a = g.getImageData(0, 0, w, h).data
+			for (let r = 0; r < rows; r++)
+				for (let col = 0; col < cols; col++) {
+					let sum = 0
+					let n = 0
+					for (let yy = r * DOT; yy < Math.min(h, r * DOT + DOT); yy++)
+						for (let xx = col * DOT; xx < Math.min(w, col * DOT + DOT); xx++) {
+							sum += a[(yy * w + xx) * 4 + 3]
+							n++
+						}
+					glyph[r * cols + col] = n ? sum / n / 255 : 0
+				}
 		}
 
 		const draw = () => {
 			ctx.clearRect(0, 0, w, h)
 			if (!to.length) return
+			const R = Math.min(w, h) * RADIUS
+			const wide = R * 0.7 * 1.5
+			const lens = pa > 0.01
+			// The type turns to dots inside Rm, wider than the crater so a ring
+			// of dotted letters stays readable around it
+			const Rm = R * 1.8 * pa
+			const ink = lens && !!text
+			if (ink && glyphDirty) buildGlyph()
+			lensCb.current?.(sx, sy, ink ? Rm : 0)
+			// Over the type the ambient field steps back, so it doesn't drown
+			// the letters in noise
+			let quiet = 1
+			if (ink && tb.x1 > tb.x0) {
+				const dx = Math.max(tb.x0 - sx, 0, sx - tb.x1)
+				const dy = Math.max(tb.y0 - sy, 0, sy - tb.y1)
+				quiet = 1 - 0.8 * Math.max(0, 1 - Math.hypot(dx, dy) / R)
+			}
 			ctx.fillStyle = color
 			ctx.beginPath()
-			const sigma = Math.min(w, h) * 0.12
-			let i = 0
-			for (let y = DOT / 2; y < h; y += DOT) {
-				for (let x = DOT / 2; x < w; x += DOT, i++) {
+			for (let r = 0; r < rows; r++) {
+				const y = r * DOT + DOT / 2
+				for (let col = 0; col < cols; col++) {
+					const x = col * DOT + DOT / 2
+					const i = r * cols + col
 					let v = mix(from[i], to[i])
-					if (pa > 0.01) {
-						const d2 = (x - px) ** 2 + (y - py) ** 2
-						// The loupe works on the whole block: it darkens the ink that's
-						// there, and raises a faint dot field from the empty paper.
-						v += 0.45 * pa * Math.exp(-d2 / (2 * sigma * sigma)) * (0.25 + v)
+					// Dots of the type get half the crater's push, so the letters
+					// keep their shape
+					let push = 1
+					if (lens) {
+						const dx = x - sx
+						const dy = y - sy
+						const d2 = dx * dx + dy * dy
+						v +=
+							0.42 * pa * quiet * Math.exp(-d2 / (2 * wide * wide)) * (0.3 + v)
+						if (ink && d2 < Rm * Rm) {
+							const tt = 1 - Math.sqrt(d2) / Rm
+							const m = tt * tt * (3 - 2 * tt)
+							// Solid at the rim, like the type they replace
+							const g = glyph[i] * (1 - 0.6 * m)
+							if (g > v) {
+								v = g
+								push = 0.5
+							}
+						}
 					}
-					const bx = Math.floor(x / DOT) % 8
-					const by = Math.floor(y / DOT) % 8
-					if (Math.min(1, v) > BAYER[by][bx])
-						ctx.rect(x - DOT / 2, y - DOT / 2, DOT, DOT)
+					if (Math.min(1, v) > BAYER[r % 8][col % 8])
+						ctx.rect(
+							x + ox[i] * push - DOT / 2,
+							y + oy[i] * push - DOT / 2,
+							DOT,
+							DOT,
+						)
 				}
 			}
 			ctx.fill()
+		}
+
+		// Each dot springs toward where the field wants it; faster pointers
+		// push further
+		const step = (dt: number) => {
+			const R = Math.min(w, h) * RADIUS
+			const sigma = R * 0.7
+			const reach = sigma * 3
+			const boost = 1 + Math.min(1.5, speed / 1200)
+			let moving = false
+			for (let r = 0; r < rows; r++) {
+				const y = r * DOT + DOT / 2
+				for (let col = 0; col < cols; col++) {
+					const i = r * cols + col
+					const x = col * DOT + DOT / 2
+					const dx = x - sx
+					const dy = y - sy
+					let tx = 0
+					let ty = 0
+					if (pa > 0.01 && Math.abs(dx) < reach && Math.abs(dy) < reach) {
+						const d2 = dx * dx + dy * dy
+						const d = Math.sqrt(d2) || 1
+						const f =
+							pa * R * 0.22 * boost * Math.exp(-d2 / (2 * sigma * sigma))
+						tx = (dx / d) * f
+						ty = (dy / d) * f
+					} else if (!ox[i] && !oy[i] && !vx[i] && !vy[i]) continue
+					vx[i] += (K * (tx - ox[i]) - C * vx[i]) * dt
+					vy[i] += (K * (ty - oy[i]) - C * vy[i]) * dt
+					ox[i] += vx[i] * dt
+					oy[i] += vy[i] * dt
+					if (
+						Math.abs(vx[i]) + Math.abs(vy[i]) < 0.3 &&
+						Math.abs(ox[i] - tx) + Math.abs(oy[i] - ty) < 0.05
+					) {
+						ox[i] = tx
+						oy[i] = ty
+						vx[i] = vy[i] = 0
+					} else moving = true
+				}
+			}
+			return moving
 		}
 
 		const tick = (now: number) => {
@@ -551,8 +706,23 @@ export function Print({
 				busy = true
 			}
 			const target = inside && !reduce ? 1 : 0
-			pa += (target - pa) * Math.min(1, dt * 10)
+			pa += (target - pa) * Math.min(1, dt * 12)
 			if (Math.abs(target - pa) > 0.005) busy = true
+			else pa = target
+
+			speed +=
+				(Math.hypot(px - lastPx, py - lastPy) / dt - speed) *
+				Math.min(1, dt * 10)
+			lastPx = px
+			lastPy = py
+			if (speed > 5) busy = true
+
+			const k = 1 - Math.exp(-dt * 40)
+			sx += (px - sx) * k
+			sy += (py - sy) * k
+			if (Math.abs(px - sx) + Math.abs(py - sy) > 0.3) busy = true
+
+			if (!reduce && step(dt)) busy = true
 			draw()
 			raf = busy ? requestAnimationFrame(tick) : 0
 			if (!busy) last = 0
@@ -573,13 +743,19 @@ export function Print({
 			kick()
 		}
 
-		// Only while the pointer is over the print is there anything to do.
+		// Only while the pointer is over the print is there anything to do
 		const onMove = (e: PointerEvent) => {
 			if (e.pointerType !== 'mouse') return
 			const r = c.getBoundingClientRect()
 			px = e.clientX - r.left
 			py = e.clientY - r.top
 			const now = px >= 0 && py >= 0 && px <= r.width && py <= r.height
+			// Entering: the field starts where the pointer is, at rest
+			if (now && !inside && pa < 0.02) {
+				sx = lastPx = px
+				sy = lastPy = py
+				speed = 0
+			}
 			if (now || inside) {
 				inside = now
 				kick()
@@ -593,15 +769,25 @@ export function Print({
 			draw()
 		})
 		ro.observe(c)
+		// The type changes (another row on show) or its font arrives
+		const mo = new MutationObserver(() => (glyphDirty = true))
+		if (text?.current)
+			mo.observe(text.current, {
+				childList: true,
+				subtree: true,
+				characterData: true,
+			})
+		document.fonts?.ready.then(() => (glyphDirty = true))
 		window.addEventListener('pointermove', onMove, { passive: true })
 		return () => {
+			mo.disconnect()
 			ro.disconnect()
 			window.removeEventListener('pointermove', onMove)
 			cancelAnimationFrame(raf)
 		}
 		// Shape changes go through api.set; this effect owns the canvas.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [color])
+	}, [color, text])
 
 	useEffect(() => {
 		api.current.set(shape)

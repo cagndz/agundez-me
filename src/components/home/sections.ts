@@ -3,8 +3,9 @@ import { contactLinks, EMAIL } from '@/content/contact'
 import type { PostMeta } from '@/lib/writing'
 import type { Shape } from './print'
 
-// What the homepage lists, row by row. Each row names the object printed
-// in the ink block while it's hovered.
+// What the homepage lists, row by row. While a row is hovered the ink block
+// shows it in two levels: big, what it is; small, the detail. And it prints
+// the row's object.
 
 export type Row = {
 	id: string
@@ -14,6 +15,10 @@ export type Row = {
 	href?: string
 	// The email row copies the address instead of linking
 	copy?: boolean
+	// The block's big line, when it isn't the name
+	title?: string
+	// The block's small line, broken where the sense breaks, never by width
+	detail: string[]
 	shape: Shape
 }
 
@@ -21,33 +26,68 @@ export type Section = { id: string; label: string; rows: Row[] }
 
 export type Post = { slug: string; meta: PostMeta }
 
-// Projects get their kind under the name in the block; the rest don't.
-export const PROJECT_IDS = new Set(['lab', 'menubar', 'silex'])
+// The block's name before any row is hovered
+export const HOME = {
+	title: 'carlos agúndez',
+	detail: ['design engineer based in spain'],
+}
 
 const PROJECT_ROWS: Record<
 	string,
-	Pick<Row, 'id' | 'name' | 'meta' | 'shape'>
+	Pick<Row, 'id' | 'name' | 'meta' | 'detail' | 'shape'>
 > = {
-	Lab: { id: 'lab', name: 'lab', meta: 'experiments', shape: 'mat' },
+	Lab: {
+		id: 'lab',
+		name: 'lab',
+		meta: 'experiments',
+		detail: ['interactive ui components', 'and experiments'],
+		shape: 'tubes',
+	},
 	'Menubar Player': {
 		id: 'menubar',
 		name: 'menubar player',
 		meta: 'macos app',
+		detail: ['an audio player for youtube', 'that lives in the macos menu bar'],
 		shape: 'cassette',
 	},
-	Silex: { id: 'silex', name: 'silex', meta: 'theme', shape: 'swatches' },
+	Silex: {
+		id: 'silex',
+		name: 'silex',
+		meta: 'theme',
+		detail: [
+			'a quiet dark theme.',
+			'color where it counts, gray everywhere else',
+		],
+		shape: 'laptop',
+	},
 }
 
-// One object per post. A post without one gets a stack of pages.
-const POST_SHAPES: Record<string, Shape> = {
-	'when-will-change-helps': 'layers',
-	'base-ui-dialog-mounts-open': 'openbox',
+// Per post: its object, and the block's lines. In the big line, product
+// names stay whole: a no-break space inside "base ui", a word joiner after
+// the hyphen in "will-change".
+const POSTS: Record<string, Pick<Row, 'title' | 'detail' | 'shape'>> = {
+	'when-will-change-helps': {
+		title: "when will-\u2060change helps, and when it doesn't",
+		detail: [
+			'where will-change removed the repaint,',
+			'and where it did nothing',
+		],
+		shape: 'layers',
+	},
+	'base-ui-dialog-mounts-open': {
+		title: 'animating a base\u00a0ui dialog that mounts open',
+		detail: [
+			'a dialog that mounts open skips its enter animation.',
+			'why, and the fix',
+		],
+		shape: 'openbox',
+	},
 }
 
-const SOCIAL_SHAPES: Record<string, Shape> = {
-	X: 'x',
-	GitHub: 'github',
-	LinkedIn: 'linkedin',
+const SOCIAL: Record<string, Pick<Row, 'detail' | 'shape'>> = {
+	X: { detail: ['@cagndz'], shape: 'x' },
+	GitHub: { detail: ['@cagndz'], shape: 'github' },
+	LinkedIn: { detail: ['carlos agúndez torres'], shape: 'linkedin' },
 }
 
 export function sections(posts: Post[]): Section[] {
@@ -69,7 +109,9 @@ export function sections(posts: Post[]): Section[] {
 				// ISO date: "2026-10-24" → "2026.10"
 				meta: meta.date.slice(0, 7).replace('-', '.'),
 				href: `/writing/${slug}`,
-				shape: POST_SHAPES[slug] ?? 'layers',
+				// A post without its own lines shows its title and nothing under
+				// it, and gets a stack of pages
+				...(POSTS[slug] ?? { detail: [], shape: 'layers' as Shape }),
 			})),
 		},
 		{
@@ -81,6 +123,8 @@ export function sections(posts: Post[]): Section[] {
 					name: EMAIL,
 					meta: 'copy',
 					copy: true,
+					title: 'email',
+					detail: [EMAIL],
 					shape: 'envelope',
 				},
 				...contactLinks.map(({ label, href }) => ({
@@ -88,7 +132,7 @@ export function sections(posts: Post[]): Section[] {
 					name: label.toLowerCase(),
 					meta: '↗',
 					href,
-					shape: SOCIAL_SHAPES[label] ?? 'envelope',
+					...(SOCIAL[label] ?? { detail: [], shape: 'envelope' as Shape }),
 				})),
 			],
 		},
