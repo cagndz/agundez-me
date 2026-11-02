@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { type Face, faceStyle } from './faces/face'
 import { Print } from './print'
 import { Scramble } from './scramble'
 import { type Post, PROJECT_IDS, type Row } from './sections'
@@ -50,7 +49,7 @@ function useWide() {
 	)
 }
 
-export function Home({ posts, face }: { posts: Post[]; face: Face }) {
+export function Home({ posts }: { posts: Post[] }) {
 	const wide = useWide()
 	const [row, setRow] = useState<Row | null>(null)
 	const [run, setRun] = useState(0)
@@ -94,8 +93,8 @@ export function Home({ posts, face }: { posts: Post[]; face: Face }) {
 
 	return (
 		<div
-			style={{ ...theme, ...faceStyle(face) }}
-			className={`${face.className} min-h-screen text-[15px] leading-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]`}
+			style={theme}
+			className='min-h-screen text-[15px] leading-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]'
 		>
 			<header className='relative overflow-hidden bg-(--ink) text-(--paper) lg:sticky lg:top-0 lg:h-screen'>
 				{wide && (
@@ -107,8 +106,8 @@ export function Home({ posts, face }: { posts: Post[]; face: Face }) {
 				)}
 				<div className='relative px-6 pt-10 pb-8 lg:p-8'>
 					{/* The big type's side bearing is pulled back so it lines up
-					    with the small text under it. Both depend on the face. */}
-					<h1 className='ml-[calc(var(--name-bearing)*-1)] text-[clamp(3rem,7.5vw,7.5rem)] leading-[0.9] font-semibold tracking-(--name-tracking) [overflow-wrap:anywhere]'>
+					    with the small text under it. */}
+					<h1 className='-ml-[0.055em] text-[clamp(3rem,7.5vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.055em] [overflow-wrap:anywhere]'>
 						<Scramble
 							text={shown ? shown.name : 'carlos agúndez'}
 							run={run}
