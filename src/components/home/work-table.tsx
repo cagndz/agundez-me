@@ -52,8 +52,13 @@ function RowLine({
 		<>
 			{/* Only the name underlines: it's what the link is. The meta just
 			    comes up to full strength. The name decodes once on the way in. */}
-			<span className='min-w-0 decoration-1 underline-offset-4 group-hover/row:underline group-focus-visible/row:underline lg:truncate'>
-				<Scramble text={row.name} delay={120 + index * 45} intro={intro} />
+			<span className='min-w-0 decoration-1 underline-offset-4 group-hover/row:underline group-focus-visible/row:underline lg:whitespace-nowrap'>
+				<Scramble
+					text={row.name}
+					delay={120 + index * 45}
+					intro={intro}
+					className='lg:truncate'
+				/>
 			</span>
 			<span className='shrink-0 tabular-nums opacity-70 transition-opacity duration-150 group-hover/row:opacity-100 group-focus-visible/row:opacity-100'>
 				{row.copy ? (
