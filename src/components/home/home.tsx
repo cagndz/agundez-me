@@ -107,7 +107,7 @@ export function Home({ posts }: { posts: Post[] }) {
 				<div className='relative px-6 pt-10 pb-8 lg:p-8'>
 					{/* The big type's side bearing is pulled back so it lines up
 					    with the small text under it. */}
-					<h1 className='-ml-[0.055em] text-[clamp(3rem,7.5vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.055em] [overflow-wrap:anywhere]'>
+					<h1 className='-ml-[0.035em] text-[clamp(3rem,7.5vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.055em] [overflow-wrap:anywhere]'>
 						<Scramble
 							text={shown ? shown.name : 'carlos agúndez'}
 							run={run}
