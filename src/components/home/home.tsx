@@ -123,7 +123,7 @@ export function Home({ posts }: { posts: Post[] }) {
 			<main className='px-6 py-4 lg:px-8 lg:py-12'>
 				{/* Narrow on purpose: the kinds and dates stay close to the names
 				    they belong to, instead of out at the far edge of the half. */}
-				<div className='max-w-[33rem]'>
+				<div className='max-w-[34rem]'>
 					<WorkTable posts={posts} onHover={hover} intro={intro} />
 				</div>
 			</main>
