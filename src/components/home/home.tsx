@@ -2,18 +2,19 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Print } from './print'
-import { Scramble } from './scramble'
-import { type Post, PROJECT_IDS, type Row } from './sections'
+import { HOME, type Post, type Row } from './sections'
 import { WorkTable } from './work-table'
+import './home.css'
 
 // The homepage, in one ink. Half the page is a blue block: the name leads,
-// huge, and whatever row you're on takes its place, with its object printed
-// as a 1-bit dither in the bottom left, small and cut by the edges. The
-// other half is the work, as a table.
+// huge, and whatever row you're on takes its place, big line and small,
+// with its object printed as a 1-bit dither in the bottom left, cut by the
+// edges. Over the block the pointer is a loupe. The other half is the work,
+// as a table.
 //
 // In one column (below 1024px, or without a mouse) the block is only a
-// header: the name, no object, and nothing in it reacts to the rows, so a
-// tap on a row never reflows the page.
+// header: the name, no object, no loupe, and nothing in it reacts to the
+// rows, so a tap on a row never reflows the page.
 
 const INK = '#1f36d1'
 // The site's paper (--background); the canvas needs the literal colour.
@@ -30,11 +31,6 @@ const theme = {
 // beat before going back to the name keeps it from flashing in between.
 const SETTLE = 90
 
-// The entrance plays once per visit: coming back from a post or the lab
-// with client navigation keeps the page as it was. A full reload plays it
-// again, since this lives in the module.
-let introPlayed = false
-
 const WIDE = '(min-width: 1024px) and (hover: hover) and (pointer: fine)'
 
 function useWide() {
@@ -49,82 +45,90 @@ function useWide() {
 	)
 }
 
+// The entrance plays on every full load: the server always renders the
+// page marked for it, and it's plain CSS. Coming back from a post or the
+// lab with client navigation mounts the page again, but it keeps still:
+// this module outlives client navigation and starts over on a full load.
+let entered = false
+
 export function Home({ posts }: { posts: Post[] }) {
+	// Decided on mount, and only read here: on the server and at hydration
+	// it's still false, so both render the entrance and agree.
+	const [enter] = useState(() => !entered)
+	useEffect(() => {
+		entered = true
+	}, [])
 	const wide = useWide()
 	const [row, setRow] = useState<Row | null>(null)
-	const [run, setRun] = useState(0)
 	const leave = useRef<ReturnType<typeof setTimeout>>(undefined)
-	const [intro] = useState(() => !introPlayed)
+	const type = useRef<HTMLDivElement>(null)
 
-	useEffect(() => {
-		introPlayed = true
-		return () => clearTimeout(leave.current)
-	}, [])
-
-	// What's on show, kept outside render so the handlers can compare against
-	// it. A click focuses the row it's already hovering (and blurs it on the
-	// way out); those repeat events must not decode the name again.
-	const current = useRef<string | null>(null)
-
-	const show = (r: Row | null) => {
-		const id = r ? r.id : null
-		if (id === current.current) return
-		current.current = id
-		setRow(r)
-		setRun((n) => n + 1)
-	}
+	useEffect(() => () => clearTimeout(leave.current), [])
 
 	const hover = (r: Row | null) => {
 		if (!wide) return
 		clearTimeout(leave.current)
-		if (r) return show(r)
-		leave.current = setTimeout(() => show(null), SETTLE)
+		if (r) return setRow(r)
+		leave.current = setTimeout(() => setRow(null), SETTLE)
+	}
+
+	// Under the loupe the print takes the type over: the real type is masked
+	// out in all but the outer quarter of the zone, where the dots under it
+	// are still nearly solid, so the hand-over is soft.
+	const lens = (x: number, y: number, r: number) => {
+		const el = type.current
+		if (!el) return
+		if (r < 1) {
+			el.style.maskImage = ''
+			return
+		}
+		el.style.maskImage = `radial-gradient(circle ${r}px at ${x - el.offsetLeft}px ${y - el.offsetTop}px, transparent 75%, #000 100%)`
 	}
 
 	// Leaving the wide layout drops whatever was on show.
 	const shown = wide ? row : null
-	// Under the name: "design engineer" on the way in, a project's kind on a
-	// project, nothing for the rest.
-	const sub = !shown
-		? 'design engineer'
-		: PROJECT_IDS.has(shown.id)
-			? shown.meta
-			: ''
+	const title = shown ? (shown.title ?? shown.name) : HOME.title
+	const detail = shown ? shown.detail : HOME.detail
 
 	return (
 		<div
 			style={theme}
-			className='min-h-screen text-[15px] leading-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]'
+			data-enter={enter ? '' : undefined}
+			className='min-h-screen text-base leading-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]'
 		>
-			<header className='relative overflow-hidden bg-(--ink) text-(--paper) lg:sticky lg:top-0 lg:h-screen'>
+			<header className='relative overflow-hidden bg-(--ink) text-[15px] text-(--paper) lg:sticky lg:top-0 lg:h-screen'>
 				{wide && (
 					<Print
 						shape={shown ? shown.shape : 'none'}
 						color={PAPER}
+						text={type}
+						onLens={lens}
 						className='absolute inset-0 h-full w-full'
 					/>
 				)}
-				<div className='relative px-6 pt-10 pb-8 lg:p-8'>
+				<div
+					ref={type}
+					className='pointer-events-none relative px-6 pt-10 pb-8 lg:p-8'
+				>
 					{/* The big type's side bearing is pulled back so it lines up
 					    with the small text under it. */}
 					<h1 className='-ml-[0.035em] text-[clamp(3rem,7.5vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.055em] [overflow-wrap:anywhere]'>
-						<Scramble
-							text={shown ? shown.name : 'carlos agúndez'}
-							run={run}
-							duration={420}
-							intro={intro}
-						/>
+						{title}
 					</h1>
-					<p className='mt-4 h-4 font-mono text-xs tabular-nums opacity-80'>
-						<Scramble text={sub} run={run} duration={300} intro={intro} />
+					<p className='mt-4 min-h-4 font-mono text-xs leading-4 opacity-80'>
+						{detail.map((line) => (
+							<span key={line} className='block'>
+								{line}
+							</span>
+						))}
 					</p>
 				</div>
 			</header>
 			<main className='px-6 py-4 lg:px-8 lg:py-12'>
 				{/* Narrow on purpose: the kinds and dates stay close to the names
 				    they belong to, instead of out at the far edge of the half. */}
-				<div className='mx-auto max-w-[38rem]'>
-					<WorkTable posts={posts} onHover={hover} intro={intro} />
+				<div className='home-list mx-auto max-w-[40rem]'>
+					<WorkTable posts={posts} onHover={hover} />
 				</div>
 			</main>
 		</div>
