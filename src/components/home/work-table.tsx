@@ -128,7 +128,9 @@ export function WorkTable({
 			<h2 id={`${s.id}-heading`} className='font-semibold'>
 				{s.label}
 			</h2>
-			<ul>
+			{/* The rows start a line below the label, so it sits alone at the
+			    top of its section with empty space beside it. */}
+			<ul className='col-start-2 row-start-2'>
 				{s.rows.map((r) => (
 					<li key={r.id}>
 						<RowLine row={r} index={index++} onHover={onHover} intro={intro} />
