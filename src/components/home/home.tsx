@@ -61,18 +61,24 @@ export function Home({ posts }: { posts: Post[] }) {
 		return () => clearTimeout(leave.current)
 	}, [])
 
+	// What's on show, kept outside render so the handlers can compare against
+	// it. A click focuses the row it's already hovering (and blurs it on the
+	// way out); those repeat events must not decode the name again.
+	const current = useRef<string | null>(null)
+
+	const show = (r: Row | null) => {
+		const id = r ? r.id : null
+		if (id === current.current) return
+		current.current = id
+		setRow(r)
+		setRun((n) => n + 1)
+	}
+
 	const hover = (r: Row | null) => {
 		if (!wide) return
 		clearTimeout(leave.current)
-		if (r) {
-			setRow(r)
-			setRun((n) => n + 1)
-			return
-		}
-		leave.current = setTimeout(() => {
-			setRow(null)
-			setRun((n) => n + 1)
-		}, SETTLE)
+		if (r) return show(r)
+		leave.current = setTimeout(() => show(null), SETTLE)
 	}
 
 	// Leaving the wide layout drops whatever was on show.
@@ -101,7 +107,7 @@ export function Home({ posts }: { posts: Post[] }) {
 				<div className='relative px-6 pt-10 pb-8 lg:p-8'>
 					{/* The big type's side bearing is pulled back so it lines up
 					    with the small text under it. */}
-					<h1 className='-ml-[0.055em] text-[clamp(3rem,7.5vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.055em] [overflow-wrap:anywhere]'>
+					<h1 className='-ml-[0.035em] text-[clamp(3rem,7.5vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.055em] [overflow-wrap:anywhere]'>
 						<Scramble
 							text={shown ? shown.name : 'carlos agúndez'}
 							run={run}
@@ -115,7 +121,11 @@ export function Home({ posts }: { posts: Post[] }) {
 				</div>
 			</header>
 			<main className='px-6 py-4 lg:px-8 lg:py-12'>
-				<WorkTable posts={posts} onHover={hover} intro={intro} />
+				{/* Narrow on purpose: the kinds and dates stay close to the names
+				    they belong to, instead of out at the far edge of the half. */}
+				<div className='mx-auto max-w-[38rem]'>
+					<WorkTable posts={posts} onHover={hover} intro={intro} />
+				</div>
 			</main>
 		</div>
 	)

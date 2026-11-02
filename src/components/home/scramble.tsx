@@ -14,12 +14,16 @@ export function Scramble({
 	delay = 0,
 	duration = 520,
 	intro = true,
+	className = '',
 }: {
 	text: string
 	run?: number
 	delay?: number
 	duration?: number
 	intro?: boolean
+	// Applied to the real text (e.g. truncation). The noise only inherits
+	// from the parent, and is clipped to the real text's box with no ellipsis.
+	className?: string
 }) {
 	// The noise is kept with the text it belongs to: when the text changes
 	// and no animation runs (reduced motion), the new text shows as is.
@@ -69,10 +73,27 @@ export function Scramble({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [text, run, delay, duration])
 
+	// The real text always holds the space, and the noise is laid over it.
+	// Noise glyphs are wider or narrower than the letters they stand for, so
+	// in flow they'd rewrap the line and shove everything below it around.
+	const noisy = out !== text
 	return (
-		<>
+		<span className='relative block'>
 			<span className='sr-only'>{text}</span>
-			<span aria-hidden='true'>{out}</span>
-		</>
+			<span
+				aria-hidden='true'
+				className={`block ${noisy ? 'invisible' : ''} ${className}`}
+			>
+				{text}
+			</span>
+			{noisy && (
+				<span
+					aria-hidden='true'
+					className='absolute inset-0 block overflow-hidden'
+				>
+					{out}
+				</span>
+			)}
+		</span>
 	)
 }

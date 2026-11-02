@@ -52,8 +52,13 @@ function RowLine({
 		<>
 			{/* Only the name underlines: it's what the link is. The meta just
 			    comes up to full strength. The name decodes once on the way in. */}
-			<span className='min-w-0 decoration-1 underline-offset-4 group-hover/row:underline group-focus-visible/row:underline lg:truncate'>
-				<Scramble text={row.name} delay={120 + index * 45} intro={intro} />
+			<span className='min-w-0 decoration-1 underline-offset-4 group-hover/row:underline group-focus-visible/row:underline lg:whitespace-nowrap'>
+				<Scramble
+					text={row.name}
+					delay={120 + index * 45}
+					intro={intro}
+					className='lg:truncate'
+				/>
 			</span>
 			<span className='shrink-0 tabular-nums opacity-70 transition-opacity duration-150 group-hover/row:opacity-100 group-focus-visible/row:opacity-100'>
 				{row.copy ? (
@@ -120,10 +125,12 @@ export function WorkTable({
 			aria-labelledby={`${s.id}-heading`}
 			className='grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-5 border-b border-(--ink)/20 py-6 last:border-0 lg:grid-cols-[7rem_minmax(0,1fr)] lg:gap-x-6'
 		>
-			<h2 id={`${s.id}-heading`} className='text-right font-semibold'>
+			<h2 id={`${s.id}-heading`} className='font-semibold'>
 				{s.label}
 			</h2>
-			<ul>
+			{/* The rows start a line below the label, so it sits alone at the
+			    top of its section with empty space beside it. */}
+			<ul className='col-start-2 row-start-2'>
 				{s.rows.map((r) => (
 					<li key={r.id}>
 						<RowLine row={r} index={index++} onHover={onHover} intro={intro} />
