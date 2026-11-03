@@ -8,14 +8,17 @@
  *   │  └─ .lab-stage-content   the demo: travels with the frame but never scales
  *   └─ .lab-aside   the card with the specs: appears on its own, doesn't travel
  *
- * Variables origin.ts writes on the popup (inherited by the cards):
+ *   .lab-backdrop   outside the popup: its fade follows the stage's trip
+ *
+ * Variables origin.ts writes on the popup (inherited by the cards) and the backdrop:
  *   --origin-x / --origin-y     how far to move the frame and the demo so they sit over the card
  *   --origin-sx / --origin-sy   stretch so the frame is the same size as the card
  *   --origin-duration         travel duration, longer the further away the cell is
  *   --origin-opacity          1 when it starts over a (lifted) card, 0 when there is none
  */
 
-.lab-popup {
+.lab-popup,
+.lab-backdrop {
 	/* Soft start. A pure ease-out shoots off on the first frame, and from a far
 	   cell that feels like a jolt. */
 	--lab-glide: cubic-bezier(0.2, 0, 0, 1);
@@ -25,7 +28,9 @@
 	--lab-enter: var(--origin-duration, 380ms);
 	/* Exit is shorter than enter: it responds to a user action */
 	--lab-exit: calc(var(--origin-duration, 380ms) * 0.7);
+}
 
+.lab-popup {
 	/* Side of the stage: the tallest card in the lab (--stage-max, set by
 	   lab-modal.tsx), but never more than the screen allows */
 	--stage: min(var(--stage-max), calc(100vw - 3rem), 45dvh);
@@ -36,6 +41,23 @@
 		/* 18rem panel + 0.75rem gap + 3rem margin */
 		--stage: min(var(--stage-max), calc(100dvh - 3rem), calc(100vw - 21.75rem));
 	}
+}
+
+/* ── Backdrop ─────────────────────────────────────────────
+   Same duration and curve as the stage: it darkens while the piece comes
+   closer and clears while it goes back, and both arrive together. With its
+   own timing, a far cell's trip would end after the backdrop had settled. */
+.lab-backdrop {
+	transition: opacity var(--lab-enter) var(--lab-glide);
+}
+
+.lab-backdrop[data-starting-style],
+.lab-backdrop[data-ending-style] {
+	opacity: 0;
+}
+
+.lab-backdrop[data-ending-style] {
+	transition-duration: var(--lab-exit);
 }
 
 /* ── Popup ────────────────────────────────────────────────
@@ -142,7 +164,9 @@
 	.lab-popup[data-ending-style] .lab-aside {
 		translate: none;
 	}
-	.lab-popup[data-ending-style] {
+	.lab-popup[data-ending-style],
+	.lab-backdrop,
+	.lab-backdrop[data-ending-style] {
 		transition-duration: 200ms;
 	}
 }

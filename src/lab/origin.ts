@@ -15,20 +15,31 @@ const DURATION_MAX = 520
  * frame moved and stretched until it covers the origin card, the demo moved
  * onto the card's own demo, plus the travel duration.
  * The variables are inherited, so .lab-stage reads them (see lab-modal.css).
+ * The backdrop gets them too: it sits outside the popup, and its fade has to
+ * last exactly as long as the trip.
  * Without a cell, it falls back to a generic effect from the center.
  */
-export function applyOrigin(popup: HTMLElement, slug: string | undefined) {
+export function applyOrigin(
+	popup: HTMLElement,
+	slug: string | undefined,
+	backdrop?: HTMLElement | null,
+) {
+	const targets = backdrop ? [popup, backdrop] : [popup]
+	const setVar = (name: string, value: string) => {
+		for (const el of targets) el.style.setProperty(name, value)
+	}
+
 	const stage = popup.querySelector<HTMLElement>('[data-lab-stage]')
 	const rect = slug ? getCellRect(slug) : null
 
 	if (!rect || !stage) {
-		popup.style.setProperty('--origin-x', '0px')
-		popup.style.setProperty('--origin-y', '0px')
-		popup.style.setProperty('--origin-sx', '0.95')
-		popup.style.setProperty('--origin-sy', '0.95')
-		popup.style.setProperty('--origin-duration', '300ms')
+		setVar('--origin-x', '0px')
+		setVar('--origin-y', '0px')
+		setVar('--origin-sx', '0.95')
+		setVar('--origin-sy', '0.95')
+		setVar('--origin-duration', '300ms')
 		// No card to come from: it has to fade in, or it would just pop
-		popup.style.setProperty('--origin-opacity', '0')
+		setVar('--origin-opacity', '0')
 		return
 	}
 
@@ -51,14 +62,14 @@ export function applyOrigin(popup: HTMLElement, slug: string | undefined) {
 		DURATION_BASE + distance * DURATION_PER_PX,
 	)
 
-	popup.style.setProperty('--origin-x', `${dx}px`)
-	popup.style.setProperty('--origin-y', `${dy}px`)
-	popup.style.setProperty('--origin-sx', `${sx}`)
-	popup.style.setProperty('--origin-sy', `${sy}`)
-	popup.style.setProperty('--origin-duration', `${Math.round(duration)}ms`)
+	setVar('--origin-x', `${dx}px`)
+	setVar('--origin-y', `${dy}px`)
+	setVar('--origin-sx', `${sx}`)
+	setVar('--origin-sy', `${sy}`)
+	setVar('--origin-duration', `${Math.round(duration)}ms`)
 	// It starts exactly over the card, which is lifted (see liftCell), so it
 	// is opaque from the first frame: one piece that moves, not a copy that appears
-	popup.style.setProperty('--origin-opacity', '1')
+	setVar('--origin-opacity', '1')
 }
 
 /**
@@ -72,9 +83,10 @@ export function applyOrigin(popup: HTMLElement, slug: string | undefined) {
 export function applyOriginWithoutTransition(
 	popup: HTMLElement,
 	slug: string | undefined,
+	backdrop?: HTMLElement | null,
 ) {
 	popup.setAttribute('data-no-transition', '')
-	applyOrigin(popup, slug)
+	applyOrigin(popup, slug, backdrop)
 	void popup.offsetWidth // force style calculation with the variables already set
 	popup.removeAttribute('data-no-transition')
 }
