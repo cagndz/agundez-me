@@ -95,23 +95,10 @@
 	opacity: var(--origin-opacity, 0);
 }
 
-/* Only the frame stretches to the card's size. Stretching also squashes its
-   corners (rounded-sm × 0.6 = 2.4px), so the radius is divided by the same
-   scale, each axis on its own (horizontal / vertical radius), and grows back
-   to rounded-sm along the same curve: the corners look the same the whole trip. */
+/* Only the frame stretches to the card's size */
 .lab-popup[data-starting-style] .lab-stage-frame,
 .lab-popup[data-ending-style] .lab-stage-frame {
 	scale: var(--origin-sx, 0.95) var(--origin-sy, 0.95);
-	border-radius: calc(var(--radius-sm) / var(--origin-sx, 0.95)) /
-		calc(var(--radius-sm) / var(--origin-sy, 0.95));
-}
-
-.lab-stage-frame {
-	transition:
-		translate var(--lab-enter) var(--lab-glide),
-		scale var(--lab-enter) var(--lab-glide),
-		border-radius var(--lab-enter) var(--lab-glide),
-		opacity 160ms var(--lab-out);
 }
 
 /* Exit: returns to the card and stays opaque until it lands, where the card
@@ -121,16 +108,6 @@
 	transition:
 		translate var(--lab-exit) var(--lab-glide),
 		scale var(--lab-exit) var(--lab-glide),
-		opacity calc(var(--lab-exit) * 0.45) linear calc(var(--lab-exit) * 0.4);
-}
-
-/* After the rule above, which has the same specificity: the frame's exit
-   also carries its radius */
-.lab-popup[data-ending-style] .lab-stage-frame {
-	transition:
-		translate var(--lab-exit) var(--lab-glide),
-		scale var(--lab-exit) var(--lab-glide),
-		border-radius var(--lab-exit) var(--lab-glide),
 		opacity calc(var(--lab-exit) * 0.45) linear calc(var(--lab-exit) * 0.4);
 }
 
@@ -181,7 +158,6 @@
 	.lab-popup[data-ending-style] :is(.lab-stage-frame, .lab-stage-content) {
 		translate: none;
 		scale: none;
-		border-radius: var(--radius-sm);
 		opacity: 0; /* the card isn't lifted here, so the stage fades in over it */
 	}
 	.lab-popup[data-starting-style] .lab-aside,
