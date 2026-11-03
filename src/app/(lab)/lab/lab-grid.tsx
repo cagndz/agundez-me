@@ -34,7 +34,11 @@ export function LabGrid({ items }: { items: LabItem[] }) {
 							key={item.id}
 							data-lab-item
 							style={style}
-							className='group relative grid place-items-center rounded-sm bg-(--surface) px-4 font-mono text-sm uppercase ring-1 ring-foreground/10'
+							// data-lifted: the modal is open from this card (origin.ts). The
+							// surface and demo go at once, since the modal's stage covers
+							// them exactly; the label, which the stage doesn't have, fades.
+							// motion-safe: with reduced motion nothing travels, so the card stays.
+							className='group relative grid place-items-center rounded-sm bg-(--surface) px-4 font-mono text-sm uppercase ring-1 ring-foreground/10 motion-safe:data-lifted:bg-transparent motion-safe:data-lifted:ring-transparent'
 						>
 							<Link
 								href={`/lab?c=${item.slug}`}
@@ -43,7 +47,7 @@ export function LabGrid({ items }: { items: LabItem[] }) {
 								aria-label={`Open ${item.title}`}
 								className='absolute inset-0 rounded-sm'
 							/>
-							<span className='absolute top-4 left-4 flex items-center gap-2'>
+							<span className='absolute top-4 left-4 flex items-center gap-2 transition-opacity duration-200 ease-out-strong motion-safe:group-data-lifted:opacity-0 motion-safe:group-data-lifted:duration-150'>
 								<span
 									className='size-2 rounded-full bg-accent opacity-0 transition-[opacity,translate] duration-150 ease-out-strong group-hover:opacity-100 group-hover:duration-200 group-has-[a:focus-visible]:opacity-100 group-has-[a:focus-visible]:duration-200 motion-safe:-translate-x-2 motion-safe:group-hover:translate-x-0 motion-safe:group-has-[a:focus-visible]:translate-x-0'
 									aria-hidden='true'
@@ -58,7 +62,7 @@ export function LabGrid({ items }: { items: LabItem[] }) {
 							{Demo && (
 								<DemoFit
 									expectedSize={item.size}
-									className='pointer-events-none relative w-full min-w-0 *:pointer-events-auto'
+									className='pointer-events-none relative w-full min-w-0 *:pointer-events-auto motion-safe:group-data-lifted:invisible'
 								>
 									<Demo />
 								</DemoFit>

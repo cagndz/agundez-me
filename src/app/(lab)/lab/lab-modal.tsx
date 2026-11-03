@@ -10,7 +10,11 @@ import {
 	useState,
 	type CSSProperties,
 } from 'react'
-import { applyOrigin, applyOriginWithoutTransition } from '@/lab/origin'
+import {
+	applyOrigin,
+	applyOriginWithoutTransition,
+	liftCell,
+} from '@/lab/origin'
 import { demos } from '@/lab/registry'
 import { DemoFit } from '@/lab/demo-fit'
 import { XMark } from '@/components/icons/x-mark'
@@ -56,12 +60,19 @@ export function LabModal({
 
 	const slug = item?.slug
 	const popupRef = useRef<HTMLDivElement | null>(null)
+	// Mounts before the popup (it comes first in the portal), so it's ready
+	// when setPopup runs
+	const backdropRef = useRef<HTMLDivElement | null>(null)
 
-	// When the popup mounts (on open), set where it grows from.
+	// When the popup mounts (on open), set where it grows from and lift the
+	// card it leaves, in the same frame, so the piece never shows twice.
 	const setPopup = useCallback(
 		(el: HTMLDivElement | null) => {
 			popupRef.current = el
-			if (el && slug) applyOriginWithoutTransition(el, slug)
+			if (el && slug) {
+				applyOriginWithoutTransition(el, slug, backdropRef.current)
+				liftCell(slug)
+			}
 		},
 		[slug],
 	)
@@ -69,7 +80,7 @@ export function LabModal({
 	// On close, measure again: the cell may have moved (resize) since it opened.
 	useLayoutEffect(() => {
 		if (item === undefined && lastItem && popupRef.current) {
-			applyOrigin(popupRef.current, lastItem.slug)
+			applyOrigin(popupRef.current, lastItem.slug, backdropRef.current)
 		}
 	}, [item, lastItem])
 
@@ -81,9 +92,18 @@ export function LabModal({
 				if (openedInApp) router.back()
 				else router.replace('/lab', { scroll: false })
 			}}
+			// Once the stage has landed back on its card (Base UI waits for the
+			// popup's exit), the card takes over in the same spot.
+			onOpenChangeComplete={(isOpen) => {
+				if (!isOpen) liftCell(undefined)
+			}}
 		>
 			<Dialog.Portal>
-				<Dialog.Backdrop className='fixed inset-0 bg-foreground/10 backdrop-blur-sm transition-opacity duration-320 ease-out-strong data-ending-style:opacity-0 data-ending-style:duration-220 data-starting-style:opacity-0' />
+				{/* Its fade shares the stage's duration and curve (lab-modal.css) */}
+				<Dialog.Backdrop
+					ref={backdropRef}
+					className='lab-backdrop fixed inset-0 bg-foreground/10 backdrop-blur-sm'
+				/>
 				<Dialog.Popup
 					ref={setPopup}
 					data-theme='lab'
