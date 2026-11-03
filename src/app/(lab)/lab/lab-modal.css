@@ -12,6 +12,7 @@
  *   --origin-x / --origin-y     how far to move the frame and the demo so they sit over the card
  *   --origin-sx / --origin-sy   stretch so the frame is the same size as the card
  *   --origin-duration         travel duration, longer the further away the cell is
+ *   --origin-opacity          1 when it starts over a (lifted) card, 0 when there is none
  */
 
 .lab-popup {
@@ -55,8 +56,9 @@
 	z-index: 1; /* above the panel, which comes out from behind */
 }
 
-/* Enter: travels from the card. The fade is quick so the whole trip is
-   visible, not just the arrival (the card's own demo shows through meanwhile). */
+/* Enter: travels from the card. The card is lifted (origin.ts), so the stage
+   is already opaque when it leaves: nothing fades, the piece just moves. The
+   opacity transition is only for the fallback without a card. */
 .lab-stage-frame,
 .lab-stage-content {
 	transition:
@@ -68,7 +70,7 @@
 .lab-popup[data-starting-style] :is(.lab-stage-frame, .lab-stage-content),
 .lab-popup[data-ending-style] :is(.lab-stage-frame, .lab-stage-content) {
 	translate: var(--origin-x, 0px) var(--origin-y, 0px);
-	opacity: 0;
+	opacity: var(--origin-opacity, 0);
 }
 
 /* Only the frame stretches to the card's size */
@@ -77,8 +79,9 @@
 	scale: var(--origin-sx, 0.95) var(--origin-sy, 0.95);
 }
 
-/* Exit: returns to the card and fades at the end of the trip (40% delay), not
-   at the start. If opacity dropped at once, the modal would vanish before arriving. */
+/* Exit: returns to the card and stays opaque until it lands, where the card
+   takes over (onOpenChangeComplete in lab-modal.tsx). The late fade only runs
+   in the fallback without a card. */
 .lab-popup[data-ending-style] :is(.lab-stage-frame, .lab-stage-content) {
 	transition:
 		translate var(--lab-exit) var(--lab-glide),
@@ -133,6 +136,7 @@
 	.lab-popup[data-ending-style] :is(.lab-stage-frame, .lab-stage-content) {
 		translate: none;
 		scale: none;
+		opacity: 0; /* the card isn't lifted here, so the stage fades in over it */
 	}
 	.lab-popup[data-starting-style] .lab-aside,
 	.lab-popup[data-ending-style] .lab-aside {

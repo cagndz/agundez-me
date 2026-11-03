@@ -27,6 +27,8 @@ export function applyOrigin(popup: HTMLElement, slug: string | undefined) {
 		popup.style.setProperty('--origin-sx', '0.95')
 		popup.style.setProperty('--origin-sy', '0.95')
 		popup.style.setProperty('--origin-duration', '300ms')
+		// No card to come from: it has to fade in, or it would just pop
+		popup.style.setProperty('--origin-opacity', '0')
 		return
 	}
 
@@ -54,6 +56,9 @@ export function applyOrigin(popup: HTMLElement, slug: string | undefined) {
 	popup.style.setProperty('--origin-sx', `${sx}`)
 	popup.style.setProperty('--origin-sy', `${sy}`)
 	popup.style.setProperty('--origin-duration', `${Math.round(duration)}ms`)
+	// It starts exactly over the card, which is lifted (see liftCell), so it
+	// is opaque from the first frame: one piece that moves, not a copy that appears
+	popup.style.setProperty('--origin-opacity', '1')
 }
 
 /**
@@ -72,4 +77,21 @@ export function applyOriginWithoutTransition(
 	applyOrigin(popup, slug)
 	void popup.offsetWidth // force style calculation with the variables already set
 	popup.removeAttribute('data-no-transition')
+}
+
+/**
+ * Lifts the card the modal opened from (data-lifted on the card, styled in
+ * lab-grid.tsx): its surface and demo disappear, so while the modal is open
+ * there is only one copy of the piece and its slot stays empty.
+ * Pass undefined to put every card back.
+ */
+export function liftCell(slug: string | undefined) {
+	for (const lifted of document.querySelectorAll(
+		'[data-lab-item][data-lifted]',
+	)) {
+		lifted.removeAttribute('data-lifted')
+	}
+	if (!slug) return
+	const cell = document.querySelector(`[data-lab-cell="${slug}"]`)
+	cell?.closest('[data-lab-item]')?.setAttribute('data-lifted', '')
 }

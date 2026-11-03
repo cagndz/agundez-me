@@ -10,7 +10,11 @@ import {
 	useState,
 	type CSSProperties,
 } from 'react'
-import { applyOrigin, applyOriginWithoutTransition } from '@/lab/origin'
+import {
+	applyOrigin,
+	applyOriginWithoutTransition,
+	liftCell,
+} from '@/lab/origin'
 import { demos } from '@/lab/registry'
 import { DemoFit } from '@/lab/demo-fit'
 import { XMark } from '@/components/icons/x-mark'
@@ -57,11 +61,15 @@ export function LabModal({
 	const slug = item?.slug
 	const popupRef = useRef<HTMLDivElement | null>(null)
 
-	// When the popup mounts (on open), set where it grows from.
+	// When the popup mounts (on open), set where it grows from and lift the
+	// card it leaves, in the same frame, so the piece never shows twice.
 	const setPopup = useCallback(
 		(el: HTMLDivElement | null) => {
 			popupRef.current = el
-			if (el && slug) applyOriginWithoutTransition(el, slug)
+			if (el && slug) {
+				applyOriginWithoutTransition(el, slug)
+				liftCell(slug)
+			}
 		},
 		[slug],
 	)
@@ -80,6 +88,11 @@ export function LabModal({
 				if (nextOpen) return
 				if (openedInApp) router.back()
 				else router.replace('/lab', { scroll: false })
+			}}
+			// Once the stage has landed back on its card (Base UI waits for the
+			// popup's exit), the card takes over in the same spot.
+			onOpenChangeComplete={(isOpen) => {
+				if (!isOpen) liftCell(undefined)
 			}}
 		>
 			<Dialog.Portal>
