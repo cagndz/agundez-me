@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
 		'out/**',
 		'build/**',
 		'next-env.d.ts',
+		// Local Node scripts that render the homepage demos, not site code
+		'scripts/home-media/**',
 	]),
 ])
 

@@ -1,136 +1,198 @@
 'use client'
 
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { Print } from './print'
-import { HOME, type Post, type Row } from './sections'
-import { WorkTable } from './work-table'
+import Link from 'next/link'
+import { useRef } from 'react'
+import { contactLinks } from '@/content/contact'
+import { BracketLink } from './bracket-link'
+import { CopyEmail } from './copy-email'
+import { homeProjects, type Post } from './data'
+import { Intro, IntroGate } from './intro'
+import { Name } from './name'
+import { type RiseHandle, RisePreview } from './rise-preview'
 import './home.css'
 
-// The homepage, in one ink. Half the page is a blue block: the name leads,
-// huge, and whatever row you're on takes its place, big line and small,
-// with its object printed as a 1-bit dither in the bottom left, cut by the
-// edges. Over the block the pointer is a loupe. The other half is the work,
-// as a table.
+// The homepage as a typewritten booklet: one ink, a list in Geist Mono where every entry runs out to its figure
+// along a row of dots, and the name at the head of the page in Unbounded.
+// A project's demo rises out of the pointer. The first visit is printed in
+// (intro.tsx).
 //
-// In one column (below 1024px, or without a mouse) the block is only a
-// header: the name, no object, no loupe, and nothing in it reacts to the
-// rows, so a tap on a row never reflows the page.
+// Sizes follow one golden scale from the body: 13 · 21 · 34 · 55 · 89 ·
+// 144 · 233. The text is 13 on a 21 line (13 × φ), the name runs from 55
+// on a phone to 233 on a large screen, the gaps are steps of the scale.
 
 const INK = '#1f36d1'
-// The site's paper (--background); the canvas needs the literal colour.
 const PAPER = '#faf9f7'
+// The golden scale, in pixels
+const S = { 0: 13, 1: 21, 2: 34, 3: 55, 4: 89, 5: 144, 6: 233 } as const
+const DOTS = '.'.repeat(240)
 
-const theme = {
-	'--ink': INK,
-	'--paper': PAPER,
-	background: PAPER,
-	color: INK,
-} as React.CSSProperties
+const fine = () => matchMedia('(hover: hover) and (pointer: fine)').matches
 
-// Moving from one row to the next fires a leave, then an enter. Waiting a
-// beat before going back to the name keeps it from flashing in between.
-const SETTLE = 90
-
-const WIDE = '(min-width: 1024px) and (hover: hover) and (pointer: fine)'
-
-function useWide() {
-	return useSyncExternalStore(
-		(onChange) => {
-			const m = matchMedia(WIDE)
-			m.addEventListener('change', onChange)
-			return () => m.removeEventListener('change', onChange)
-		},
-		() => matchMedia(WIDE).matches,
-		() => false,
+function Entry({
+	href,
+	label,
+	figure,
+	...rest
+}: {
+	href: string
+	label: React.ReactNode
+	figure: string
+} & React.HTMLAttributes<HTMLElement>) {
+	const className =
+		'flex items-end outline-none hover:bg-(--ink) hover:text-(--paper) focus-visible:bg-(--ink) focus-visible:text-(--paper)'
+	const inner = (
+		<>
+			{/* On a narrow screen a long title wraps, its dots on its last line */}
+			<span className='min-w-0'>{label}</span>
+			<span
+				aria-hidden='true'
+				className='min-w-[2ch] flex-1 overflow-hidden whitespace-nowrap'
+			>
+				{DOTS}
+			</span>
+			<span className='shrink-0'>{figure}</span>
+		</>
+	)
+	if (href.startsWith('/'))
+		return (
+			<Link href={href} className={className} {...rest}>
+				{inner}
+			</Link>
+		)
+	return (
+		<a
+			href={href}
+			target={href.startsWith('http') ? '_blank' : undefined}
+			rel={href.startsWith('http') ? 'noreferrer' : undefined}
+			className={className}
+			{...rest}
+		>
+			{inner}
+		</a>
 	)
 }
 
-// The entrance plays on every full load: the server always renders the
-// page marked for it, and it's plain CSS. Coming back from a post or the
-// lab with client navigation mounts the page again, but it keeps still:
-// this module outlives client navigation and starts over on a full load.
-let entered = false
-
 export function Home({ posts }: { posts: Post[] }) {
-	// Decided on mount, and only read here: on the server and at hydration
-	// it's still false, so both render the entrance and agree.
-	const [enter] = useState(() => !entered)
-	useEffect(() => {
-		entered = true
-	}, [])
-	const wide = useWide()
-	const [row, setRow] = useState<Row | null>(null)
+	const page = useRef<HTMLDivElement>(null)
+	const list = useRef<HTMLDivElement>(null)
+	const head = useRef<HTMLElement>(null)
+	const rise = useRef<RiseHandle>(null)
 	const leave = useRef<ReturnType<typeof setTimeout>>(undefined)
-	const type = useRef<HTMLDivElement>(null)
 
-	useEffect(() => () => clearTimeout(leave.current), [])
-
-	const hover = (r: Row | null) => {
-		if (!wide) return
-		clearTimeout(leave.current)
-		if (r) return setRow(r)
-		leave.current = setTimeout(() => setRow(null), SETTLE)
-	}
-
-	// Under the loupe the print takes the type over: the real type is masked
-	// out in all but the outer quarter of the zone, where the dots under it
-	// are still nearly solid, so the hand-over is soft.
-	const lens = (x: number, y: number, r: number) => {
-		const el = type.current
-		if (!el) return
-		if (r < 1) {
-			el.style.maskImage = ''
-			return
-		}
-		el.style.maskImage = `radial-gradient(circle ${r}px at ${x - el.offsetLeft}px ${y - el.offsetTop}px, transparent 75%, #000 100%)`
-	}
-
-	// Leaving the wide layout drops whatever was on show.
-	const shown = wide ? row : null
-	const title = shown ? (shown.title ?? shown.name) : HOME.title
-	const detail = shown ? shown.detail : HOME.detail
+	// Pointing at a project raises its demo; moving between projects keeps
+	// it up, so only leaving them all lets it go
+	const bind = (i: number) => ({
+		onPointerEnter: (e: React.PointerEvent) => {
+			if (!fine()) return
+			clearTimeout(leave.current)
+			rise.current?.open(i, e.clientX)
+		},
+		onPointerMove: (e: React.PointerEvent) => rise.current?.move(e.clientX),
+		onPointerLeave: () => {
+			clearTimeout(leave.current)
+			leave.current = setTimeout(() => rise.current?.close(), 60)
+		},
+	})
 
 	return (
 		<div
-			style={theme}
-			data-enter={enter ? '' : undefined}
-			className='min-h-screen text-base leading-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]'
+			ref={page}
+			// The intro's gate marks this element before it is painted
+			suppressHydrationWarning
+			style={{ '--ink': INK, '--paper': PAPER } as React.CSSProperties}
+			className='grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] bg-(--paper) px-6 font-mono text-[13px] leading-[21px] text-(--ink)'
 		>
-			<header className='relative overflow-hidden bg-(--ink) text-[15px] text-(--paper) lg:sticky lg:top-0 lg:h-screen'>
-				{wide && (
-					<Print
-						shape={shown ? shown.shape : 'none'}
-						color={PAPER}
-						text={type}
-						onLens={lens}
-						className='absolute inset-0 h-full w-full'
-					/>
-				)}
-				<div
-					ref={type}
-					className='pointer-events-none relative px-6 pt-10 pb-8 lg:p-8'
+			<IntroGate />
+			<header ref={head} style={{ paddingTop: S[2] }} className='text-center'>
+				<Name />
+				<p
+					data-intro-item
+					style={{ marginTop: S[2] }}
+					className='tracking-[0.08em] uppercase'
 				>
-					{/* The big type's side bearing is pulled back so it lines up
-					    with the small text under it. */}
-					<h1 className='-ml-[0.035em] text-[clamp(3rem,7.5vw,7.5rem)] leading-[0.9] font-semibold tracking-[-0.055em] [overflow-wrap:anywhere]'>
-						{title}
-					</h1>
-					<p className='mt-4 min-h-4 font-mono text-xs leading-4 opacity-80'>
-						{detail.map((line) => (
-							<span key={line} className='block'>
-								{line}
-							</span>
-						))}
-					</p>
-				</div>
+					Design engineer, Spain
+				</p>
 			</header>
-			<main className='px-6 py-4 lg:px-8 lg:py-12'>
-				{/* Narrow on purpose: the kinds and dates stay close to the names
-				    they belong to, instead of out at the far edge of the half. */}
-				<div className='home-list mx-auto max-w-[40rem]'>
-					<WorkTable posts={posts} onHover={hover} />
+
+			<main
+				style={{ paddingBlock: S[3] }}
+				// With a pointer that hovers, the list sits in the middle of the
+				// page, leaving room above it for the demos to rise into; on a
+				// touch screen there are none, so it follows the name closely
+				className='flex items-start justify-center [@media(hover:hover)_and_(pointer:fine)]:items-center'
+			>
+				<div ref={list} className='relative w-full max-w-[58ch]'>
+					<section>
+						<h2
+							data-intro-item
+							style={{ marginBottom: 8 }}
+							className='tracking-[0.08em] text-(--ink)/60 uppercase'
+						>
+							Projects
+						</h2>
+						<ul>
+							{homeProjects.map((p, i) => (
+								<li key={p.id} data-intro-item>
+									<Entry
+										href={p.href}
+										label={
+											<>
+												{p.name.toLowerCase()} [{p.kind}]
+											</>
+										}
+										figure={p.year}
+										{...bind(i)}
+									/>
+								</li>
+							))}
+						</ul>
+					</section>
+
+					<section style={{ marginTop: S[2] }}>
+						<h2
+							data-intro-item
+							style={{ marginBottom: 8 }}
+							className='tracking-[0.08em] text-(--ink)/60 uppercase'
+						>
+							Writing
+						</h2>
+						<ul>
+							{posts.map(({ slug, meta }) => (
+								<li key={slug} data-intro-item>
+									<Entry
+										href={`/writing/${slug}`}
+										label={meta.title.toLowerCase()}
+										figure={meta.date.slice(0, 7).replace('-', '.')}
+									/>
+								</li>
+							))}
+						</ul>
+					</section>
 				</div>
 			</main>
+
+			<footer
+				data-intro-item
+				style={{ paddingBottom: S[2] }}
+				className='text-center'
+			>
+				{contactLinks.map(({ label, href }) => (
+					<span key={label}>
+						<BracketLink href={href}>{label.toLowerCase()}</BracketLink>
+						<span
+							aria-hidden='true'
+							className='px-[1.25ch] opacity-40 sm:px-[2.25ch]'
+						>
+							·
+						</span>
+					</span>
+				))}
+				<CopyEmail />
+			</footer>
+
+			<RisePreview ref={rise} anchor={list} ceiling={head} />
+
+			<Intro root={page} />
 		</div>
 	)
 }

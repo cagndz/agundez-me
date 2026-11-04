@@ -1,0 +1,13 @@
+// Color where it counts, gray everywhere else
+import { motion } from 'motion/react'
+
+export function Ember({ heat = 0.8, label }: EmberProps) {
+  const glow = useGlow(heat, { decay: 0.6 })
+  if (!label) return null
+
+  return (
+    <motion.span animate={{ opacity: glow }} className="ember">
+      {label.trim()}
+    </motion.span>
+  )
+}

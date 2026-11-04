@@ -1,55 +1,31 @@
-/* ── The list: one row at a time ──────────────────────────────────────
-   Hovering a row steps the rest of the list back, and every section label
-   but its own, so only the path to the row stays at full strength. Coming
-   back waits a beat: crossing the gap between two sections shouldn't
-   flash the whole list on and off. Inside the list, it all answers at
-   once. Keyboard focus gets the same; the pointer only where it hovers,
-   so a tap never leaves the list dimmed. */
+/* The typewriter's caret, while "email" turns into "copied" */
 
-.home-row,
-.home-label {
-	transition: opacity 200ms ease-out 120ms;
-}
-.home-list:has(.home-row:hover, .home-row:focus-visible)
-	:is(.home-row, .home-label) {
-	transition-delay: 0ms;
+.home-caret {
+	display: inline-block;
+	width: 1px;
+	height: 1.1em;
+	margin-left: 1px;
+	vertical-align: -0.15em;
+	background: currentColor;
 }
 
-.home-list:has(.home-row:focus-visible) .home-row:not(:focus-visible),
-.home-list:has(.home-row:focus-visible)
-	.home-section:not(:has(.home-row:focus-visible))
-	.home-label {
-	opacity: 0.3;
+/* The intro (intro.tsx): its sheet only on a page the gate has marked, and
+   until it starts, everything it brings in waits unseen */
+
+.home-intro {
+	display: none;
 }
 
-@media (hover: hover) and (pointer: fine) {
-	.home-list:has(.home-row:hover) .home-row:not(:hover),
-	.home-list:has(.home-row:hover)
-		.home-section:not(:has(.home-row:hover))
-		.home-label {
-		opacity: 0.3;
-	}
+[data-intro] .home-intro {
+	display: block;
 }
 
-/* ── The entrance ─────────────────────────────────────────────────────
-   On every full load, not when coming back with client navigation (see
-   home.tsx). The block is simply there; the list's sections come in one
-   after another, each as one block. */
-
-@keyframes home-enter {
-	from {
-		opacity: 0;
-		transform: translateY(10px);
-	}
+/* The name waits in the middle of the screen: its top sits 34px down,
+   like the real one, and this takes its centre to the screen's */
+[data-intro] .home-intro .intro-name {
+	transform: translateY(calc(50svh - 34px - 50%));
 }
 
-[data-enter] .home-section {
-	animation: home-enter 600ms ease both;
-	animation-delay: calc(var(--i) * 120ms);
-}
-
-@media (prefers-reduced-motion: reduce) {
-	[data-enter] .home-section {
-		animation: none;
-	}
+[data-intro] [data-intro-item] {
+	opacity: 0;
 }
