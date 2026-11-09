@@ -133,11 +133,9 @@ export function LabModal({
 					</div>
 					<aside className='lab-aside flex w-(--stage) flex-col gap-5 overflow-y-auto rounded-sm bg-(--surface) p-4 ring-1 ring-foreground/10 max-md:max-h-[calc(100dvh-3rem-var(--stage)-0.75rem)] md:w-72'>
 						<div className='-mt-1 flex items-center justify-between'>
-							{/* Same label as the card it opened from: 001 / DIAL */}
-							<Dialog.Title className='flex gap-2 font-mono text-sm uppercase'>
-								<span className='tabular-nums'>{shown?.id}</span>
-								<span aria-hidden='true'>/</span>
-								<span className='text-muted'>{shown?.title}</span>
+							{/* Same label as the card it opened from: DIAL */}
+							<Dialog.Title className='font-mono text-sm uppercase'>
+								{shown?.title}
 							</Dialog.Title>
 							<Dialog.Close
 								aria-label='Close'

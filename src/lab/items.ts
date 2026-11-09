@@ -45,6 +45,8 @@ export type LabSpec = {
 }
 
 export type LabItem = {
+	// A stable key, never shown: the board is a masonry, so cards don't sit
+	// in the order a visible number would promise
 	id: string
 	slug: string
 	title: string
