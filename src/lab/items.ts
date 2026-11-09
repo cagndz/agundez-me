@@ -32,6 +32,12 @@ import {
 	SPRING_BACK,
 	TURN,
 } from './demos/receipt/constants'
+import {
+	CHECK,
+	FOLD,
+	RETRACE,
+	SIZE as SIGNATURE_SIZE,
+} from './demos/signature/constants'
 
 export type LabSpec = {
 	label: string
@@ -155,6 +161,28 @@ export const items: LabItem[] = [
 			{ label: 'Render', value: 'Canvas · 8×8 Bayer dither to 1-bit' },
 			{ label: 'Tear', value: 'clip-path · starts at the nearest corner' },
 			{ label: 'A11y', value: 'Arrows · Enter · Escape · reduced motion' },
+			{ label: 'Stack', value: 'React · Motion · TypeScript' },
+		],
+	},
+	{
+		id: '006',
+		slug: 'signature',
+		title: 'Signature',
+		size: SIGNATURE_SIZE,
+		summary:
+			'Sign and lift the pen. A moment later the pad folds into a signed pill.',
+		curves: [
+			{ label: 'Retrace', transition: RETRACE },
+			{ label: 'Fold', transition: FOLD },
+			{ label: 'Check', transition: CHECK },
+		],
+		specs: [
+			{ label: 'Countdown', value: '1.8 s after the pen lifts' },
+			{ label: 'Fold', value: 'clip-path · ink shrinks into its slot' },
+			{
+				label: 'A11y',
+				value: 'Live status · reopen button · reduced motion',
+			},
 			{ label: 'Stack', value: 'React · Motion · TypeScript' },
 		],
 	},
