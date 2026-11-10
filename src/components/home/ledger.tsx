@@ -80,7 +80,7 @@ function Heading({
 	return (
 		<h2
 			style={{ '--i': order } as React.CSSProperties}
-			className={`home-h text-(--ink)/60 ${LABEL}`}
+			className={`home-h text-(--ink)/75 ${LABEL}`}
 		>
 			{children}
 		</h2>
