@@ -47,7 +47,7 @@ export function Contact({
 					href={href}
 					target='_blank'
 					rel='noreferrer'
-					className='home-link'
+					className='home-link pointer-coarse:py-0.5'
 				>
 					{label.toLowerCase()}
 				</a>
@@ -63,7 +63,7 @@ export function Contact({
 						'--cut': `${((SLOTS - word.length) / SLOTS) * 100}%`,
 					} as React.CSSProperties
 				}
-				className='home-link home-copy inline-flex'
+				className='home-link home-copy inline-flex pointer-coarse:py-0.5'
 			>
 				{Array.from({ length: SLOTS }, (_, k) => (
 					<span

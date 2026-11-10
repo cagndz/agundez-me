@@ -5,56 +5,56 @@ import { homeProjects, type Post } from './data'
 // gives a detail on the right, with a row of leaders between, the way
 // Syro's sleeve itemises its costs.
 
-export const LABEL = 'text-[11px] tracking-[0.08em] uppercase'
+const LABEL = 'text-[11px] tracking-[0.08em] uppercase'
 
 const DOTS = '.'.repeat(240)
 
 // A row of the ledger. `order` places it in the entrance (home.css).
-// A label too long for a narrow screen would wrap and leave a hole before
-// its leaders, so with `stack` it takes a line of its own there, and the
-// leaders run on the next one out to the figure.
+// With `bare`, a narrow screen shows the label alone: a post's title is
+// too long to share its line there, and the date is not worth a second.
+//
+// On a touch screen each row is 24px tall, the least a target should be
+// (WCAG 2.2, 2.5.8); with a mouse, one 20px line of the page.
 export function Row({
 	href,
 	label,
 	figure,
 	order = 0,
-	stack = false,
+	bare = false,
 	...rest
 }: {
 	href: string
 	label: React.ReactNode
 	figure: React.ReactNode
 	order?: number
-	stack?: boolean
+	bare?: boolean
 } & React.HTMLAttributes<HTMLElement>) {
 	const external = !href.startsWith('/')
 	const props = {
 		// One line of the page. The rows touch, so the pointer never falls
 		// between two of them.
-		className: `home-row flex items-end ${stack ? 'max-sm:flex-wrap' : ''}`,
+		className: 'home-row flex items-end pointer-coarse:py-0.5',
 		style: { '--i': order } as React.CSSProperties,
 		...rest,
 	}
 	const inner = (
 		<>
-			<span
-				className={`home-label min-w-0 ${stack ? 'max-sm:basis-full' : ''}`}
-			>
-				{label}
-			</span>
+			<span className='home-label min-w-0'>{label}</span>
 			{/* The leaders, a space either side so they never run into a
 			    letter. Only whole dots: the row of them is as many characters
 			    wide as fit (the width rounded down to a whole number of
 			    cells), set against the figure. */}
 			<span
 				aria-hidden='true'
-				className={`home-dots relative mx-[1ch] min-w-[2ch] flex-1 self-stretch ${stack ? 'max-sm:ml-0' : ''}`}
+				className={`home-dots relative mx-[1ch] min-w-[2ch] flex-1 self-stretch ${bare ? 'max-sm:hidden' : ''}`}
 			>
 				<span className='absolute right-0 bottom-0 w-[round(down,100%,1ch)] overflow-hidden whitespace-nowrap'>
 					{DOTS}
 				</span>
 			</span>
-			<span className='home-figure shrink-0'>{figure}</span>
+			<span className={`home-figure shrink-0 ${bare ? 'max-sm:hidden' : ''}`}>
+				{figure}
+			</span>
 		</>
 	)
 	if (!external)
@@ -136,7 +136,7 @@ export function Ledger({
 								label={p.meta.title.toLowerCase()}
 								figure={month(p.meta.date)}
 								order={n + 2 + i}
-								stack
+								bare
 							/>
 						</li>
 					))}

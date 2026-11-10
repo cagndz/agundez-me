@@ -39,6 +39,15 @@
 	pointer-events: none;
 }
 
+/* On a touch screen the links are padded to 24px tall (contact.tsx); the
+   underline keeps to the text */
+@media (pointer: coarse) {
+	.home-link::before,
+	.home-link::after {
+		bottom: 0;
+	}
+}
+
 .home-link::before {
 	background: repeating-linear-gradient(
 		to right,
@@ -78,18 +87,33 @@
 	}
 }
 
-/* The email's underline keeps to its letters: the slots the word leaves
-   empty are cut off (--cut, set from the word), and the cut moves as the
-   letters roll */
+/* The email's underline is as long as the word showing, not the slots
+   it is set in: it ends --cut short of them (set from the word), so the
+   rule draws across "email" and no further, and when the letters roll it
+   grows to "copied" and back */
 .home-link.home-copy::before,
 .home-link.home-copy::after {
-	clip-path: inset(0 var(--cut) 0 0);
+	right: var(--cut);
 }
 
 .home-copy::before {
 	transition:
 		opacity 150ms ease,
-		clip-path 320ms cubic-bezier(0.19, 1, 0.22, 1);
+		right 320ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.home-copy::after {
+	transition:
+		transform 180ms cubic-bezier(0.4, 0, 0.2, 1),
+		right 320ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.home-copy:hover::after {
+		transition:
+			transform 280ms cubic-bezier(0.19, 1, 0.22, 1),
+			right 320ms cubic-bezier(0.19, 1, 0.22, 1);
+	}
 }
 
 /* Its letters, each in a slot of one line: the word as it is on top, the
@@ -194,10 +218,9 @@
 	}
 }
 
-/* Only where it starts: it ends wherever the element's own clip is (the
-   email's underline keeps to its letters). That clip must be an inset()
-   too, never none, or the two would not interpolate and the leaders would
-   jump out halfway instead of running. */
+/* Only where it starts: it ends at the element's own clip, which must be
+   an inset() too, never none, or the two would not interpolate and the
+   leaders would jump out halfway instead of running. */
 .home-dots,
 .home-link::before {
 	clip-path: inset(0 0 0 0);
