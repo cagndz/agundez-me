@@ -121,7 +121,7 @@ function slipClip(
 }
 
 /** What sits under the paper: how you browse and pick a product to print. */
-export type Menu = (props: {
+type Menu = (props: {
 	// A receipt is over it: it's dimmed and out of reach
 	covered: boolean
 	pick: (product: Product) => void

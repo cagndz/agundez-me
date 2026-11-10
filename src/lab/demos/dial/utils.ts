@@ -50,7 +50,7 @@ export function getKeyTarget(key: string, from: number): number | null {
 	}
 }
 
-export function snapToTick(pixel: number): number {
+function snapToTick(pixel: number): number {
 	return Math.round(pixel / PX_PER_UNIT) * PX_PER_UNIT
 }
 

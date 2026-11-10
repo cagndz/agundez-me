@@ -19,7 +19,7 @@ export const BLUR = 6
 export const BLEED = 32
 
 // The drop waits inside the trigger, tall rather than round
-export const DROP = { width: 16, height: 26 }
+const DROP = { width: 16, height: 26 }
 
 // The panel's resting transform, and the one that hides it in the trigger as
 // the drop: centred on the trigger, scaled down to the drop's size.

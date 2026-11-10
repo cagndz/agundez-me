@@ -5,7 +5,7 @@ type Bezier = readonly [number, number, number, number]
 // The transitions the demos use, in Motion's format (durations in seconds). The
 // lab imports the same constants the demos animate with, so a curve can never
 // show something the demo doesn't do.
-export type CurveTransition =
+type CurveTransition =
 	| { readonly duration: number; readonly ease: Bezier }
 	| {
 			readonly type: 'spring'

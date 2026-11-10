@@ -3,7 +3,7 @@ import type { TickType } from './types'
 // One knob for the whole size of the component. Every pixel measure below
 // is written at scale 1 (the prototype) and multiplied by SCALE.
 // 1.15 makes the window 368px wide, the widest a lab demo can be.
-export const SCALE = 1.15
+const SCALE = 1.15
 
 // Layout measures are rounded so edges land on whole pixels (no blurry lines).
 const scaled = (px: number) => Math.round(px * SCALE)
@@ -74,7 +74,7 @@ export const RUBBER_STIFFNESS = 0.55
 export const RUBBER_RANGE = scaled(200)
 // Coming back from past an end must not overshoot into the range: critically
 // damped (ratio 1), so damping = 2 * sqrt(stiffness).
-export const RETURN_STIFFNESS = 170
+const RETURN_STIFFNESS = 170
 export const RETURN_SPRING = {
 	type: 'spring',
 	stiffness: RETURN_STIFFNESS,
@@ -88,7 +88,7 @@ export const REDUCED_RETURN_TWEEN = {
 // Keys are a system response, not a throw: stiff and critically damped, so a
 // step settles in ~0.25s and a held key trails ~2-3 units with no overshoot
 // for the readout to roll past and back.
-export const KEY_STIFFNESS = 600
+const KEY_STIFFNESS = 600
 export const KEY_SPRING = {
 	type: 'spring',
 	stiffness: KEY_STIFFNESS,
