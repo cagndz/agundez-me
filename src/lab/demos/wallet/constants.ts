@@ -14,7 +14,7 @@ export const CASE_HEIGHT = 244
 export const CASE_RADIUS = 14
 export const LIP_WIDTH = 178
 // How far the lip pokes above the glass. The rest of LIP_HEIGHT hides behind the glass corner.
-export const LIP_OVERHANG = 16
+const LIP_OVERHANG = 16
 export const LIP_HEIGHT = 22
 // Top edge of the lip: the case top minus the part that pokes out.
 export const LIP_TOP = CASE_TOP - LIP_OVERHANG

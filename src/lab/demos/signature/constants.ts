@@ -52,7 +52,7 @@ export const DIVIDER_X = SLOT.x + MINI_WIDTH + DIVIDER_GAP
 
 // The ring: an 18px box that rests in the pill as the check, and is carried
 // to the pad's top-right corner (shrunk to 14px) as the countdown
-export const RING_CORNER = 14
+const RING_CORNER = 14
 export const RING_AT = {
 	left: DIVIDER_X + 1 + DIVIDER_GAP,
 	top: PILL_Y + (PILL.height - RING) / 2,

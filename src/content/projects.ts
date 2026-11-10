@@ -1,24 +1,24 @@
-export type Project = {
+// The projects on the homepage, in order. `kind` is what the list says the
+// project is; `id` names its demo (components/home/data.ts).
+type Project = {
+	id: 'lab' | 'menubar' | 'silex'
 	name: string
-	description: string
+	kind: string
 	href: string
 }
 
 export const projects: Project[] = [
+	{ id: 'lab', name: 'Lab', kind: 'interactive components', href: '/lab' },
 	{
-		name: 'Lab',
-		description: 'Interactive UI components and experiments',
-		href: '/lab',
-	},
-	{
+		id: 'menubar',
 		name: 'Menubar Player',
-		description: 'An audio player for YouTube that lives in the macOS menu bar',
+		kind: 'macos app',
 		href: 'https://github.com/cagndz/menubar-player',
 	},
 	{
+		id: 'silex',
 		name: 'Silex',
-		description:
-			'A quiet dark theme. Color where it counts, gray everywhere else',
+		kind: 'editor theme',
 		href: 'https://github.com/cagndz/silex',
 	},
 ]

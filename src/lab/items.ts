@@ -39,7 +39,7 @@ import {
 	SIZE as SIGNATURE_SIZE,
 } from './demos/signature/constants'
 
-export type LabSpec = {
+type LabSpec = {
 	label: string
 	value: string
 }

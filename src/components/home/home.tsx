@@ -1,198 +1,126 @@
 'use client'
 
-import Link from 'next/link'
-import { useRef } from 'react'
-import { contactLinks } from '@/content/contact'
-import { BracketLink } from './bracket-link'
-import { CopyEmail } from './copy-email'
+import { useEffect, useRef } from 'react'
+import { Contact } from './contact'
 import { homeProjects, type Post } from './data'
-import { Intro, IntroGate } from './intro'
+import { martian } from './fonts'
+import { InlineScript } from './inline-script'
+import { Ledger } from './ledger'
 import { Name } from './name'
-import { type RiseHandle, RisePreview } from './rise-preview'
+import { fine, Preview, type PreviewHandle } from './preview'
 import './home.css'
 
-// The homepage as a typewritten booklet: one ink, a list in Geist Mono where every entry runs out to its figure
-// along a row of dots, and the name at the head of the page in Unbounded.
-// A project's demo rises out of the pointer. The first visit is printed in
-// (intro.tsx).
+// The homepage, after the sleeve of Aphex Twin's Syro (The Designers
+// Republic): a deadpan list of what there is, set as a ledger, in one ink.
+// One face for the whole page, Martian Mono at one width; the name is set
+// in it too, a step up from the list. Name, list and links make one column
+// on one left edge, a little above the middle of the screen. A project's
+// demo shows beside the pointer (preview.tsx), and the rest of the list
+// steps back from the row under it.
 //
-// Sizes follow one golden scale from the body: 13 · 21 · 34 · 55 · 89 ·
-// 144 · 233. The text is 13 on a 21 line (13 × φ), the name runs from 55
-// on a phone to 233 on a large screen, the gaps are steps of the scale.
+// Three sizes on a 4px grid. Font sizes are free; every line height, gap
+// and box is a multiple of 4 (spacing in steps of 8 where it can). The
+// text is 13 on a 20 line; the name a step up, 20 on 24; what only labels
+// or qualifies a step down at 11 (the headings on the list's own 20 line,
+// so each is one row of the ledger; the line under the name on 16). Gaps:
+// 32 between sections and before the links, 48 from the name to the list.
+// The demo's plate is 320 by 200. Hairlines and optical nudges (the
+// underline's 2px drop, the name's side bearing) sit outside the grid on
+// purpose.
+//
+// On the first visit of a session the page rules itself in (home.css).
 
 const INK = '#1f36d1'
 const PAPER = '#faf9f7'
-// The golden scale, in pixels
-const S = { 0: 13, 1: 21, 2: 34, 3: 55, 4: 89, 5: 144, 6: 233 } as const
-const DOTS = '.'.repeat(240)
 
-const fine = () => matchMedia('(hover: hover) and (pointer: fine)').matches
-
-function Entry({
-	href,
-	label,
-	figure,
-	...rest
-}: {
-	href: string
-	label: React.ReactNode
-	figure: string
-} & React.HTMLAttributes<HTMLElement>) {
-	const className =
-		'flex items-end outline-none hover:bg-(--ink) hover:text-(--paper) focus-visible:bg-(--ink) focus-visible:text-(--paper)'
-	const inner = (
-		<>
-			{/* On a narrow screen a long title wraps, its dots on its last line */}
-			<span className='min-w-0'>{label}</span>
-			<span
-				aria-hidden='true'
-				className='min-w-[2ch] flex-1 overflow-hidden whitespace-nowrap'
-			>
-				{DOTS}
-			</span>
-			<span className='shrink-0'>{figure}</span>
-		</>
-	)
-	if (href.startsWith('/'))
-		return (
-			<Link href={href} className={className} {...rest}>
-				{inner}
-			</Link>
-		)
-	return (
-		<a
-			href={href}
-			target={href.startsWith('http') ? '_blank' : undefined}
-			rel={href.startsWith('http') ? 'noreferrer' : undefined}
-			className={className}
-			{...rest}
-		>
-			{inner}
-		</a>
-	)
-}
+// The entrance plays on the first visit of a session, on a page opened
+// from outside the site, with motion allowed; ?intro forces it. A reload
+// or coming back from a post shows the page as it is. An inline script
+// decides and marks the page before its first paint, so that what the
+// entrance brings in is never seen first; should the page never be
+// played, the mark lifts on its own.
+const GATE = `{var e=document.currentScript&&document.currentScript.parentElement;try{var q=/[?&]intro(=|&|$)/.test(location.search),r=document.referrer,s=false;try{s=!!r&&new URL(r).origin===location.origin}catch(_){}if(e&&(q||(!sessionStorage.getItem('intro')&&!s&&!matchMedia('(prefers-reduced-motion: reduce)').matches))){e.setAttribute('data-intro','');sessionStorage.setItem('intro','1');setTimeout(function(){if(!e.hasAttribute('data-play'))e.removeAttribute('data-intro')},4000)}}catch(_){}}`
+// Long enough for the last of it (home.css)
+const INTRO_MS = 2000
 
 export function Home({ posts }: { posts: Post[] }) {
-	const page = useRef<HTMLDivElement>(null)
-	const list = useRef<HTMLDivElement>(null)
-	const head = useRef<HTMLElement>(null)
-	const rise = useRef<RiseHandle>(null)
+	const root = useRef<HTMLDivElement>(null)
+	const preview = useRef<PreviewHandle>(null)
 	const leave = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-	// Pointing at a project raises its demo; moving between projects keeps
-	// it up, so only leaving them all lets it go
-	const bind = (i: number) => ({
-		onPointerEnter: (e: React.PointerEvent) => {
-			if (!fine()) return
+	// A marked page is held, unseen, until its face has loaded; then the
+	// entrance plays, and once it is over the marks come off
+	useEffect(() => {
+		const el = root.current
+		if (!el?.hasAttribute('data-intro')) return
+		let alive = true
+		let timer: ReturnType<typeof setTimeout>
+		document.fonts.ready.then(() => {
+			if (!alive) return
+			requestAnimationFrame(() => {
+				el.setAttribute('data-play', '')
+				timer = setTimeout(() => {
+					el.removeAttribute('data-intro')
+					el.removeAttribute('data-play')
+				}, INTRO_MS)
+			})
+		})
+		return () => {
+			alive = false
+			clearTimeout(timer)
+		}
+	}, [])
+
+	// Pointing at a project raises its demo by the pointer; focusing one
+	// from the keyboard raises it beside the row. Moving between projects
+	// keeps it up, so only leaving them all lets it go.
+	const bind = (i: number) => {
+		const hold = () => clearTimeout(leave.current)
+		const release = () => {
 			clearTimeout(leave.current)
-			rise.current?.open(i, e.clientX)
-		},
-		onPointerMove: (e: React.PointerEvent) => rise.current?.move(e.clientX),
-		onPointerLeave: () => {
-			clearTimeout(leave.current)
-			leave.current = setTimeout(() => rise.current?.close(), 60)
-		},
-	})
+			leave.current = setTimeout(() => preview.current?.close(), 60)
+		}
+		return {
+			onPointerEnter: (e: React.PointerEvent) => {
+				if (!fine()) return
+				hold()
+				preview.current?.open(i, e.clientX, e.clientY)
+			},
+			onPointerMove: (e: React.PointerEvent) =>
+				preview.current?.move(e.clientX, e.clientY),
+			onPointerLeave: release,
+			onFocus: (e: React.FocusEvent<HTMLElement>) => {
+				if (!e.currentTarget.matches(':focus-visible')) return
+				hold()
+				const r = e.currentTarget.getBoundingClientRect()
+				preview.current?.open(i, r.right, r.top + r.height / 2)
+			},
+			onBlur: release,
+		}
+	}
 
 	return (
 		<div
-			ref={page}
-			// The intro's gate marks this element before it is painted
-			suppressHydrationWarning
+			ref={root}
 			style={{ '--ink': INK, '--paper': PAPER } as React.CSSProperties}
-			className='grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] bg-(--paper) px-6 font-mono text-[13px] leading-[21px] text-(--ink)'
+			// The gate marks this element before it is painted
+			suppressHydrationWarning
+			className={`${martian.className} relative min-h-svh bg-(--paper) px-6 text-[13px] leading-5 text-(--ink) [font-stretch:87.5%]`}
 		>
-			<IntroGate />
-			<header ref={head} style={{ paddingTop: S[2] }} className='text-center'>
+			<InlineScript html={GATE} />
+			<div className='mx-auto flex min-h-svh max-w-[58ch] flex-col py-8'>
+				<div className='min-h-6 flex-[1_1_0]' />
 				<Name />
-				<p
-					data-intro-item
-					style={{ marginTop: S[2] }}
-					className='tracking-[0.08em] uppercase'
-				>
-					Design engineer, Spain
-				</p>
-			</header>
-
-			<main
-				style={{ paddingBlock: S[3] }}
-				// With a pointer that hovers, the list sits in the middle of the
-				// page, leaving room above it for the demos to rise into; on a
-				// touch screen there are none, so it follows the name closely
-				className='flex items-start justify-center [@media(hover:hover)_and_(pointer:fine)]:items-center'
-			>
-				<div ref={list} className='relative w-full max-w-[58ch]'>
-					<section>
-						<h2
-							data-intro-item
-							style={{ marginBottom: 8 }}
-							className='tracking-[0.08em] text-(--ink)/60 uppercase'
-						>
-							Projects
-						</h2>
-						<ul>
-							{homeProjects.map((p, i) => (
-								<li key={p.id} data-intro-item>
-									<Entry
-										href={p.href}
-										label={
-											<>
-												{p.name.toLowerCase()} [{p.kind}]
-											</>
-										}
-										figure={p.year}
-										{...bind(i)}
-									/>
-								</li>
-							))}
-						</ul>
-					</section>
-
-					<section style={{ marginTop: S[2] }}>
-						<h2
-							data-intro-item
-							style={{ marginBottom: 8 }}
-							className='tracking-[0.08em] text-(--ink)/60 uppercase'
-						>
-							Writing
-						</h2>
-						<ul>
-							{posts.map(({ slug, meta }) => (
-								<li key={slug} data-intro-item>
-									<Entry
-										href={`/writing/${slug}`}
-										label={meta.title.toLowerCase()}
-										figure={meta.date.slice(0, 7).replace('-', '.')}
-									/>
-								</li>
-							))}
-						</ul>
-					</section>
-				</div>
-			</main>
-
-			<footer
-				data-intro-item
-				style={{ paddingBottom: S[2] }}
-				className='text-center'
-			>
-				{contactLinks.map(({ label, href }) => (
-					<span key={label}>
-						<BracketLink href={href}>{label.toLowerCase()}</BracketLink>
-						<span
-							aria-hidden='true'
-							className='px-[1.25ch] opacity-40 sm:px-[2.25ch]'
-						>
-							·
-						</span>
-					</span>
-				))}
-				<CopyEmail />
-			</footer>
-
-			<RisePreview ref={rise} anchor={list} ceiling={head} />
-
-			<Intro root={page} />
+				<main className='mt-12'>
+					<Ledger posts={posts} bind={bind} />
+				</main>
+				<Contact
+					className='mt-8'
+					order={homeProjects.length + posts.length + 2}
+				/>
+				<div className='min-h-6 flex-[1.4_1_0]' />
+			</div>
+			<Preview ref={preview} />
 		</div>
 	)
 }

@@ -25,7 +25,7 @@ export type Side = Dimension['side']
 
 // A box placed with CSS: the keys are the CSS property names, so a Rect can be
 // passed straight to `style`.
-export type Rect = {
+type Rect = {
 	left: number
 	top: number
 	width: number
