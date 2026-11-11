@@ -7,8 +7,7 @@ export type Word = { text: string; start: number; end: number }
 export type Note = {
 	id: string
 	name: string
-	chat: string
-	received: string
+	chat: string // the chat it came from
 	// A portrait in public/lab/voice: Unsplash photos (free under the
 	// Unsplash License), cropped to the face at 192px. Sources, by id:
 	// jordi 1599566150163-29194dcaad36 · pau 1527980965255-d3b416303d12
@@ -26,8 +25,7 @@ const RAW = [
 		id: 'jordi',
 		photo: '/lab/voice/jordi.webp',
 		name: 'Jordi',
-		chat: 'Jordi Vidal',
-		received: '9:41',
+		chat: 'Work',
 		text: 'Hey! The client loved the second option. They only want the logo a bit bigger, and the green slightly warmer. Can you send it by Friday?',
 	},
 	{
@@ -35,7 +33,6 @@ const RAW = [
 		photo: '/lab/voice/pau.webp',
 		name: 'Pau',
 		chat: 'Climbing Saturday',
-		received: '10:15',
 		text: 'Rain all morning, so let’s move it to the gym. Eleven o’clock, and I’ll bring the spare shoes.',
 	},
 	{
@@ -43,7 +40,6 @@ const RAW = [
 		photo: '/lab/voice/lucia.webp',
 		name: 'Lucía',
 		chat: 'Family',
-		received: '12:04',
 		text: 'Grandma wants to know if you’re coming on Sunday. She’s making the lemon cake, so don’t be late this time!',
 	},
 ]

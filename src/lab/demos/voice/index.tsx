@@ -360,10 +360,7 @@ export function Voice() {
 												{q.current.name}
 											</p>
 											<p className='truncate text-[12px] text-[#f4f4f2]/45'>
-												{q.current.chat === q.current.name ||
-												q.current.chat.startsWith(q.current.name)
-													? q.current.received
-													: `${q.current.chat} · ${q.current.received}`}
+												{q.current.chat}
 											</p>
 										</div>
 									</Swap>
