@@ -38,6 +38,13 @@ import {
 	RETRACE,
 	SIZE as SIGNATURE_SIZE,
 } from './demos/signature/constants'
+import {
+	DRAW_BACK,
+	FALL as HOLD_FALL,
+	REWIND,
+	SIZE as HOLD_SIZE,
+	SPREAD,
+} from './demos/hold/constants'
 
 type LabSpec = {
 	label: string
@@ -184,6 +191,33 @@ export const items: LabItem[] = [
 			{
 				label: 'A11y',
 				value: 'Live status · reopen button · reduced motion',
+			},
+			{ label: 'Stack', value: 'React · Motion · TypeScript' },
+		],
+	},
+	{
+		id: '007',
+		slug: 'hold',
+		title: 'Hold',
+		size: HOLD_SIZE,
+		summary:
+			'Hold to drain the button into a drop. Let go early and it flows back; hold on and it falls.',
+		curves: [
+			{ label: 'Draw back', transition: DRAW_BACK },
+			{ label: 'Fall', transition: HOLD_FALL },
+			{ label: 'Spread', transition: SPREAD },
+			{ label: 'Rewind', transition: REWIND },
+		],
+		specs: [
+			{ label: 'Hold', value: '1.2 s · let go early and it flows back' },
+			{
+				label: 'Liquid',
+				value: 'SVG surface · 24 spring columns · volume kept',
+			},
+			{ label: 'Goo', value: 'SVG blur + alpha threshold · crisp on top' },
+			{
+				label: 'A11y',
+				value: 'Space or Enter to hold · live status · reduced motion',
 			},
 			{ label: 'Stack', value: 'React · Motion · TypeScript' },
 		],
