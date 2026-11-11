@@ -479,7 +479,12 @@ function Swap({
 	)
 }
 
-/** Time left in the note, rewritten when the shown second changes. */
+/**
+ * Time left in the note: its length before it starts, counting down as it
+ * plays. One number and no minus sign; the minus is a media player's, where
+ * it tells remaining apart from the elapsed time beside it. Rewritten when
+ * the shown second changes, not every frame.
+ */
 function Remaining({
 	position,
 	offset,
@@ -489,7 +494,7 @@ function Remaining({
 	offset: number
 	duration: number
 }) {
-	const read = (value: number) => `-${formatTime(duration - (value - offset))}`
+	const read = (value: number) => formatTime(duration - (value - offset))
 	const [text, setText] = useState(() => read(position.get()))
 	useMotionValueEvent(position, 'change', (value) => {
 		const at = value - offset
