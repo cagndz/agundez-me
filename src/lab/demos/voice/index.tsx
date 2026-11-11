@@ -1,0 +1,500 @@
+'use client'
+
+import { useId, useRef, useState } from 'react'
+import {
+	AnimatePresence,
+	LayoutGroup,
+	motion,
+	useReducedMotion,
+	useMotionValueEvent,
+	useSpring,
+	type MotionValue,
+	type Variants,
+} from 'motion/react'
+import {
+	DETAILS,
+	DETAILS_IN,
+	DETAILS_OUT,
+	DROP,
+	FACE,
+	FACE_FROM,
+	FADE,
+	GAP,
+	INSTANT,
+	LINE,
+	LINES,
+	MORPH,
+	BADGE_AT,
+	BADGE_CUT,
+	BADGE_ROOM,
+	CROSSFADE,
+	CUT,
+	FAN,
+	OVERLAP,
+	PAD,
+	PLAY,
+	PRESS,
+	REDUCED,
+	RADIUS,
+	ROW,
+	SEEK,
+	SHADOW,
+	SHIFT,
+	SIZE,
+	SPAN,
+	STRIP,
+	SWAP_IN,
+	SWAP_OUT,
+	WIDTH,
+} from './constants'
+import { useCoarsePointer, useDismiss, useQueue } from './hooks'
+import { formatTime } from './notes'
+import { Avatar, CheckIcon, PauseIcon, PlayIcon } from './parts'
+import { Scrubber } from './scrubber'
+import { Transcript } from './transcript'
+import { VoiceBadge } from './indicator'
+
+// Voice notes from every chat, stacked in one island instead of scattered
+// across conversations. Idle, it's a play button and the faces waiting.
+// Tap a face (or play) and the island grows down out of that same row:
+// who's talking, what they're saying lit word by word, a waveform to
+// scrub. The row stays put the whole time, a ring marking who's playing,
+// and each new person comes in from their side of it. Tap anywhere else,
+// or Escape, and it pauses and folds back up into the row.
+
+const RATES = [1, 1.5, 2]
+
+// The notch: everything but a circle at (--cut-x, middle) of radius --cut-r
+const NOTCH =
+	'radial-gradient(circle at calc(var(--cut-x) * 1px) 50%, transparent calc(var(--cut-r) * 1px), #000 calc(var(--cut-r) * 1px + 0.5px))'
+// And the badge's: a circle of --hole px around where the badge sits. The
+// two masks intersect, so the face keeps only what both leave.
+const HOLE = `radial-gradient(circle at ${BADGE_AT}px ${BADGE_AT}px, transparent calc(var(--hole) * 1px), #000 calc(var(--hole) * 1px + 0.5px))`
+const MASK = `${NOTCH}, ${HOLE}`
+
+export function Voice() {
+	const reduceMotion = useReducedMotion()
+	const q = useQueue()
+	// The faces in the row while it's open: whoever was pending when it
+	// opened. Heard ones stay, dimmed, so nobody shifts under your finger;
+	// they leave when it folds.
+	const [session, setSession] = useState<string[] | null>(null)
+	const [fanned, setFanned] = useState(false)
+	// Touch has no hover to fan the stack with: keep it fanned, so every
+	// face is whole and big enough to tap
+	const coarse = useCoarsePointer()
+	const spread = fanned || coarse
+	const expanded = session !== null && !q.done
+	const island = useRef<HTMLDivElement>(null)
+	const group = useId()
+
+	useDismiss(expanded, island, () => {
+		q.pause()
+		setSession(null)
+	})
+
+	// The playhead the eye follows: the queue's clock through a spring, so
+	// seeks glide. A new note or a drag jumps instead. Never a re-render:
+	// motion value to motion value.
+	const shown = useSpring(0, SEEK)
+	const dragging = useRef(false)
+	const lastNote = useRef(0)
+	const offset = q.index * SPAN
+	useMotionValueEvent(q.position, 'change', (value) => {
+		const note = Math.floor(value / SPAN)
+		if (note !== lastNote.current || dragging.current || reduceMotion) {
+			shown.jump(value)
+		} else shown.set(value)
+		lastNote.current = note
+	})
+
+	function open(index?: number) {
+		setSession(q.pending.map((n) => n.id))
+		if (index === undefined) q.play()
+		else q.playAt(index)
+	}
+
+	function onPlay() {
+		if (!expanded) open()
+		else if (q.playing) q.pause()
+		else q.play()
+	}
+
+	function onFace(index: number) {
+		if (!expanded) open(index)
+		else if (index !== q.index) q.playAt(index)
+		else if (q.playing) q.pause()
+		else q.play()
+	}
+
+	const row = expanded
+		? q.notes.filter((n) => session.includes(n.id))
+		: q.pending
+	const morph = reduceMotion ? INSTANT : MORPH
+	const swapIcon = !reduceMotion
+
+	// Space before the face at position k in the row: stacked, fanned, or
+	// with room for the ring when the face before it (or it) is playing
+	function gapBefore(k: number) {
+		const base = spread ? FAN : OVERLAP
+		const isCurrent = (n: (typeof row)[number] | undefined) =>
+			n !== undefined && expanded && q.notes.indexOf(n) === q.index
+		if (isCurrent(row[k - 1])) return Math.max(base, FAN) + BADGE_ROOM
+		return base
+	}
+
+	return (
+		<LayoutGroup id={group}>
+			<div
+				className='flex justify-center font-sans normal-case **:outline-[#f4f4f2]'
+				style={SIZE}
+			>
+				<motion.div
+					ref={island}
+					layout
+					transition={morph}
+					className='self-start overflow-hidden bg-foreground text-[#f4f4f2]'
+					style={{
+						borderRadius: RADIUS,
+						boxShadow: SHADOW,
+						width: expanded ? WIDTH : 'auto',
+					}}
+				>
+					{/* The row: the same idle and open, so the island grows out of it.
+					    Open, it settles to the left edge, the play button snug in the
+					    corner (8px all round, the radius minus its own) */}
+					<motion.div
+						layout='position'
+						transition={morph}
+						className={`flex items-center gap-3 px-2 ${expanded ? 'justify-start' : 'justify-center'}`}
+						style={{ height: ROW }}
+					>
+						{q.done ? (
+							<motion.button
+								key='done'
+								type='button'
+								initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.95 }}
+								animate={{ opacity: 1, scale: 1 }}
+								transition={reduceMotion ? REDUCED : CROSSFADE}
+								onClick={() => {
+									q.reset()
+									setSession(null)
+								}}
+								className='flex h-10 cursor-pointer items-center gap-2.5 rounded-full pr-4 text-[14px] font-medium whitespace-nowrap focus-visible:outline-2 focus-visible:-outline-offset-2'
+							>
+								<span className='grid size-10 place-items-center rounded-full bg-[#f4f4f2]/10'>
+									<CheckIcon />
+								</span>
+								All caught up
+							</motion.button>
+						) : (
+							<>
+								<motion.button
+									layout='position'
+									transition={morph}
+									type='button'
+									onClick={onPlay}
+									aria-label={
+										expanded
+											? q.playing
+												? 'Pause'
+												: 'Play'
+											: `Play ${q.pending.length} voice notes`
+									}
+									whileTap={reduceMotion ? undefined : { scale: PRESS }}
+									className='grid shrink-0 cursor-pointer place-items-center rounded-full bg-[#f4f4f2] text-foreground focus-visible:outline-2 focus-visible:outline-offset-2'
+									style={{ width: PLAY, height: PLAY }}
+								>
+									<AnimatePresence initial={false} mode='popLayout'>
+										<motion.span
+											key={expanded && q.playing ? 'pause' : 'play'}
+											className='grid place-items-center'
+											initial={
+												swapIcon
+													? { opacity: 0, scale: 0.8, filter: 'blur(2px)' }
+													: false
+											}
+											animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+											exit={
+												swapIcon
+													? { opacity: 0, scale: 0.8, filter: 'blur(2px)' }
+													: { opacity: 0, transition: INSTANT }
+											}
+											transition={CROSSFADE}
+										>
+											{expanded && q.playing ? (
+												<PauseIcon size={14} />
+											) : (
+												<PlayIcon size={14} />
+											)}
+										</motion.span>
+									</AnimatePresence>
+								</motion.button>
+
+								<div
+									className='flex items-center'
+									onPointerEnter={(e) =>
+										e.pointerType === 'mouse' && setFanned(true)
+									}
+									onPointerLeave={() => setFanned(false)}
+									onFocus={() => setFanned(true)}
+									onBlur={(e) => {
+										if (!e.currentTarget.contains(e.relatedTarget))
+											setFanned(false)
+									}}
+								>
+									<AnimatePresence initial={false} mode='popLayout'>
+										{row.map((note, k) => {
+											const index = q.notes.indexOf(note)
+											const current = expanded && index === q.index
+											const heard = q.heard.includes(note.id) && !current
+											const veil = !expanded || current ? 0 : heard ? 0.7 : 0.45
+											const next = row[k + 1]
+											// The notch the next face cuts into this one, in this
+											// face's own coordinates. No next face: nothing to cut.
+											const cutX =
+												next === undefined
+													? FACE * 4
+													: FACE + gapBefore(k + 1) + FACE / 2
+											const cutR = FACE / 2 + CUT
+											return (
+												<motion.button
+													key={note.id}
+													layout
+													type='button'
+													onClick={() => onFace(index)}
+													aria-label={
+														current
+															? `${note.name}, ${q.playing ? 'pause' : 'play'}`
+															: `Play ${note.name}’s voice note`
+													}
+													aria-current={current ? 'true' : undefined}
+													initial={{
+														opacity: 0,
+														scale: reduceMotion ? 1 : FACE_FROM,
+													}}
+													animate={{ opacity: 1, scale: 1 }}
+													exit={{
+														opacity: 0,
+														scale: reduceMotion ? 1 : FACE_FROM,
+													}}
+													whileTap={reduceMotion ? undefined : { scale: PRESS }}
+													transition={{ layout: morph, default: FADE }}
+													className='group/face relative cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 pointer-coarse:after:absolute pointer-coarse:after:-inset-1 pointer-coarse:after:rounded-full'
+													style={{
+														zIndex: k + 1,
+														marginLeft: k === 0 ? 0 : gapBefore(k),
+													}}
+												>
+													<motion.span
+														className='relative block rounded-full'
+														initial={false}
+														animate={{
+															'--cut-x': cutX,
+															'--cut-r': cutR,
+															'--hole': current ? BADGE_CUT : 0,
+														}}
+														transition={morph}
+														style={{
+															maskImage: MASK,
+															WebkitMaskImage: MASK,
+															maskComposite: 'intersect',
+															WebkitMaskComposite: 'source-in',
+														}}
+													>
+														<Avatar note={note} size={FACE} />
+														{/* Dimmed with a veil, lifted on hover */}
+														<span
+															aria-hidden='true'
+															className='pointer-events-none absolute inset-0 rounded-full bg-foreground opacity-(--veil) transition-opacity duration-150 ease-[ease] group-hover/face:opacity-0'
+															style={{ '--veil': veil } as React.CSSProperties}
+														/>
+													</motion.span>
+													{current && (
+														<VoiceBadge
+															note={note}
+															position={q.position}
+															offset={offset}
+															playing={q.playing}
+														/>
+													)}
+												</motion.button>
+											)
+										})}
+									</AnimatePresence>
+								</div>
+							</>
+						)}
+					</motion.div>
+
+					{/* The details, grown down out of the row */}
+					<AnimatePresence initial={false} mode='popLayout'>
+						{expanded && (
+							<motion.div
+								key='details'
+								layout='position'
+								initial={{ opacity: 0, y: reduceMotion ? 0 : -DROP }}
+								animate={{
+									opacity: 1,
+									y: 0,
+									transition: reduceMotion ? REDUCED : DETAILS_IN,
+								}}
+								exit={{
+									opacity: 0,
+									y: reduceMotion ? 0 : -DROP / 2,
+									transition: reduceMotion ? REDUCED : DETAILS_OUT,
+								}}
+								className='flex flex-col'
+								style={{
+									width: WIDTH,
+									height: DETAILS,
+									padding: `4px ${PAD}px ${PAD}px`,
+									gap: GAP,
+								}}
+							>
+								{/* Who's talking */}
+								<div className='relative' style={{ height: STRIP }}>
+									<Swap id={q.current.id} direction={q.direction}>
+										<div className='flex h-full items-baseline gap-2 pt-1.5'>
+											<p className='shrink-0 text-[15px] font-medium'>
+												{q.current.name}
+											</p>
+											<p className='truncate text-[12px] text-[#f4f4f2]/45'>
+												{q.current.chat}
+											</p>
+										</div>
+									</Swap>
+								</div>
+
+								{/* What they're saying */}
+								<div className='relative' style={{ height: LINE * LINES }}>
+									<Swap id={q.current.id} direction={q.direction}>
+										<Transcript
+											note={q.current}
+											shown={shown}
+											offset={offset}
+										/>
+									</Swap>
+								</div>
+
+								{/* Where in it */}
+								<div
+									className='flex items-center gap-3'
+									style={{ height: STRIP }}
+								>
+									<div className='relative h-8 flex-1'>
+										<Swap id={q.current.id} direction={q.direction}>
+											<Scrubber
+												note={q.current}
+												position={q.position}
+												shown={shown}
+												offset={offset}
+												draggingRef={dragging}
+												onSeek={q.seek}
+											/>
+										</Swap>
+									</div>
+									<span className='w-9 shrink-0 text-right font-mono text-[11px] text-[#f4f4f2]/45 tabular-nums'>
+										<Remaining
+											key={q.current.id}
+											position={q.position}
+											offset={offset}
+											duration={q.current.duration}
+										/>
+									</span>
+									{/* Speed, where a podcast player would put skip: the row
+									    of faces already moves between people */}
+									<button
+										type='button'
+										onClick={() =>
+											q.setRate(
+												RATES[(RATES.indexOf(q.rate) + 1) % RATES.length],
+											)
+										}
+										aria-label={`Playback speed ${q.rate}×`}
+										className='h-8 w-11 shrink-0 cursor-pointer rounded-full font-mono text-[11px] text-[#f4f4f2]/50 tabular-nums transition-colors duration-150 ease-out-strong hover:bg-[#f4f4f2]/8 hover:text-[#f4f4f2] focus-visible:outline-2 focus-visible:-outline-offset-2'
+									>
+										{q.rate}×
+									</button>
+								</div>
+							</motion.div>
+						)}
+					</AnimatePresence>
+				</motion.div>
+			</div>
+		</LayoutGroup>
+	)
+}
+
+/**
+ * One person's content handing over to the next, in a box that keeps its
+ * size. The new one slides in from their side of the row.
+ */
+function Swap({
+	id,
+	direction,
+	children,
+}: {
+	id: string
+	direction: 1 | -1
+	children: React.ReactNode
+}) {
+	const reduceMotion = useReducedMotion()
+	const shift = reduceMotion ? 0 : SHIFT
+	const variants: Variants = {
+		enter: (d: number) => ({ opacity: 0, x: d * shift, filter: 'blur(2px)' }),
+		center: {
+			opacity: 1,
+			x: 0,
+			filter: 'blur(0px)',
+			transition: reduceMotion ? REDUCED : SWAP_IN,
+		},
+		exit: (d: number) => ({
+			opacity: 0,
+			x: -d * shift,
+			filter: 'blur(2px)',
+			transition: reduceMotion ? REDUCED : SWAP_OUT,
+		}),
+	}
+	return (
+		<AnimatePresence initial={false} custom={direction}>
+			<motion.div
+				key={id}
+				custom={direction}
+				variants={variants}
+				initial='enter'
+				animate='center'
+				exit='exit'
+				className='absolute inset-0'
+			>
+				{children}
+			</motion.div>
+		</AnimatePresence>
+	)
+}
+
+/**
+ * Time left in the note: its length before it starts, counting down as it
+ * plays. One number and no minus sign; the minus is a media player's, where
+ * it tells remaining apart from the elapsed time beside it. Rewritten when
+ * the shown second changes, not every frame.
+ */
+function Remaining({
+	position,
+	offset,
+	duration,
+}: {
+	position: MotionValue<number>
+	offset: number
+	duration: number
+}) {
+	const read = (value: number) => formatTime(duration - (value - offset))
+	const [text, setText] = useState(() => read(position.get()))
+	useMotionValueEvent(position, 'change', (value) => {
+		const at = value - offset
+		if (at < 0 || at >= SPAN) return
+		const next = read(value)
+		setText((prev) => (prev === next ? prev : next))
+	})
+	return text
+}

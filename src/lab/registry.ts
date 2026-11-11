@@ -6,6 +6,7 @@ import { Tooltip } from './demos/tooltip'
 import { Receipt } from './demos/receipt'
 import { Signature } from './demos/signature'
 import { Hold } from './demos/hold'
+import { Voice } from './demos/voice'
 
 export const demos: Record<string, ComponentType | undefined> = {
 	dial: Dial,
@@ -15,4 +16,5 @@ export const demos: Record<string, ComponentType | undefined> = {
 	receipt: Receipt,
 	signature: Signature,
 	hold: Hold,
+	voice: Voice,
 }
