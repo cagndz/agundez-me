@@ -21,6 +21,7 @@ import {
 	LINE,
 	LINES,
 	MORPH,
+	FAN,
 	OVERLAP,
 	PAD,
 	PLAY,
@@ -32,7 +33,6 @@ import {
 	SHIFT,
 	SIZE,
 	SPAN,
-	SPREAD,
 	STRIP,
 	SWAP_IN,
 	SWAP_OUT,
@@ -61,7 +61,7 @@ export function Voice() {
 	// opened. Heard ones stay, dimmed, so nobody shifts under your finger;
 	// they leave when it folds.
 	const [session, setSession] = useState<string[] | null>(null)
-	const [hovered, setHovered] = useState<string | null>(null)
+	const [fanned, setFanned] = useState(false)
 	const expanded = session !== null && !q.done
 	const island = useRef<HTMLDivElement>(null)
 	const group = useId()
@@ -174,35 +174,38 @@ export function Voice() {
 									)}
 								</motion.button>
 
-								<div className='flex items-center'>
+								<div
+									className='flex items-center'
+									onPointerEnter={(e) =>
+										e.pointerType === 'mouse' && setFanned(true)
+									}
+									onPointerLeave={() => setFanned(false)}
+									onFocus={() => setFanned(true)}
+									onBlur={(e) => {
+										if (!e.currentTarget.contains(e.relatedTarget))
+											setFanned(false)
+									}}
+								>
 									<AnimatePresence initial={false} mode='popLayout'>
 										{row.map((note, k) => {
 											const index = q.notes.indexOf(note)
 											const current = expanded && index === q.index
 											const heard = q.heard.includes(note.id) && !current
-											const lit = !expanded || current || hovered === note.id
-											// Room after the one before, if that one is hovered or playing
+											const veil = !expanded || current ? 0 : heard ? 0.7 : 0.45
+											// Fanned, every face has room; open, the one after the
+											// one playing does too
 											const before = row[k - 1]
 											const spread =
-												before !== undefined &&
-												(hovered === before.id ||
-													(expanded && q.notes.indexOf(before) === q.index))
+												fanned ||
+												(expanded &&
+													before !== undefined &&
+													q.notes.indexOf(before) === q.index)
 											return (
 												<motion.button
 													key={note.id}
 													layout
 													type='button'
 													onClick={() => onFace(index)}
-													onPointerEnter={(e) =>
-														e.pointerType === 'mouse' && setHovered(note.id)
-													}
-													onPointerLeave={() =>
-														setHovered((h) => (h === note.id ? null : h))
-													}
-													onFocus={() => setHovered(note.id)}
-													onBlur={() =>
-														setHovered((h) => (h === note.id ? null : h))
-													}
 													aria-label={
 														current
 															? `${note.name}, ${q.playing ? 'pause' : 'play'}`
@@ -214,10 +217,10 @@ export function Voice() {
 													exit={{ opacity: 0, scale: 0.5 }}
 													whileTap={{ scale: 0.92 }}
 													transition={{ layout: morph, default: FADE }}
-													className='relative cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-4'
+													className='group/face relative cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-4'
 													style={{
 														zIndex: k + 1,
-														marginLeft: k === 0 ? 0 : spread ? SPREAD : OVERLAP,
+														marginLeft: k === 0 ? 0 : spread ? FAN : OVERLAP,
 													}}
 												>
 													{/* The cutout: a ring of the island's colour, so each
@@ -229,12 +232,10 @@ export function Voice() {
 													/>
 													{/* Dimmed with a veil rather than opacity: the faces
 													    overlap, and a see-through face shows the one below */}
-													<motion.span
+													<span
 														aria-hidden='true'
-														className='pointer-events-none absolute inset-0 rounded-full bg-foreground'
-														initial={false}
-														animate={{ opacity: lit ? 0 : heard ? 0.7 : 0.45 }}
-														transition={FADE}
+														className='pointer-events-none absolute inset-0 rounded-full bg-foreground opacity-(--veil) transition-opacity duration-200 ease-out-strong group-hover/face:opacity-0'
+														style={{ '--veil': veil } as React.CSSProperties}
 													/>
 													{current && (
 														<motion.span

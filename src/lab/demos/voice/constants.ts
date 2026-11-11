@@ -11,11 +11,12 @@ export const ROW = 56
 export const PLAY = 40
 export const FACE = 36
 // The faces overlap like any avatar stack, each a little over the one
-// before it. Hovering one (or the one playing) pushes the next aside by
-// SPREAD so it shows whole and has room to be picked; it doesn't move
-// itself, so it can't slide out from under the pointer.
+// before it. Point at the stack and the whole of it fans out, every face
+// whole and FAN apart, so any of them can be picked; it closes back up
+// when the pointer leaves. Open, the one playing keeps that room after it
+// so its ring shows whole.
 export const OVERLAP = -12
-export const SPREAD = 6
+export const FAN = 4
 
 // The island, open. It keeps the row's corner radius, so idle and open read
 // as one shape that only grew.
