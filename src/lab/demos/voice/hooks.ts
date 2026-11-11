@@ -141,12 +141,6 @@ export function useQueue(notes: Note[] = NOTES) {
 		[notes, position],
 	)
 
-	/** Done with this one: it counts as heard and the next one takes over. */
-	const next = useCallback(() => {
-		const [state, at] = finish(live.current, notes)
-		commit(state, at)
-	}, [notes, commit])
-
 	const setRate = useCallback(
 		(rate: number) => commit({ ...live.current, rate }, timeNow()),
 		[commit, timeNow],
@@ -159,7 +153,6 @@ export function useQueue(notes: Note[] = NOTES) {
 
 	const current = notes[s.index]
 	const pending = notes.filter((n) => !s.heard.includes(n.id))
-	const after = pending.filter((n) => n.id !== current.id)
 
 	return {
 		current,
@@ -170,7 +163,6 @@ export function useQueue(notes: Note[] = NOTES) {
 		direction: s.direction,
 		heard: s.heard,
 		pending,
-		upNext: after[0] as Note | undefined,
 		done: pending.length === 0,
 		notes,
 		timeNow,
@@ -178,7 +170,6 @@ export function useQueue(notes: Note[] = NOTES) {
 		playAt,
 		pause,
 		seek,
-		next,
 		setRate,
 		reset,
 	}

@@ -49,7 +49,7 @@ import {
 } from './constants'
 import { useCoarsePointer, useDismiss, useQueue } from './hooks'
 import { formatTime } from './notes'
-import { Avatar, CheckIcon, NextIcon, PauseIcon, PlayIcon } from './parts'
+import { Avatar, CheckIcon, PauseIcon, PlayIcon } from './parts'
 import { Scrubber } from './scrubber'
 import { Transcript } from './transcript'
 import { VoiceBadge } from './indicator'
@@ -355,7 +355,7 @@ export function Voice() {
 								{/* Who's talking */}
 								<div className='relative' style={{ height: STRIP }}>
 									<Swap id={q.current.id} direction={q.direction}>
-										<div className='flex h-full items-baseline gap-2 pt-1.5 pr-14'>
+										<div className='flex h-full items-baseline gap-2 pt-1.5'>
 											<p className='shrink-0 text-[15px] font-medium'>
 												{q.current.name}
 											</p>
@@ -364,18 +364,6 @@ export function Voice() {
 											</p>
 										</div>
 									</Swap>
-									<button
-										type='button'
-										onClick={() =>
-											q.setRate(
-												RATES[(RATES.indexOf(q.rate) + 1) % RATES.length],
-											)
-										}
-										aria-label={`Playback speed ${q.rate}×`}
-										className='absolute top-0 right-0 h-8 min-w-10 cursor-pointer rounded-full px-2 font-mono text-[11px] text-[#f4f4f2]/50 tabular-nums transition-colors duration-150 ease-out-strong hover:bg-[#f4f4f2]/8 hover:text-[#f4f4f2] focus-visible:outline-2 focus-visible:-outline-offset-2'
-									>
-										{q.rate}×
-									</button>
 								</div>
 
 								{/* What they're saying */}
@@ -414,13 +402,19 @@ export function Voice() {
 											duration={q.current.duration}
 										/>
 									</span>
+									{/* Speed, where a podcast player would put skip: the row
+									    of faces already moves between people */}
 									<button
 										type='button'
-										onClick={q.next}
-										aria-label={q.upNext ? `Next: ${q.upNext.name}` : 'Finish'}
-										className='grid size-8 shrink-0 cursor-pointer place-items-center rounded-full text-[#f4f4f2]/60 transition-colors duration-150 ease-out-strong hover:bg-[#f4f4f2]/8 hover:text-[#f4f4f2] focus-visible:outline-2 focus-visible:-outline-offset-2 motion-safe:active:scale-[0.97]'
+										onClick={() =>
+											q.setRate(
+												RATES[(RATES.indexOf(q.rate) + 1) % RATES.length],
+											)
+										}
+										aria-label={`Playback speed ${q.rate}×`}
+										className='h-8 w-11 shrink-0 cursor-pointer rounded-full font-mono text-[11px] text-[#f4f4f2]/50 tabular-nums transition-colors duration-150 ease-out-strong hover:bg-[#f4f4f2]/8 hover:text-[#f4f4f2] focus-visible:outline-2 focus-visible:-outline-offset-2'
 									>
-										<NextIcon />
+										{q.rate}×
 									</button>
 								</div>
 							</motion.div>

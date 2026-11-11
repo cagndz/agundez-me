@@ -59,21 +59,6 @@ export function PauseIcon({ size = 12 }: { size?: number }) {
 	)
 }
 
-export function NextIcon({ size = 12 }: { size?: number }) {
-	return (
-		<svg
-			aria-hidden='true'
-			width={size}
-			height={size}
-			viewBox='0 0 12 12'
-			fill='currentColor'
-		>
-			<path d='M1.8 2.3v7.4a.5.5 0 0 0 .78.42l5.4-3.7a.5.5 0 0 0 0-.84l-5.4-3.7a.5.5 0 0 0-.78.42Z' />
-			<rect x='8.6' y='1.8' width='1.7' height='8.4' rx='.6' />
-		</svg>
-	)
-}
-
 export function CheckIcon() {
 	return (
 		<svg
