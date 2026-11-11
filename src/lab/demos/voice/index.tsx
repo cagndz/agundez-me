@@ -119,11 +119,13 @@ export function Voice() {
 					className='self-start overflow-hidden bg-foreground text-[#f4f4f2]'
 					style={{ borderRadius: RADIUS, width: expanded ? WIDTH : 'auto' }}
 				>
-					{/* The row: the same idle and open, so the island grows out of it */}
+					{/* The row: the same idle and open, so the island grows out of it.
+					    Open, it settles to the left edge, the play button snug in the
+					    corner (8px all round, the radius minus its own) */}
 					<motion.div
 						layout='position'
 						transition={morph}
-						className='flex items-center justify-center gap-3 px-2'
+						className={`flex items-center gap-3 px-2 ${expanded ? 'justify-start' : 'justify-center'}`}
 						style={{ height: ROW }}
 					>
 						{q.done ? (
