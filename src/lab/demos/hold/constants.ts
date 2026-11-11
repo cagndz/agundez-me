@@ -23,28 +23,23 @@ export const SIZE = {
 // How long the hold takes, in seconds
 export const HOLD = 1.2
 
-// The goo. Wide enough that where the ink meets the neck it curves into a
-// funnel. The crisp shapes are drawn back over it, so only the joins round
-// off, never the edges.
-export const BLUR = 8
-// Room around the shapes so the blur isn't cut at the filter layer's edge
-export const BLEED = 24
-
 // The drop is drawn at this size and scaled
 export const DROP = 20
-// The neck is drawn at this size and scaled: transform only. It never gets
-// thinner than NECK_MIN, so it can't turn into a hairline.
-export const NECK_W = 14
-export const NECK_MIN = 6
-export const NECK_H = 100
+// The neck's half-width: wide as the drop starts to form, a thread by the
+// time it's about to let go. That thinning is the hold's progress.
+export const NECK_WIDE = 5
+export const NECK_THIN = 1.6
+// The concave curve where the neck leaves the button's underside
+export const FILLET = 5
+// When the thread breaks, the share that stays on the drop as a tail; the
+// rest retracts into the button. Coming back, the same shares close the gap.
+export const TAIL_SHARE = 0.6
 // How far the drop sags at full weight, past its own size
 export const SAG = 20
 // Fast to appear, slow to finish: visible from the first moment of the hold.
 // One smooth curve, no corners: a kink here shows up as a hitch in the
 // drop's movement on the way back up.
 export const RADIUS_CURVE = 0.55
-// Where the neck leaves the button
-export const NECK_FROM = HEIGHT - 4
 
 // Where the drop's base ends its fall: just past the stain's middle, so it
 // lands in it
@@ -63,7 +58,7 @@ export const fall = (distance: number) =>
 		duration: 0.08 + 0.022 * Math.sqrt(Math.max(distance, 0)),
 		ease: [0.55, 0, 1, 0.45],
 	}) as const
-// The neck slides down after the drop and into it
+// The thread breaking: tail and stub draw in, the drop rounds up
 export const FOLLOW = { type: 'spring', duration: 0.24, bounce: 0 } as const
 // Rid of the weight, the button springs up a touch
 export const RECOIL = { y: [0, -3, 1, 0] }

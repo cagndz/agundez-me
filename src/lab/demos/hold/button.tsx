@@ -20,18 +20,15 @@ import {
 } from 'motion/react'
 import {
 	ABSORB,
-	BLEED,
-	BLUR,
 	DROP,
+	FILLET,
 	FOLLOW,
 	HEIGHT,
 	HOLD,
 	IMPACT,
 	IMPACT_TIMING,
-	NECK_FROM,
-	NECK_H,
-	NECK_MIN,
-	NECK_W,
+	NECK_THIN,
+	NECK_WIDE,
 	RADIUS_CURVE,
 	REACH_SPAN,
 	RECOIL,
@@ -40,18 +37,19 @@ import {
 	REGATHER,
 	REWIND,
 	SAG,
+	TAIL_SHARE,
 	drawBack,
 	fall,
 } from './constants'
-import { GooFilter } from './goo-filter'
+import { attached, ellipse, stub, tailed } from './drip'
 import { LiquidInk } from './liquid'
-import { useSvgId } from './utils'
 
 // Hold to confirm, as a drop. The button is a reservoir of liquid ink.
 // While held, it drains through the bottom centre into a drop that swells
 // beneath it, heavier and lower on a neck that thins. Let go early and it
-// all flows back. Hold to the end and the drop lets go: the neck follows it
-// down and is absorbed, so nothing is left hanging. A fallen drop doesn't
+// all flows back. Hold to the end and the thread breaks: the drop falls,
+// rounding up its half of the thread, and the button draws in the rest.
+// Everything is drawn with real curves (see drip.ts), no blur. A fallen drop doesn't
 // come back on its own; resetting has to draw it back up.
 
 type Phase = 'idle' | 'holding' | 'falling' | 'done' | 'rising' | 'refilling'
@@ -92,7 +90,6 @@ export function HoldButton({
 	onLand,
 	children,
 }: HoldButtonProps) {
-	const filterId = useSvgId('hold-goo')
 	const reduceMotion = useReducedMotion()
 	const [phase, setPhase] = useState<Phase>('idle')
 	const phaseRef = useRef<Phase>('idle')
@@ -101,7 +98,7 @@ export function HoldButton({
 
 	// How much of the ink has gone into the drop
 	const progress = useMotionValue(0)
-	// 0 while attached; 1 once the neck has followed the drop down
+	// 0 while attached; 1 once the thread has broken and drawn in
 	const released = useMotionValue(0)
 	const fallY = useMotionValue(0)
 	const falling = useMotionValue(0)
@@ -119,40 +116,38 @@ export function HoldButton({
 	const center = useTransform(
 		() => HEIGHT - 3 + Math.pow(progress.get(), 1.4) * SAG + radius.get(),
 	)
-	const dropTop = useTransform(() => center.get() + fallY.get() - radius.get())
-
-	// The neck runs from the bottom of the button to the drop. Released, its
-	// top slides down to the drop, so it's absorbed instead of snapping.
-	const neckTop = useTransform(
-		() => NECK_FROM + (dropTop.get() - NECK_FROM) * released.get(),
-	)
-	const neckScaleY = useTransform(
-		// Overlaps the drop by a couple of pixels while attached; none once
-		// absorbed, so not even a sliver rides on top of the drop
-		() =>
-			Math.max(dropTop.get() + 2 * (1 - released.get()) - neckTop.get(), 0) /
-			NECK_H,
-	)
-	const neckScaleX = useTransform(
-		progress,
-		[0, 0.12, 1],
-		[0, 1, NECK_MIN / NECK_W],
-	)
-
 	// The drop's shape: stretched by speed while it travels
 	const velocity = useVelocity(fallY)
 	const stretch = useTransform(
 		() => Math.min(Math.abs(velocity.get()) / 1600, 0.7) * falling.get(),
 	)
-	const dropY = useTransform(() => center.get() - DROP / 2 + fallY.get())
-	const dropScaleX = useTransform(
-		() => (radius.get() / (DROP / 2)) * (1 - stretch.get() * 0.3),
-	)
-	const dropScaleY = useTransform(
-		() => (radius.get() / (DROP / 2)) * (1 + stretch.get()),
-	)
-	const innerScaleX = useTransform(() => squashX.get() * absorb.get())
-	const innerScaleY = useTransform(() => squashY.get() * absorb.get())
+
+	// Drop, neck and the fillet under the button as one outline
+	const cx = x + width / 2
+	const drip = useTransform(() => {
+		const p = progress.get()
+		const r = released.get()
+		const top = HEIGHT + buttonY.get()
+		const size = radius.get()
+		const s = stretch.get()
+		const k = absorb.get()
+		// Stretched, squashed or absorbed, its base stays where it is
+		const bottom = center.get() + fallY.get() + size
+		const rx = size * (1 - s * 0.3) * squashX.get() * k
+		const ry = size * (1 + s) * squashY.get() * k
+		const drop = { cx, cy: bottom - ry, rx, ry }
+		const half = Math.min(NECK_WIDE - (NECK_WIDE - NECK_THIN) * p, size * 0.7)
+		const fillet = Math.min(FILLET, size)
+		if (r <= 0.001) return attached(drop, cx, top, fillet, half)
+		if (r >= 0.999) return ellipse(drop)
+		// Parting, or closing: the gap between the button and the drop,
+		// shared between the stub and the tail
+		const open = Math.max(drop.cy - drop.ry - (top + fillet), 0) * (1 - r)
+		return (
+			stub(cx, top, fillet * (1 - r), half, open * (1 - TAIL_SHARE)) +
+			tailed(drop, open * TAIL_SHARE)
+		)
+	})
 
 	function go(next: Phase) {
 		phaseRef.current = next
@@ -274,68 +269,25 @@ export function HoldButton({
 				className='absolute top-0 rounded-full bg-(--surface) ring-1 ring-foreground/20 outline-offset-2 ring-inset group-has-[:focus-visible]/hold:outline-2'
 				style={{ left: x, width, height: HEIGHT, y: buttonY }}
 			/>
-			<GooFilter id={filterId} blur={BLUR} />
-			{/* The ink: button, neck, drop and children in one filtered layer, so
-			    the goo melts them together. It repaints on every frame of the
-			    animation, so it gets its own GPU layer and its repaints stay
-			    inside it. */}
-			<div
-				aria-hidden='true'
-				className='pointer-events-none absolute [transform:translateZ(0)] [contain:layout_paint]'
-				style={{
-					top: -BLEED,
-					left: -BLEED,
-					width: area.width + BLEED * 2,
-					height: area.height + BLEED * 2,
-					padding: BLEED,
-					filter: `url(#${filterId})`,
-				}}
-			>
-				<div className='relative size-full'>
-					{children}
-					<LiquidInk
-						progress={progress}
-						buttonY={buttonY}
-						phase={phase}
-						x={x}
-						width={width}
-						height={HEIGHT}
-					/>
-					<motion.div
-						className='absolute top-0 rounded-full bg-foreground'
-						style={{
-							left: x + width / 2 - NECK_W / 2,
-							width: NECK_W,
-							height: NECK_H,
-							y: neckTop,
-							scaleX: neckScaleX,
-							scaleY: neckScaleY,
-							originY: 0,
-						}}
-					/>
-					{/* Outer: travels and grows from its centre. Inner: squashes from
-					    its base when it lands, and is absorbed */}
-					<motion.div
-						className='absolute top-0'
-						style={{
-							left: x + width / 2 - DROP / 2,
-							width: DROP,
-							height: DROP,
-							y: dropY,
-							scaleX: dropScaleX,
-							scaleY: dropScaleY,
-						}}
-					>
-						<motion.div
-							className='size-full rounded-full bg-foreground'
-							style={{
-								scaleX: innerScaleX,
-								scaleY: innerScaleY,
-								originY: 1,
-							}}
-						/>
-					</motion.div>
-				</div>
+			{/* The ink: the stain (children), the liquid in the button, and the
+			    drop with its neck */}
+			<div aria-hidden='true' className='pointer-events-none absolute inset-0'>
+				{children}
+				<LiquidInk
+					progress={progress}
+					buttonY={buttonY}
+					phase={phase}
+					x={x}
+					width={width}
+					height={HEIGHT}
+				/>
+				<svg
+					className='absolute top-0 left-0 overflow-visible text-foreground'
+					width={area.width}
+					height={area.height}
+				>
+					<motion.path d={drip} fill='currentColor' />
+				</svg>
 			</div>
 
 			<motion.button
