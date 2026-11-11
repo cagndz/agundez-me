@@ -17,6 +17,7 @@ import {
 	DETAILS_OUT,
 	DROP,
 	FACE,
+	FACE_FROM,
 	FADE,
 	GAP,
 	INSTANT,
@@ -28,8 +29,11 @@ import {
 	OVERLAP,
 	PAD,
 	PLAY,
+	PRESS,
+	REDUCED,
 	RADIUS,
 	RING,
+	RING_FROM,
 	RING_GAP,
 	RING_ROOM,
 	RING_WIDTH,
@@ -44,7 +48,7 @@ import {
 	SWAP_OUT,
 	WIDTH,
 } from './constants'
-import { useDismiss, useQueue } from './hooks'
+import { useCoarsePointer, useDismiss, useQueue } from './hooks'
 import { formatTime } from './notes'
 import { Avatar, CheckIcon, NextIcon, PauseIcon, PlayIcon } from './parts'
 import { Scrubber } from './scrubber'
@@ -72,6 +76,10 @@ export function Voice() {
 	// they leave when it folds.
 	const [session, setSession] = useState<string[] | null>(null)
 	const [fanned, setFanned] = useState(false)
+	// Touch has no hover to fan the stack with: keep it fanned, so every
+	// face is whole and big enough to tap
+	const coarse = useCoarsePointer()
+	const spread = fanned || coarse
 	const expanded = session !== null && !q.done
 	const island = useRef<HTMLDivElement>(null)
 	const group = useId()
@@ -123,11 +131,11 @@ export function Voice() {
 	// Space before the face at position k in the row: stacked, fanned, or
 	// with room for the ring when the face before it (or it) is playing
 	function gapBefore(k: number) {
-		const base = fanned ? FAN : OVERLAP
+		const base = spread ? FAN : OVERLAP
 		const isCurrent = (n: (typeof row)[number] | undefined) =>
 			n !== undefined && expanded && q.notes.indexOf(n) === q.index
 		if (isCurrent(row[k - 1])) return Math.max(base, FAN) + RING_ROOM
-		if (fanned && isCurrent(row[k])) return FAN + RING_ROOM
+		if (spread && isCurrent(row[k])) return FAN + RING_ROOM
 		return base
 	}
 
@@ -185,7 +193,7 @@ export function Voice() {
 												: 'Play'
 											: `Play ${q.pending.length} voice notes`
 									}
-									whileTap={{ scale: 0.94 }}
+									whileTap={reduceMotion ? undefined : { scale: PRESS }}
 									className='grid shrink-0 cursor-pointer place-items-center rounded-full bg-[#f4f4f2] text-foreground focus-visible:outline-2 focus-visible:outline-offset-2'
 									style={{ width: PLAY, height: PLAY }}
 								>
@@ -239,12 +247,18 @@ export function Voice() {
 															: `Play ${note.name}’s voice note`
 													}
 													aria-current={current ? 'true' : undefined}
-													initial={{ opacity: 0, scale: 0.6 }}
+													initial={{
+														opacity: 0,
+														scale: reduceMotion ? 1 : FACE_FROM,
+													}}
 													animate={{ opacity: 1, scale: 1 }}
-													exit={{ opacity: 0, scale: 0.5 }}
-													whileTap={{ scale: 0.92 }}
+													exit={{
+														opacity: 0,
+														scale: reduceMotion ? 1 : FACE_FROM,
+													}}
+													whileTap={reduceMotion ? undefined : { scale: PRESS }}
 													transition={{ layout: morph, default: FADE }}
-													className='group/face relative cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-4'
+													className='group/face relative cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 pointer-coarse:after:absolute pointer-coarse:after:-inset-1 pointer-coarse:after:rounded-full'
 													style={{
 														zIndex: k + 1,
 														marginLeft: k === 0 ? 0 : gapBefore(k),
@@ -272,9 +286,16 @@ export function Voice() {
 														<motion.span
 															layoutId='ring'
 															aria-hidden='true'
-															initial={{ opacity: 0, scale: 0.85 }}
+															initial={{
+																opacity: 0,
+																scale: reduceMotion ? 1 : RING_FROM,
+															}}
 															animate={{ opacity: 1, scale: 1 }}
-															transition={reduceMotion ? INSTANT : RING}
+															transition={
+																reduceMotion
+																	? { layout: INSTANT, default: REDUCED }
+																	: RING
+															}
 															className='pointer-events-none absolute rounded-full border-[#f4f4f2]'
 															style={{
 																inset: -(RING_GAP + RING_WIDTH),
@@ -297,16 +318,16 @@ export function Voice() {
 							<motion.div
 								key='details'
 								layout='position'
-								initial={{ opacity: 0, y: -DROP }}
+								initial={{ opacity: 0, y: reduceMotion ? 0 : -DROP }}
 								animate={{
 									opacity: 1,
 									y: 0,
-									transition: reduceMotion ? INSTANT : DETAILS_IN,
+									transition: reduceMotion ? REDUCED : DETAILS_IN,
 								}}
 								exit={{
 									opacity: 0,
-									y: -DROP / 2,
-									transition: reduceMotion ? INSTANT : DETAILS_OUT,
+									y: reduceMotion ? 0 : -DROP / 2,
+									transition: reduceMotion ? REDUCED : DETAILS_OUT,
 								}}
 								className='flex flex-col'
 								style={{
@@ -385,7 +406,7 @@ export function Voice() {
 										type='button'
 										onClick={q.next}
 										aria-label={q.upNext ? `Next: ${q.upNext.name}` : 'Finish'}
-										className='grid size-8 shrink-0 cursor-pointer place-items-center rounded-full text-[#f4f4f2]/60 transition-colors duration-150 ease-out-strong hover:bg-[#f4f4f2]/8 hover:text-[#f4f4f2] focus-visible:outline-2 focus-visible:-outline-offset-2 active:scale-[0.94]'
+										className='grid size-8 shrink-0 cursor-pointer place-items-center rounded-full text-[#f4f4f2]/60 transition-colors duration-150 ease-out-strong hover:bg-[#f4f4f2]/8 hover:text-[#f4f4f2] focus-visible:outline-2 focus-visible:-outline-offset-2 motion-safe:active:scale-[0.97]'
 									>
 										<NextIcon />
 									</button>
@@ -420,13 +441,13 @@ function Swap({
 			opacity: 1,
 			x: 0,
 			filter: 'blur(0px)',
-			transition: reduceMotion ? INSTANT : SWAP_IN,
+			transition: reduceMotion ? REDUCED : SWAP_IN,
 		},
 		exit: (d: number) => ({
 			opacity: 0,
 			x: -d * shift,
 			filter: 'blur(2px)',
-			transition: reduceMotion ? INSTANT : SWAP_OUT,
+			transition: reduceMotion ? REDUCED : SWAP_OUT,
 		}),
 	}
 	return (

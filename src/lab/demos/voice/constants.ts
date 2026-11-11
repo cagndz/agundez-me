@@ -67,6 +67,17 @@ export const DETAILS_IN = {
 export const DETAILS_OUT = { duration: 0.12, ease: EASE_OUT } as const
 export const DROP = 10 // px the details travel down as they arrive
 
+// Reduced motion: nothing moves or scales, but what changes still fades,
+// so a new state reads as new rather than snapping in
+export const REDUCED = { duration: 0.15, ease: EASE_OUT } as const
+
+// A press is felt more than seen
+export const PRESS = 0.97
+// Faces arrive from, and leave to, nearly full size: nothing appears out
+// of nothing
+export const FACE_FROM = 0.9
+export const RING_FROM = 0.95
+
 // Faces dimming and coming and going in the row
 export const FADE = { duration: 0.2, ease: EASE_OUT } as const
 
