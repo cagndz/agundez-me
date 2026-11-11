@@ -1,0 +1,70 @@
+// Voice notes: the pending voice notes from every chat, stacked in one
+// island. Idle it's a row of faces; open, the same row stays where it is
+// and the island grows down from it, playing the notes one after another
+// with the transcript lighting up as each word is said.
+
+export const EASE_OUT = [0.23, 1, 0.32, 1] as const
+export const INSTANT = { duration: 0 } as const
+
+// The row: play button and faces, the same idle and open
+export const ROW = 56
+export const PLAY = 40
+export const FACE = 36
+export const FACE_GAP = 8
+
+// The island, open. It keeps the row's corner radius, so idle and open read
+// as one shape that only grew.
+export const WIDTH = 340
+export const RADIUS = ROW / 2
+export const PAD = 16
+export const LINE = 22
+export const LINES = 3
+export const STRIP = 32 // name row and scrubber row
+export const GAP = 12
+export const DETAILS = 4 + STRIP + GAP + LINE * LINES + GAP + STRIP + PAD
+export const HEIGHT = ROW + DETAILS
+
+export const SIZE = { width: WIDTH, height: HEIGHT }
+
+// The island changing shape. A touch of bounce: it's a thing that grows,
+// and the bounce is what makes it read as one surface rather than a swap.
+export const MORPH = { type: 'spring', duration: 0.42, bounce: 0.18 } as const
+// The details come down out of the row once the shape is mostly there, and
+// leave first when it folds
+export const DETAILS_IN = {
+	duration: 0.26,
+	ease: EASE_OUT,
+	delay: 0.08,
+} as const
+export const DETAILS_OUT = { duration: 0.12, ease: EASE_OUT } as const
+export const DROP = 10 // px the details travel down as they arrive
+
+// Faces dimming and coming and going in the row
+export const FADE = { duration: 0.2, ease: EASE_OUT } as const
+
+// The ring on whoever is playing, sliding along the row
+export const RING = { type: 'spring', duration: 0.36, bounce: 0.15 } as const
+
+// One person handing over to the next. The new one comes in from their
+// side of the row: from the right for the next, from the left going back.
+export const SWAP_OUT = { duration: 0.16, ease: EASE_OUT } as const
+export const SWAP_IN = { duration: 0.3, ease: EASE_OUT, delay: 0.04 } as const
+export const SHIFT = 24 // px
+
+// The playhead chasing a seek. Critically damped, so a jump glides and
+// lands without overshoot; while playing it trails the clock by ~0.1s.
+export const SEEK = { type: 'spring', stiffness: 420, damping: 42 } as const
+
+// The playhead carries which note it's in: note i plays from i × SPAN. A
+// person's transcript and waveform leaving then ignore the next note's
+// time instead of rewinding to its zero on their way out.
+export const SPAN = 1000
+
+// The transcript scrolling to keep the line being said in view
+export const SCROLL = { type: 'spring', duration: 0.5, bounce: 0 } as const
+
+// Waveform bars on the scrubber
+export const BARS = 40
+
+// Arrow keys on the scrubber move this many seconds
+export const KEY_STEP = 2

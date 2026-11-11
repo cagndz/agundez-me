@@ -45,6 +45,13 @@ import {
 	SIZE as HOLD_SIZE,
 	SPREAD,
 } from './demos/hold/constants'
+import {
+	MORPH,
+	RING,
+	SEEK,
+	SIZE as VOICE_SIZE,
+	SWAP_IN,
+} from './demos/voice/constants'
 
 type LabSpec = {
 	label: string
@@ -218,6 +225,36 @@ export const items: LabItem[] = [
 			{
 				label: 'A11y',
 				value: 'Space or Enter to hold · live status · reduced motion',
+			},
+			{ label: 'Stack', value: 'React · Motion · TypeScript' },
+		],
+	},
+	{
+		id: '008',
+		slug: 'voice',
+		title: 'Voice notes',
+		size: VOICE_SIZE,
+		summary:
+			'Every pending voice note in one island. Tap a face and it grows down to play them back to back, each word lit as it’s said.',
+		curves: [
+			{ label: 'Morph', transition: MORPH },
+			{ label: 'Swap', transition: SWAP_IN },
+			{ label: 'Ring', transition: RING },
+			{ label: 'Seek', transition: SEEK },
+		],
+		specs: [
+			{ label: 'Queue', value: 'Plays on · heard notes leave · 1× 1.5× 2×' },
+			{
+				label: 'Transcript',
+				value: 'Word timings · lit as said · seeks sweep',
+			},
+			{
+				label: 'Space',
+				value: 'Grows from the row · next comes from the right',
+			},
+			{
+				label: 'A11y',
+				value: 'Slider with arrows · Escape · reduced motion',
 			},
 			{ label: 'Stack', value: 'React · Motion · TypeScript' },
 		],
