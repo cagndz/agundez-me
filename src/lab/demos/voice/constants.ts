@@ -78,6 +78,10 @@ export const PRESS = 0.97
 export const FACE_FROM = 0.9
 export const RING_FROM = 0.95
 
+// The play/pause icon and "All caught up" cross-fading in, with a touch of
+// scale and blur so the two states read as one changing into the other
+export const CROSSFADE = { duration: 0.15, ease: EASE_OUT } as const
+
 // Faces dimming and coming and going in the row
 export const FADE = { duration: 0.2, ease: EASE_OUT } as const
 
@@ -86,9 +90,10 @@ export const RING = { type: 'spring', duration: 0.36, bounce: 0.15 } as const
 
 // One person handing over to the next. The new one comes in from their
 // side of the row: from the right for the next, from the left going back.
+// A directional hint, not a slide.
 export const SWAP_OUT = { duration: 0.16, ease: EASE_OUT } as const
 export const SWAP_IN = { duration: 0.3, ease: EASE_OUT, delay: 0.04 } as const
-export const SHIFT = 24 // px
+export const SHIFT = 12 // px
 
 // The playhead chasing a seek. Critically damped, so a jump glides and
 // lands without overshoot; while playing it trails the clock by ~0.1s.

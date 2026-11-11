@@ -24,6 +24,7 @@ import {
 	LINE,
 	LINES,
 	MORPH,
+	CROSSFADE,
 	CUT,
 	FAN,
 	OVERLAP,
@@ -127,6 +128,7 @@ export function Voice() {
 		? q.notes.filter((n) => session.includes(n.id))
 		: q.pending
 	const morph = reduceMotion ? INSTANT : MORPH
+	const swapIcon = !reduceMotion
 
 	// Space before the face at position k in the row: stacked, fanned, or
 	// with room for the ring when the face before it (or it) is playing
@@ -166,8 +168,12 @@ export function Voice() {
 						style={{ height: ROW }}
 					>
 						{q.done ? (
-							<button
+							<motion.button
+								key='done'
 								type='button'
+								initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.95 }}
+								animate={{ opacity: 1, scale: 1 }}
+								transition={reduceMotion ? REDUCED : CROSSFADE}
 								onClick={() => {
 									q.reset()
 									setSession(null)
@@ -178,7 +184,7 @@ export function Voice() {
 									<CheckIcon />
 								</span>
 								All caught up
-							</button>
+							</motion.button>
 						) : (
 							<>
 								<motion.button
@@ -197,11 +203,30 @@ export function Voice() {
 									className='grid shrink-0 cursor-pointer place-items-center rounded-full bg-[#f4f4f2] text-foreground focus-visible:outline-2 focus-visible:outline-offset-2'
 									style={{ width: PLAY, height: PLAY }}
 								>
-									{expanded && q.playing ? (
-										<PauseIcon size={14} />
-									) : (
-										<PlayIcon size={14} />
-									)}
+									<AnimatePresence initial={false} mode='popLayout'>
+										<motion.span
+											key={expanded && q.playing ? 'pause' : 'play'}
+											className='grid place-items-center'
+											initial={
+												swapIcon
+													? { opacity: 0, scale: 0.8, filter: 'blur(2px)' }
+													: false
+											}
+											animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+											exit={
+												swapIcon
+													? { opacity: 0, scale: 0.8, filter: 'blur(2px)' }
+													: { opacity: 0, transition: INSTANT }
+											}
+											transition={CROSSFADE}
+										>
+											{expanded && q.playing ? (
+												<PauseIcon size={14} />
+											) : (
+												<PlayIcon size={14} />
+											)}
+										</motion.span>
+									</AnimatePresence>
 								</motion.button>
 
 								<div
@@ -278,7 +303,7 @@ export function Voice() {
 														{/* Dimmed with a veil, lifted on hover */}
 														<span
 															aria-hidden='true'
-															className='pointer-events-none absolute inset-0 rounded-full bg-foreground opacity-(--veil) transition-opacity duration-200 ease-out-strong group-hover/face:opacity-0'
+															className='pointer-events-none absolute inset-0 rounded-full bg-foreground opacity-(--veil) transition-opacity duration-150 ease-[ease] group-hover/face:opacity-0'
 															style={{ '--veil': veil } as React.CSSProperties}
 														/>
 													</motion.span>

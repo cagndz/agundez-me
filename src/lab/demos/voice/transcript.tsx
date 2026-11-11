@@ -10,7 +10,8 @@ import {
 import { INSTANT, LINE, LINES, SCROLL, SPAN } from './constants'
 import { spokenAt, type Note } from './notes'
 
-// The transcript, lit word by word as it's said. It follows the same
+// The transcript, lit word by word as it's said, each word in 100ms: the
+// playhead's spring already trails the voice by ~0.1s. It follows the same
 // smoothed playhead as the scrubber, so a seek sweeps the light across the
 // words instead of snapping. The text scrolls to keep the line being said
 // second from the top: one line of what was just said above it.
@@ -63,7 +64,7 @@ export function Transcript({
 								words.current[i] = el
 							}}
 							aria-hidden='true'
-							className={`transition-colors duration-200 ease-out-strong ${
+							className={`transition-colors duration-100 ease-out-strong ${
 								i < spoken ? 'text-[#f4f4f2]' : 'text-[#f4f4f2]/28'
 							}`}
 						>
