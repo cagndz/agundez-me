@@ -10,7 +10,12 @@ export const INSTANT = { duration: 0 } as const
 export const ROW = 56
 export const PLAY = 40
 export const FACE = 36
-export const FACE_GAP = 8
+// The faces overlap like any avatar stack, each a little over the one
+// before it. Hovering one (or the one playing) pushes the next aside by
+// SPREAD so it shows whole and has room to be picked; it doesn't move
+// itself, so it can't slide out from under the pointer.
+export const OVERLAP = -12
+export const SPREAD = 6
 
 // The island, open. It keeps the row's corner radius, so idle and open read
 // as one shape that only grew.

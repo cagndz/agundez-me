@@ -15,13 +15,13 @@ import {
 	DETAILS_OUT,
 	DROP,
 	FACE,
-	FACE_GAP,
 	FADE,
 	GAP,
 	INSTANT,
 	LINE,
 	LINES,
 	MORPH,
+	OVERLAP,
 	PAD,
 	PLAY,
 	RADIUS,
@@ -32,6 +32,7 @@ import {
 	SHIFT,
 	SIZE,
 	SPAN,
+	SPREAD,
 	STRIP,
 	SWAP_IN,
 	SWAP_OUT,
@@ -60,6 +61,7 @@ export function Voice() {
 	// opened. Heard ones stay, dimmed, so nobody shifts under your finger;
 	// they leave when it folds.
 	const [session, setSession] = useState<string[] | null>(null)
+	const [hovered, setHovered] = useState<string | null>(null)
 	const expanded = session !== null && !q.done
 	const island = useRef<HTMLDivElement>(null)
 	const group = useId()
@@ -172,18 +174,35 @@ export function Voice() {
 									)}
 								</motion.button>
 
-								<div className='flex items-center' style={{ gap: FACE_GAP }}>
+								<div className='flex items-center'>
 									<AnimatePresence initial={false} mode='popLayout'>
-										{row.map((note) => {
+										{row.map((note, k) => {
 											const index = q.notes.indexOf(note)
 											const current = expanded && index === q.index
 											const heard = q.heard.includes(note.id) && !current
+											const lit = !expanded || current || hovered === note.id
+											// Room after the one before, if that one is hovered or playing
+											const before = row[k - 1]
+											const spread =
+												before !== undefined &&
+												(hovered === before.id ||
+													(expanded && q.notes.indexOf(before) === q.index))
 											return (
 												<motion.button
 													key={note.id}
 													layout
 													type='button'
 													onClick={() => onFace(index)}
+													onPointerEnter={(e) =>
+														e.pointerType === 'mouse' && setHovered(note.id)
+													}
+													onPointerLeave={() =>
+														setHovered((h) => (h === note.id ? null : h))
+													}
+													onFocus={() => setHovered(note.id)}
+													onBlur={() =>
+														setHovered((h) => (h === note.id ? null : h))
+													}
 													aria-label={
 														current
 															? `${note.name}, ${q.playing ? 'pause' : 'play'}`
@@ -191,18 +210,32 @@ export function Voice() {
 													}
 													aria-current={current ? 'true' : undefined}
 													initial={{ opacity: 0, scale: 0.6 }}
-													animate={{
-														opacity:
-															!expanded || current ? 1 : heard ? 0.3 : 0.55,
-														scale: 1,
-													}}
+													animate={{ opacity: 1, scale: 1 }}
 													exit={{ opacity: 0, scale: 0.5 }}
-													whileHover={{ opacity: 1 }}
 													whileTap={{ scale: 0.92 }}
 													transition={{ layout: morph, default: FADE }}
-													className='relative cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-2'
+													className='relative cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-4'
+													style={{
+														zIndex: k + 1,
+														marginLeft: k === 0 ? 0 : spread ? SPREAD : OVERLAP,
+													}}
 												>
-													<Avatar note={note} size={FACE} />
+													{/* The cutout: a ring of the island's colour, so each
+													    face reads clean over the one under it */}
+													<Avatar
+														note={note}
+														size={FACE}
+														className='shadow-[0_0_0_2px_var(--color-foreground)]'
+													/>
+													{/* Dimmed with a veil rather than opacity: the faces
+													    overlap, and a see-through face shows the one below */}
+													<motion.span
+														aria-hidden='true'
+														className='pointer-events-none absolute inset-0 rounded-full bg-foreground'
+														initial={false}
+														animate={{ opacity: lit ? 0 : heard ? 0.7 : 0.45 }}
+														transition={FADE}
+													/>
 													{current && (
 														<motion.span
 															layoutId='ring'
@@ -210,7 +243,7 @@ export function Voice() {
 															initial={{ opacity: 0, scale: 0.85 }}
 															animate={{ opacity: 1, scale: 1 }}
 															transition={reduceMotion ? INSTANT : RING}
-															className='absolute -inset-[4px] rounded-full border-2 border-[#f4f4f2]'
+															className='pointer-events-none absolute inset-0 rounded-full shadow-[0_0_0_2px_var(--color-foreground),0_0_0_4px_#f4f4f2]'
 														/>
 													)}
 												</motion.button>

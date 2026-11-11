@@ -7,7 +7,6 @@ export type Word = { text: string; start: number; end: number }
 export type Note = {
 	id: string
 	name: string
-	initials: string
 	chat: string
 	received: string
 	// The avatar's gradient: a light bloom top left, a deep pool bottom
@@ -25,7 +24,6 @@ const RAW = [
 		id: 'jordi',
 		tint: { light: '#ffd9b8', base: '#d9774f', deep: '#9c3f2a' },
 		name: 'Jordi',
-		initials: 'J',
 		chat: 'Jordi Vidal',
 		received: '9:41',
 		text: 'Hey! The client loved the second option. They only want the logo a bit bigger, and the green slightly warmer. Can you send it by Friday?',
@@ -34,7 +32,6 @@ const RAW = [
 		id: 'marta',
 		tint: { light: '#f1d3ef', base: '#9b6fc4', deep: '#553a8f' },
 		name: 'Marta',
-		initials: 'M',
 		chat: 'Marta Ruiz',
 		received: '10:02',
 		text: 'Okay, so I talked to the venue. We can have the terrace until midnight, but they need the final number of guests by Thursday.',
@@ -43,7 +40,6 @@ const RAW = [
 		id: 'pau',
 		tint: { light: '#d8ecc9', base: '#5c9a82', deep: '#2b5f5c' },
 		name: 'Pau',
-		initials: 'P',
 		chat: 'Climbing Saturday',
 		received: '10:15',
 		text: 'Rain all morning, so let’s move it to the gym. Eleven o’clock, and I’ll bring the spare shoes.',
@@ -52,7 +48,6 @@ const RAW = [
 		id: 'lucia',
 		tint: { light: '#d6e6f7', base: '#5f86c4', deep: '#2f4a8a' },
 		name: 'Lucía',
-		initials: 'L',
 		chat: 'Family',
 		received: '12:04',
 		text: 'Grandma wants to know if you’re coming on Sunday. She’s making the lemon cake, so don’t be late this time!',

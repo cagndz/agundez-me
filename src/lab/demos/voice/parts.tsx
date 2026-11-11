@@ -8,8 +8,9 @@ const GRAIN = `url("data:image/svg+xml,${encodeURIComponent(
 ).replace(/%2523/g, '%23')}")`
 
 // Faces are soft, grainy gradients: three tones of one hue, so people tell
-// apart by colour without the row turning into a sweet shop. The initial
-// sits on top, quiet.
+// apart by colour without the row turning into a sweet shop. No initials:
+// in a stack half of each face is under the next, and a clipped letter
+// reads as broken. The name is there the moment the island opens.
 export function Avatar({
 	note,
 	size,
@@ -23,21 +24,18 @@ export function Avatar({
 	return (
 		<span
 			aria-hidden='true'
-			className={`relative grid shrink-0 place-items-center overflow-hidden rounded-full font-medium text-white/90 ${className}`}
+			className={`relative block shrink-0 overflow-hidden rounded-full ${className}`}
 			style={{
 				width: size,
 				height: size,
-				fontSize: Math.round(size * 0.38),
 				backgroundColor: base,
 				backgroundImage: `radial-gradient(circle at 28% 22%, ${light} 0%, transparent 62%), radial-gradient(circle at 80% 85%, ${deep} 0%, transparent 60%)`,
-				textShadow: '0 1px 2px rgba(0,0,0,0.18)',
 			}}
 		>
 			<span
 				className='absolute inset-0 opacity-45 mix-blend-overlay'
 				style={{ backgroundImage: GRAIN, backgroundSize: '96px 96px' }}
 			/>
-			<span className='relative'>{note.initials}</span>
 		</span>
 	)
 }
