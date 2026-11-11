@@ -1,7 +1,15 @@
 import type { Note } from './notes'
 
-// Faces are a soft two-stop gradient each, the way messaging apps tell
-// people apart before a photo loads; the initial sits on top in white.
+// Grain for the faces: fractal noise, greyscale, tiled. Laid over the
+// gradient in overlay, it lifts the lights and sinks the darks a little,
+// like a print rather than a screen.
+const GRAIN = `url("data:image/svg+xml,${encodeURIComponent(
+	"<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='96' height='96' filter='url(%23n)'/></svg>",
+).replace(/%2523/g, '%23')}")`
+
+// Faces are soft, grainy gradients: three tones of one hue, so people tell
+// apart by colour without the row turning into a sweet shop. The initial
+// sits on top, quiet.
 export function Avatar({
 	note,
 	size,
@@ -11,19 +19,25 @@ export function Avatar({
 	size: number
 	className?: string
 }) {
+	const { light, base, deep } = note.tint
 	return (
 		<span
 			aria-hidden='true'
-			className={`grid shrink-0 place-items-center rounded-full font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] ${className}`}
+			className={`relative grid shrink-0 place-items-center overflow-hidden rounded-full font-medium text-white/90 ${className}`}
 			style={{
 				width: size,
 				height: size,
-				fontSize: Math.round(size * 0.4),
-				backgroundImage: `linear-gradient(140deg, ${note.tint[0]}, ${note.tint[1]})`,
-				textShadow: '0 1px 1px rgba(0,0,0,0.12)',
+				fontSize: Math.round(size * 0.38),
+				backgroundColor: base,
+				backgroundImage: `radial-gradient(circle at 28% 22%, ${light} 0%, transparent 62%), radial-gradient(circle at 80% 85%, ${deep} 0%, transparent 60%)`,
+				textShadow: '0 1px 2px rgba(0,0,0,0.18)',
 			}}
 		>
-			{note.initials}
+			<span
+				className='absolute inset-0 opacity-45 mix-blend-overlay'
+				style={{ backgroundImage: GRAIN, backgroundSize: '96px 96px' }}
+			/>
+			<span className='relative'>{note.initials}</span>
 		</span>
 	)
 }

@@ -10,8 +10,9 @@ export type Note = {
 	initials: string
 	chat: string
 	received: string
-	// Two stops of the avatar's gradient
-	tint: readonly [string, string]
+	// The avatar's gradient: a light bloom top left, a deep pool bottom
+	// right, over a base. Three tones of one hue, never two hues.
+	tint: { light: string; base: string; deep: string }
 	words: Word[]
 	duration: number // seconds
 	bars: number[] // 0–1, ten per second
@@ -22,7 +23,7 @@ const BARS_PER_SECOND = 10
 const RAW = [
 	{
 		id: 'jordi',
-		tint: ['#fbbf24', '#f97316'] as const,
+		tint: { light: '#ffd9b8', base: '#d9774f', deep: '#9c3f2a' },
 		name: 'Jordi',
 		initials: 'J',
 		chat: 'Jordi Vidal',
@@ -31,7 +32,7 @@ const RAW = [
 	},
 	{
 		id: 'marta',
-		tint: ['#c084fc', '#ec4899'] as const,
+		tint: { light: '#f1d3ef', base: '#9b6fc4', deep: '#553a8f' },
 		name: 'Marta',
 		initials: 'M',
 		chat: 'Marta Ruiz',
@@ -40,7 +41,7 @@ const RAW = [
 	},
 	{
 		id: 'pau',
-		tint: ['#34d399', '#0ea5e9'] as const,
+		tint: { light: '#d8ecc9', base: '#5c9a82', deep: '#2b5f5c' },
 		name: 'Pau',
 		initials: 'P',
 		chat: 'Climbing Saturday',
@@ -49,7 +50,7 @@ const RAW = [
 	},
 	{
 		id: 'lucia',
-		tint: ['#60a5fa', '#6366f1'] as const,
+		tint: { light: '#d6e6f7', base: '#5f86c4', deep: '#2f4a8a' },
 		name: 'Lucía',
 		initials: 'L',
 		chat: 'Family',
