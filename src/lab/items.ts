@@ -214,7 +214,7 @@ export const items: LabItem[] = [
 				label: 'Liquid',
 				value: 'SVG surface · 24 spring columns · volume kept',
 			},
-			{ label: 'Goo', value: 'SVG blur + alpha threshold · crisp on top' },
+			{ label: 'Drip', value: 'One SVG outline · the thread parts at a point' },
 			{
 				label: 'A11y',
 				value: 'Space or Enter to hold · live status · reduced motion',

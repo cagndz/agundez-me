@@ -43,7 +43,7 @@ const KICK_RELEASE = 2.4
 // and the loop stops
 const STILL = 0.03
 // Points the surface is drawn through
-const SAMPLES = 33
+const SAMPLES = 41
 
 type LiquidInkProps = {
 	progress: MotionValue<number>
@@ -104,7 +104,10 @@ export function LiquidInk({
 			const left = center - span / 2
 			const points: [number, number][] = []
 			for (let k = 0; k < SAMPLES; k++) {
-				const px = left + (k / (SAMPLES - 1)) * span
+				// Denser toward the ends, where the outline curves hardest: evenly
+				// spaced, the rounded ends came out as straight slants
+				const px =
+					left + ((1 - Math.cos((Math.PI * k) / (SAMPLES - 1))) / 2) * span
 				// The column displacement under this point, interpolated
 				const f = Math.min(
 					Math.max((px / width) * COLUMNS - 0.5, 0),
