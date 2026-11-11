@@ -2,6 +2,7 @@
 
 import { useRef } from 'react'
 import { motion, useTransform, type MotionValue } from 'motion/react'
+import { useSeconds } from './clock'
 import { BARS, KEY_STEP, SPAN } from './constants'
 import { formatTime, resample, type Note } from './notes'
 
@@ -16,20 +17,22 @@ const SLOP = 3
 
 export function Scrubber({
 	note,
-	time,
+	position,
 	shown,
 	offset,
 	draggingRef,
 	onSeek,
 }: {
 	note: Note
-	time: number
+	position: MotionValue<number>
 	shown: MotionValue<number>
 	offset: number
 	draggingRef: React.RefObject<boolean>
 	onSeek: (time: number) => void
 }) {
 	const bars = resample(note.bars, BARS)
+	// Whole seconds, for the slider's value: a render a second, not a frame
+	const time = useSeconds(position, offset)
 	const press = useRef<number | null>(null)
 	const clipPath = useTransform(shown, (value) => {
 		const at = value - offset
@@ -87,7 +90,8 @@ export function Scrubber({
 			onKeyDown={(e) => {
 				if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
 				e.preventDefault()
-				onSeek(time + (e.key === 'ArrowRight' ? KEY_STEP : -KEY_STEP))
+				const at = position.get() - offset
+				onSeek(at + (e.key === 'ArrowRight' ? KEY_STEP : -KEY_STEP))
 			}}
 			className='group relative h-8 flex-1 cursor-pointer touch-none rounded-sm py-1 select-none'
 		>

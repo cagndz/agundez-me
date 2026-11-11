@@ -1,12 +1,14 @@
 'use client'
 
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import {
 	AnimatePresence,
 	LayoutGroup,
 	motion,
 	useReducedMotion,
+	useMotionValueEvent,
 	useSpring,
+	type MotionValue,
 	type Variants,
 } from 'motion/react'
 import {
@@ -79,19 +81,20 @@ export function Voice() {
 		setSession(null)
 	})
 
-	// The playhead the eye follows: the clock through a spring, so seeks
-	// glide. A new note or a drag jumps instead. Offset by note (SPAN).
+	// The playhead the eye follows: the queue's clock through a spring, so
+	// seeks glide. A new note or a drag jumps instead. Never a re-render:
+	// motion value to motion value.
 	const shown = useSpring(0, SEEK)
 	const dragging = useRef(false)
-	const lastIndex = useRef(q.index)
+	const lastNote = useRef(0)
 	const offset = q.index * SPAN
-	useEffect(() => {
-		const at = q.index * SPAN + q.time
-		if (lastIndex.current !== q.index || dragging.current || reduceMotion) {
-			shown.jump(at)
-		} else shown.set(at)
-		lastIndex.current = q.index
-	}, [q.index, q.time, reduceMotion, shown])
+	useMotionValueEvent(q.position, 'change', (value) => {
+		const note = Math.floor(value / SPAN)
+		if (note !== lastNote.current || dragging.current || reduceMotion) {
+			shown.jump(value)
+		} else shown.set(value)
+		lastNote.current = note
+	})
 
 	function open(index?: number) {
 		setSession(q.pending.map((n) => n.id))
@@ -362,7 +365,7 @@ export function Voice() {
 										<Swap id={q.current.id} direction={q.direction}>
 											<Scrubber
 												note={q.current}
-												time={q.time}
+												position={q.position}
 												shown={shown}
 												offset={offset}
 												draggingRef={dragging}
@@ -371,7 +374,12 @@ export function Voice() {
 										</Swap>
 									</div>
 									<span className='w-9 shrink-0 text-right font-mono text-[11px] text-[#f4f4f2]/45 tabular-nums'>
-										-{formatTime(q.current.duration - q.time)}
+										<Remaining
+											key={q.current.id}
+											position={q.position}
+											offset={offset}
+											duration={q.current.duration}
+										/>
 									</span>
 									<button
 										type='button'
@@ -436,4 +444,25 @@ function Swap({
 			</motion.div>
 		</AnimatePresence>
 	)
+}
+
+/** Time left in the note, rewritten when the shown second changes. */
+function Remaining({
+	position,
+	offset,
+	duration,
+}: {
+	position: MotionValue<number>
+	offset: number
+	duration: number
+}) {
+	const read = (value: number) => `-${formatTime(duration - (value - offset))}`
+	const [text, setText] = useState(() => read(position.get()))
+	useMotionValueEvent(position, 'change', (value) => {
+		const at = value - offset
+		if (at < 0 || at >= SPAN) return
+		const next = read(value)
+		setText((prev) => (prev === next ? prev : next))
+	})
+	return text
 }

@@ -1,16 +1,29 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+	useSyncExternalStore,
+} from 'react'
+import { useMotionValue } from 'motion/react'
+import { SPAN } from './constants'
 import { NOTES, type Note } from './notes'
 
 // The queue: pending voice notes played on a clock, one after another.
 // A note that ends counts as heard and the next pending one starts.
 // `direction` is where the new note sits in the row from the last one
 // (1: to the right), so a change can come in from that side.
+//
+// The clock is not React state. It's a motion value, `position`: the time
+// in the current note plus index × SPAN, set every frame without a single
+// re-render. React state only holds what changes now and then: who's
+// playing, whether it plays, who's been heard. Note and time change in the
+// same write, so nothing ever sees one note's time with another's index.
 
 type State = {
 	index: number
-	time: number
 	playing: boolean
 	heard: string[]
 	rate: number
@@ -19,7 +32,6 @@ type State = {
 
 const INITIAL: State = {
 	index: 0,
-	time: 0,
 	playing: false,
 	heard: [],
 	rate: 1,
@@ -34,24 +46,37 @@ function nextPending(notes: Note[], heard: string[], from: number) {
 	return -1
 }
 
-function finish(s: State, notes: Note[]): State {
+const towards = (from: number, to: number) => (to < from ? -1 : 1)
+
+/** This note is done: it counts as heard and the next pending one is up. */
+function finish(s: State, notes: Note[]): [State, number] {
 	const note = notes[s.index]
 	const heard = s.heard.includes(note.id) ? s.heard : [...s.heard, note.id]
 	const next = nextPending(notes, heard, s.index)
-	if (next === -1) return { ...s, heard, time: note.duration, playing: false }
-	return {
-		...s,
-		heard,
-		index: next,
-		time: 0,
-		direction: towards(s.index, next),
-	}
+	if (next === -1) return [{ ...s, heard, playing: false }, note.duration]
+	return [{ ...s, heard, index: next, direction: towards(s.index, next) }, 0]
 }
-
-const towards = (from: number, to: number) => (to < from ? -1 : 1)
 
 export function useQueue(notes: Note[] = NOTES) {
 	const [s, setS] = useState<State>(INITIAL)
+	// The state as of the last write, for the clock and the handlers to read
+	// without waiting for a render
+	const live = useRef(s)
+	const position = useMotionValue(0)
+
+	const timeNow = useCallback(
+		() => position.get() - live.current.index * SPAN,
+		[position],
+	)
+
+	const commit = useCallback(
+		(next: State, time: number) => {
+			live.current = next
+			setS(next)
+			position.set(next.index * SPAN + time)
+		},
+		[position],
+	)
 
 	useEffect(() => {
 		if (!s.playing) return
@@ -60,91 +85,95 @@ export function useQueue(notes: Note[] = NOTES) {
 		const loop = (now: number) => {
 			const dt = Math.min(0.1, (now - last) / 1000)
 			last = now
-			setS((prev) => {
-				const time = prev.time + dt * prev.rate
-				return time < notes[prev.index].duration
-					? { ...prev, time }
-					: finish(prev, notes)
-			})
+			const st = live.current
+			const time = timeNow() + dt * st.rate
+			if (time < notes[st.index].duration) {
+				position.set(st.index * SPAN + time)
+			} else {
+				const [next, at] = finish(st, notes)
+				commit(next, at)
+				if (!next.playing) return
+			}
 			raf = requestAnimationFrame(loop)
 		}
 		raf = requestAnimationFrame(loop)
 		return () => cancelAnimationFrame(raf)
-	}, [s.playing, notes])
+	}, [s.playing, notes, position, timeNow, commit])
 
 	const play = useCallback(() => {
-		setS((prev) => {
-			if (prev.heard.length === notes.length)
-				return { ...INITIAL, rate: prev.rate, playing: true }
-			return { ...prev, playing: true }
-		})
-	}, [notes])
+		const st = live.current
+		if (st.heard.length === notes.length)
+			commit({ ...INITIAL, rate: st.rate, playing: true }, 0)
+		else commit({ ...st, playing: true }, timeNow())
+	}, [notes, commit, timeNow])
 
-	/** Play this one from the start, heard or not. */
+	/** Play this one, from where it was if it's already up, else from the start. */
 	const playAt = useCallback(
-		(index: number) =>
-			setS((prev) => ({
-				...prev,
-				index,
-				time:
-					index === prev.index && prev.time < notes[index].duration
-						? prev.time
-						: 0,
-				playing: true,
-				heard: prev.heard.filter((id) => id !== notes[index].id),
-				direction:
-					index === prev.index ? prev.direction : towards(prev.index, index),
-			})),
-		[notes],
+		(index: number) => {
+			const st = live.current
+			const same = index === st.index
+			const time = same && timeNow() < notes[index].duration ? timeNow() : 0
+			commit(
+				{
+					...st,
+					index,
+					playing: true,
+					heard: st.heard.filter((id) => id !== notes[index].id),
+					direction: same ? st.direction : towards(st.index, index),
+				},
+				time,
+			)
+		},
+		[notes, commit, timeNow],
 	)
 
 	const pause = useCallback(
-		() => setS((prev) => ({ ...prev, playing: false })),
-		[],
+		() => commit({ ...live.current, playing: false }, timeNow()),
+		[commit, timeNow],
 	)
 
 	const seek = useCallback(
-		(time: number) =>
-			setS((prev) => ({
-				...prev,
-				time: Math.max(0, Math.min(time, notes[prev.index].duration - 0.01)),
-			})),
-		[notes],
+		(time: number) => {
+			const st = live.current
+			const at = Math.max(0, Math.min(time, notes[st.index].duration - 0.01))
+			position.set(st.index * SPAN + at)
+		},
+		[notes, position],
 	)
 
 	/** Done with this one: it counts as heard and the next one takes over. */
-	const next = useCallback(() => setS((prev) => finish(prev, notes)), [notes])
+	const next = useCallback(() => {
+		const [state, at] = finish(live.current, notes)
+		commit(state, at)
+	}, [notes, commit])
 
 	const setRate = useCallback(
-		(rate: number) => setS((prev) => ({ ...prev, rate })),
-		[],
+		(rate: number) => commit({ ...live.current, rate }, timeNow()),
+		[commit, timeNow],
 	)
 
 	const reset = useCallback(
-		() => setS((prev) => ({ ...INITIAL, rate: prev.rate })),
-		[],
+		() => commit({ ...INITIAL, rate: live.current.rate }, 0),
+		[commit],
 	)
 
 	const current = notes[s.index]
 	const pending = notes.filter((n) => !s.heard.includes(n.id))
 	const after = pending.filter((n) => n.id !== current.id)
-	const remaining =
-		pending.reduce((sum, n) => sum + n.duration, 0) -
-		(s.heard.includes(current.id) ? 0 : s.time)
 
 	return {
 		current,
 		index: s.index,
-		time: s.time,
+		position,
 		playing: s.playing,
 		rate: s.rate,
 		direction: s.direction,
 		heard: s.heard,
 		pending,
 		upNext: after[0] as Note | undefined,
-		remaining,
 		done: pending.length === 0,
 		notes,
+		timeNow,
 		play,
 		playAt,
 		pause,
@@ -156,6 +185,19 @@ export function useQueue(notes: Note[] = NOTES) {
 }
 
 export type Queue = ReturnType<typeof useQueue>
+
+/** A coarse pointer (touch) is in use: no hover to fan the stack with. */
+export function useCoarsePointer() {
+	return useSyncExternalStore(
+		(onChange) => {
+			const query = window.matchMedia('(pointer: coarse)')
+			query.addEventListener('change', onChange)
+			return () => query.removeEventListener('change', onChange)
+		},
+		() => window.matchMedia('(pointer: coarse)').matches,
+		() => false,
+	)
+}
 
 /** Pointer down outside the island, or Escape: back to idle. */
 export function useDismiss(
