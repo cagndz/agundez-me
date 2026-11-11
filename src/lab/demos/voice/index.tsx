@@ -28,6 +28,7 @@ import {
 	RING,
 	ROW,
 	SEEK,
+	SHADOW,
 	SHIFT,
 	SIZE,
 	SPAN,
@@ -117,7 +118,11 @@ export function Voice() {
 					layout
 					transition={morph}
 					className='self-start overflow-hidden bg-foreground text-[#f4f4f2]'
-					style={{ borderRadius: RADIUS, width: expanded ? WIDTH : 'auto' }}
+					style={{
+						borderRadius: RADIUS,
+						boxShadow: SHADOW,
+						width: expanded ? WIDTH : 'auto',
+					}}
 				>
 					{/* The row: the same idle and open, so the island grows out of it.
 					    Open, it settles to the left edge, the play button snug in the

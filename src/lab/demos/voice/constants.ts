@@ -26,6 +26,17 @@ export const HEIGHT = ROW + DETAILS
 
 export const SIZE = { width: WIDTH, height: HEIGHT }
 
+// Depth: a tight contact shadow, a soft mid one and a wide faint one, so
+// the island sits just above the page. A hairline of light along the top
+// edge catches the dark. Set as a style, so Motion keeps it undistorted
+// while the shape morphs.
+export const SHADOW = [
+	'inset 0 1px 0 rgba(255, 255, 255, 0.07)',
+	'0 1px 2px rgba(0, 0, 0, 0.10)',
+	'0 6px 16px -4px rgba(0, 0, 0, 0.18)',
+	'0 22px 44px -14px rgba(0, 0, 0, 0.28)',
+].join(', ')
+
 // The island changing shape. A touch of bounce: it's a thing that grows,
 // and the bounce is what makes it read as one surface rather than a swap.
 export const MORPH = { type: 'spring', duration: 0.42, bounce: 0.18 } as const
