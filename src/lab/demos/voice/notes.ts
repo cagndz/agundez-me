@@ -9,9 +9,11 @@ export type Note = {
 	name: string
 	chat: string
 	received: string
-	// The avatar's gradient: a light bloom top left, a deep pool bottom
-	// right, over a base. Three tones of one hue, never two hues.
-	tint: { light: string; base: string; deep: string }
+	// A portrait in public/lab/voice: Unsplash photos (free under the
+	// Unsplash License), cropped to the face at 192px. Sources, by id:
+	// jordi 1599566150163-29194dcaad36 · marta 1494790108377-be9c29b29330
+	// pau 1527980965255-d3b416303d12 · lucia 1548382131-e0ebb1f0cdea
+	photo: string
 	words: Word[]
 	duration: number // seconds
 	bars: number[] // 0–1, ten per second
@@ -22,7 +24,7 @@ const BARS_PER_SECOND = 10
 const RAW = [
 	{
 		id: 'jordi',
-		tint: { light: '#ffd9b8', base: '#d9774f', deep: '#9c3f2a' },
+		photo: '/lab/voice/jordi.webp',
 		name: 'Jordi',
 		chat: 'Jordi Vidal',
 		received: '9:41',
@@ -30,7 +32,7 @@ const RAW = [
 	},
 	{
 		id: 'marta',
-		tint: { light: '#f1d3ef', base: '#9b6fc4', deep: '#553a8f' },
+		photo: '/lab/voice/marta.webp',
 		name: 'Marta',
 		chat: 'Marta Ruiz',
 		received: '10:02',
@@ -38,7 +40,7 @@ const RAW = [
 	},
 	{
 		id: 'pau',
-		tint: { light: '#d8ecc9', base: '#5c9a82', deep: '#2b5f5c' },
+		photo: '/lab/voice/pau.webp',
 		name: 'Pau',
 		chat: 'Climbing Saturday',
 		received: '10:15',
@@ -46,7 +48,7 @@ const RAW = [
 	},
 	{
 		id: 'lucia',
-		tint: { light: '#d6e6f7', base: '#5f86c4', deep: '#2f4a8a' },
+		photo: '/lab/voice/lucia.webp',
 		name: 'Lucía',
 		chat: 'Family',
 		received: '12:04',

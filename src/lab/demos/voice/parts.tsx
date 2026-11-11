@@ -1,16 +1,8 @@
+import Image from 'next/image'
 import type { Note } from './notes'
 
-// Grain for the faces: fractal noise, greyscale, tiled. Laid over the
-// gradient in overlay, it lifts the lights and sinks the darks a little,
-// like a print rather than a screen.
-const GRAIN = `url("data:image/svg+xml,${encodeURIComponent(
-	"<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='96' height='96' filter='url(%23n)'/></svg>",
-).replace(/%2523/g, '%23')}")`
-
-// Faces are soft, grainy gradients: three tones of one hue, so people tell
-// apart by colour without the row turning into a sweet shop. No initials:
-// in a stack half of each face is under the next, and a clipped letter
-// reads as broken. The name is there the moment the island opens.
+// Faces are portraits. A hairline inside the edge, rather than a border
+// outside it, keeps a light photo from bleeding into the dark island.
 export function Avatar({
 	note,
 	size,
@@ -20,24 +12,20 @@ export function Avatar({
 	size: number
 	className?: string
 }) {
-	const { light, base, deep } = note.tint
 	return (
 		<span
-			aria-hidden='true'
-			className={`relative block shrink-0 overflow-hidden rounded-full ${className}`}
-			style={{
-				width: size,
-				height: size,
-				backgroundColor: base,
-				backgroundImage: `radial-gradient(circle at 28% 22%, ${light} 0%, transparent 62%), radial-gradient(circle at 80% 85%, ${deep} 0%, transparent 60%)`,
-			}}
+			className={`relative block shrink-0 overflow-hidden rounded-full bg-[#2a2a2a] ${className}`}
+			style={{ width: size, height: size }}
 		>
-			<span
-				className='absolute inset-0 opacity-45 mix-blend-overlay'
-				style={{ backgroundImage: GRAIN, backgroundSize: '96px 96px' }}
+			<Image
+				src={note.photo}
+				alt=''
+				width={size}
+				height={size}
+				draggable={false}
+				className='size-full object-cover select-none'
 			/>
-			{/* A hairline inside the edge, instead of a border outside it */}
-			<span className='absolute inset-0 rounded-full shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]' />
+			<span className='absolute inset-0 rounded-full shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]' />
 		</span>
 	)
 }
