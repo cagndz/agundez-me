@@ -36,6 +36,8 @@ export function Avatar({
 				className='absolute inset-0 opacity-45 mix-blend-overlay'
 				style={{ backgroundImage: GRAIN, backgroundSize: '96px 96px' }}
 			/>
+			{/* A hairline inside the edge, instead of a border outside it */}
+			<span className='absolute inset-0 rounded-full shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]' />
 		</span>
 	)
 }

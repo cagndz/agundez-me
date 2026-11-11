@@ -18,6 +18,17 @@ export const FACE = 36
 export const OVERLAP = -12
 export const FAN = 4
 
+// No borders between overlapping faces: each one has a notch cut out where
+// the next sits on it, CUT px wider than that face, so a true gap shows the
+// island through (the way Apple, Vercel and Linear stack avatars). The
+// notch slides out of the way as the stack fans and closes as it stacks.
+export const CUT = 2
+// The ring on whoever is playing: a hairline with its own gap around the
+// face. The faces beside it make room for it.
+export const RING_GAP = 2
+export const RING_WIDTH = 1.5
+export const RING_ROOM = RING_GAP + RING_WIDTH
+
 // The island, open. It keeps the row's corner radius, so idle and open read
 // as one shape that only grew.
 export const WIDTH = 340

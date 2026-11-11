@@ -21,12 +21,16 @@ import {
 	LINE,
 	LINES,
 	MORPH,
+	CUT,
 	FAN,
 	OVERLAP,
 	PAD,
 	PLAY,
 	RADIUS,
 	RING,
+	RING_GAP,
+	RING_ROOM,
+	RING_WIDTH,
 	ROW,
 	SEEK,
 	SHADOW,
@@ -53,6 +57,10 @@ import { Transcript } from './transcript'
 // or Escape, and it pauses and folds back up into the row.
 
 const RATES = [1, 1.5, 2]
+
+// The notch: everything but a circle at (--cut-x, middle) of radius --cut-r
+const NOTCH =
+	'radial-gradient(circle at calc(var(--cut-x) * 1px) 50%, transparent calc(var(--cut-r) * 1px), #000 calc(var(--cut-r) * 1px + 0.5px))'
 
 export function Voice() {
 	const reduceMotion = useReducedMotion()
@@ -108,6 +116,17 @@ export function Voice() {
 		? q.notes.filter((n) => session.includes(n.id))
 		: q.pending
 	const morph = reduceMotion ? INSTANT : MORPH
+
+	// Space before the face at position k in the row: stacked, fanned, or
+	// with room for the ring when the face before it (or it) is playing
+	function gapBefore(k: number) {
+		const base = fanned ? FAN : OVERLAP
+		const isCurrent = (n: (typeof row)[number] | undefined) =>
+			n !== undefined && expanded && q.notes.indexOf(n) === q.index
+		if (isCurrent(row[k - 1])) return Math.max(base, FAN) + RING_ROOM
+		if (fanned && isCurrent(row[k])) return FAN + RING_ROOM
+		return base
+	}
 
 	return (
 		<LayoutGroup id={group}>
@@ -192,14 +211,19 @@ export function Voice() {
 											const current = expanded && index === q.index
 											const heard = q.heard.includes(note.id) && !current
 											const veil = !expanded || current ? 0 : heard ? 0.7 : 0.45
-											// Fanned, every face has room; open, the one after the
-											// one playing does too
-											const before = row[k - 1]
-											const spread =
-												fanned ||
-												(expanded &&
-													before !== undefined &&
-													q.notes.indexOf(before) === q.index)
+											const next = row[k + 1]
+											const nextIsCurrent =
+												next !== undefined &&
+												expanded &&
+												q.notes.indexOf(next) === q.index
+											// The notch the next face cuts into this one, in this
+											// face's own coordinates. No next face: nothing to cut.
+											const cutX =
+												next === undefined
+													? FACE * 4
+													: FACE + gapBefore(k + 1) + FACE / 2
+											const cutR =
+												FACE / 2 + CUT + (nextIsCurrent ? RING_ROOM : 0)
 											return (
 												<motion.button
 													key={note.id}
@@ -220,23 +244,27 @@ export function Voice() {
 													className='group/face relative cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-4'
 													style={{
 														zIndex: k + 1,
-														marginLeft: k === 0 ? 0 : spread ? FAN : OVERLAP,
+														marginLeft: k === 0 ? 0 : gapBefore(k),
 													}}
 												>
-													{/* The cutout: a ring of the island's colour, so each
-													    face reads clean over the one under it */}
-													<Avatar
-														note={note}
-														size={FACE}
-														className='shadow-[0_0_0_2px_var(--color-foreground)]'
-													/>
-													{/* Dimmed with a veil rather than opacity: the faces
-													    overlap, and a see-through face shows the one below */}
-													<span
-														aria-hidden='true'
-														className='pointer-events-none absolute inset-0 rounded-full bg-foreground opacity-(--veil) transition-opacity duration-200 ease-out-strong group-hover/face:opacity-0'
-														style={{ '--veil': veil } as React.CSSProperties}
-													/>
+													<motion.span
+														className='relative block rounded-full'
+														initial={false}
+														animate={{ '--cut-x': cutX, '--cut-r': cutR }}
+														transition={morph}
+														style={{
+															maskImage: NOTCH,
+															WebkitMaskImage: NOTCH,
+														}}
+													>
+														<Avatar note={note} size={FACE} />
+														{/* Dimmed with a veil, lifted on hover */}
+														<span
+															aria-hidden='true'
+															className='pointer-events-none absolute inset-0 rounded-full bg-foreground opacity-(--veil) transition-opacity duration-200 ease-out-strong group-hover/face:opacity-0'
+															style={{ '--veil': veil } as React.CSSProperties}
+														/>
+													</motion.span>
 													{current && (
 														<motion.span
 															layoutId='ring'
@@ -244,7 +272,11 @@ export function Voice() {
 															initial={{ opacity: 0, scale: 0.85 }}
 															animate={{ opacity: 1, scale: 1 }}
 															transition={reduceMotion ? INSTANT : RING}
-															className='pointer-events-none absolute inset-0 rounded-full shadow-[0_0_0_2px_var(--color-foreground),0_0_0_4px_#f4f4f2]'
+															className='pointer-events-none absolute rounded-full border-[#f4f4f2]'
+															style={{
+																inset: -(RING_GAP + RING_WIDTH),
+																borderWidth: RING_WIDTH,
+															}}
 														/>
 													)}
 												</motion.button>
