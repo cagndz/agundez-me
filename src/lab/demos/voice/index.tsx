@@ -402,8 +402,8 @@ export function Voice() {
 											duration={q.current.duration}
 										/>
 									</span>
-									{/* Speed, where a podcast player would put skip: the row
-									    of faces already moves between people */}
+									{/* Speed. Moving between people is the row of faces' job,
+									    so there's no skip here */}
 									<button
 										type='button'
 										onClick={() =>
@@ -475,9 +475,9 @@ function Swap({
 
 /**
  * Time left in the note: its length before it starts, counting down as it
- * plays. One number and no minus sign; the minus is a media player's, where
- * it tells remaining apart from the elapsed time beside it. Rewritten when
- * the shown second changes, not every frame.
+ * plays. One number and no minus sign: with no elapsed time beside it,
+ * there's nothing to tell it apart from. Rewritten when the shown second
+ * changes, not every frame.
  */
 function Remaining({
 	position,
