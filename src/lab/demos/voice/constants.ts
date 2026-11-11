@@ -20,8 +20,8 @@ export const FAN = 4
 
 // No borders between overlapping faces: each one has a notch cut out where
 // the next sits on it, CUT px wider than that face, so a true gap shows the
-// island through (the way Apple, Vercel and Linear stack avatars). The
-// notch slides out of the way as the stack fans and closes as it stacks.
+// island through, whatever is behind. The notch slides out of the way as
+// the stack fans and closes as it stacks.
 export const CUT = 2
 // Who's talking: a small disc of bars at their face's lower right, moving
 // with their voice, with a notch of BADGE_CUT cut around it in the face.
@@ -115,8 +115,13 @@ export const SPAN = 1000
 // The transcript scrolling to keep the line being said in view
 export const SCROLL = { type: 'spring', duration: 0.5, bounce: 0 } as const
 
-// Waveform bars on the scrubber
-export const BARS = 40
+// Waveform bars on the scrubber: 45 bars 2.5px wide across its ~204px,
+// about 2px apart, so a bar is a little wider than its gap. The played
+// part fills them with a hard edge, no fade; since the edge spends
+// more than half its way inside a bar rather than in a gap, you see it
+// fill instead of stepping. Wider or denser and it reads as a block.
+export const BARS = 45
+export const BAR_WIDTH = 2.5
 
 // Arrow keys on the scrubber move this many seconds
 export const KEY_STEP = 2

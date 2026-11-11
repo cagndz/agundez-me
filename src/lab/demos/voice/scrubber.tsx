@@ -3,13 +3,14 @@
 import { useRef } from 'react'
 import { motion, useTransform, type MotionValue } from 'motion/react'
 import { useSeconds } from './clock'
-import { BARS, KEY_STEP, SPAN } from './constants'
+import { BAR_WIDTH, BARS, KEY_STEP, SPAN } from './constants'
 import { formatTime, resample, type Note } from './notes'
 
 // The note's waveform, to scrub. The played part is a second copy of the
-// bars clipped to the playhead, so it moves smoothly between bars and a
-// tap glides there on the playhead's spring. A drag follows the finger
-// with no spring at all: `draggingRef` tells the island to jump instead.
+// bars clipped to the playhead: a hard edge, no fade, filling the bars as
+// it goes (see BARS for why it doesn't step). A tap glides there on the
+// playhead's spring. A drag follows the finger with no spring at all:
+// `draggingRef` tells the island to jump instead.
 
 const HEIGHT = 24
 // Past this many pixels a press becomes a drag
@@ -52,8 +53,11 @@ export function Scrubber({
 			{bars.map((b, i) => (
 				<span
 					key={i}
-					className={`w-0.5 rounded-full ${className}`}
-					style={{ height: Math.max(2, Math.round(b * HEIGHT)) }}
+					className={`rounded-full ${className}`}
+					style={{
+						width: BAR_WIDTH,
+						height: Math.max(BAR_WIDTH, Math.round(b * HEIGHT)),
+					}}
 				/>
 			))}
 		</span>
