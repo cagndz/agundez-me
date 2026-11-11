@@ -11,8 +11,8 @@ export type Note = {
 	received: string
 	// A portrait in public/lab/voice: Unsplash photos (free under the
 	// Unsplash License), cropped to the face at 192px. Sources, by id:
-	// jordi 1599566150163-29194dcaad36 · marta 1494790108377-be9c29b29330
-	// pau 1527980965255-d3b416303d12 · lucia 1548382131-e0ebb1f0cdea
+	// jordi 1599566150163-29194dcaad36 · pau 1527980965255-d3b416303d12
+	// lucia 1548382131-e0ebb1f0cdea
 	photo: string
 	words: Word[]
 	duration: number // seconds
@@ -29,14 +29,6 @@ const RAW = [
 		chat: 'Jordi Vidal',
 		received: '9:41',
 		text: 'Hey! The client loved the second option. They only want the logo a bit bigger, and the green slightly warmer. Can you send it by Friday?',
-	},
-	{
-		id: 'marta',
-		photo: '/lab/voice/marta.webp',
-		name: 'Marta',
-		chat: 'Marta Ruiz',
-		received: '10:02',
-		text: 'Okay, so I talked to the venue. We can have the terrace until midnight, but they need the final number of guests by Thursday.',
 	},
 	{
 		id: 'pau',
