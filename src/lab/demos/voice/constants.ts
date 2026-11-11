@@ -23,11 +23,15 @@ export const FAN = 4
 // island through (the way Apple, Vercel and Linear stack avatars). The
 // notch slides out of the way as the stack fans and closes as it stacks.
 export const CUT = 2
-// The ring on whoever is playing: a hairline with its own gap around the
-// face. The faces beside it make room for it.
-export const RING_GAP = 2
-export const RING_WIDTH = 1.5
-export const RING_ROOM = RING_GAP + RING_WIDTH
+// Who's talking: a small disc of bars at their face's lower right, moving
+// with their voice, with a notch of BADGE_CUT cut around it in the face.
+// It sticks out past the face, so the face after makes BADGE_ROOM for it.
+export const BADGE = 16
+export const BADGE_AT = FACE - 5 // its centre, from the face's top left
+export const BADGE_CUT = BADGE / 2 + 2
+export const BADGE_ROOM = 4
+// The voice level the bars follow: quick to rise, no wobble
+export const LEVEL = { stiffness: 600, damping: 40 }
 
 // The island, open. It keeps the row's corner radius, so idle and open read
 // as one shape that only grew.
@@ -76,7 +80,7 @@ export const PRESS = 0.97
 // Faces arrive from, and leave to, nearly full size: nothing appears out
 // of nothing
 export const FACE_FROM = 0.9
-export const RING_FROM = 0.95
+export const BADGE_FROM = 0.95
 
 // The play/pause icon and "All caught up" cross-fading in, with a touch of
 // scale and blur so the two states read as one changing into the other
@@ -85,8 +89,12 @@ export const CROSSFADE = { duration: 0.15, ease: EASE_OUT } as const
 // Faces dimming and coming and going in the row
 export const FADE = { duration: 0.2, ease: EASE_OUT } as const
 
-// The ring on whoever is playing, sliding along the row
-export const RING = { type: 'spring', duration: 0.36, bounce: 0.15 } as const
+// The badge sliding along the row to whoever plays next
+export const BADGE_SLIDE = {
+	type: 'spring',
+	duration: 0.36,
+	bounce: 0.15,
+} as const
 
 // One person handing over to the next. The new one comes in from their
 // side of the row: from the right for the next, from the left going back.

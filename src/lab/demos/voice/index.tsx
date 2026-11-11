@@ -24,6 +24,9 @@ import {
 	LINE,
 	LINES,
 	MORPH,
+	BADGE_AT,
+	BADGE_CUT,
+	BADGE_ROOM,
 	CROSSFADE,
 	CUT,
 	FAN,
@@ -33,11 +36,6 @@ import {
 	PRESS,
 	REDUCED,
 	RADIUS,
-	RING,
-	RING_FROM,
-	RING_GAP,
-	RING_ROOM,
-	RING_WIDTH,
 	ROW,
 	SEEK,
 	SHADOW,
@@ -54,6 +52,7 @@ import { formatTime } from './notes'
 import { Avatar, CheckIcon, NextIcon, PauseIcon, PlayIcon } from './parts'
 import { Scrubber } from './scrubber'
 import { Transcript } from './transcript'
+import { VoiceBadge } from './indicator'
 
 // Voice notes from every chat, stacked in one island instead of scattered
 // across conversations. Idle, it's a play button and the faces waiting.
@@ -68,6 +67,10 @@ const RATES = [1, 1.5, 2]
 // The notch: everything but a circle at (--cut-x, middle) of radius --cut-r
 const NOTCH =
 	'radial-gradient(circle at calc(var(--cut-x) * 1px) 50%, transparent calc(var(--cut-r) * 1px), #000 calc(var(--cut-r) * 1px + 0.5px))'
+// And the badge's: a circle of --hole px around where the badge sits. The
+// two masks intersect, so the face keeps only what both leave.
+const HOLE = `radial-gradient(circle at ${BADGE_AT}px ${BADGE_AT}px, transparent calc(var(--hole) * 1px), #000 calc(var(--hole) * 1px + 0.5px))`
+const MASK = `${NOTCH}, ${HOLE}`
 
 export function Voice() {
 	const reduceMotion = useReducedMotion()
@@ -136,8 +139,7 @@ export function Voice() {
 		const base = spread ? FAN : OVERLAP
 		const isCurrent = (n: (typeof row)[number] | undefined) =>
 			n !== undefined && expanded && q.notes.indexOf(n) === q.index
-		if (isCurrent(row[k - 1])) return Math.max(base, FAN) + RING_ROOM
-		if (spread && isCurrent(row[k])) return FAN + RING_ROOM
+		if (isCurrent(row[k - 1])) return Math.max(base, FAN) + BADGE_ROOM
 		return base
 	}
 
@@ -248,18 +250,13 @@ export function Voice() {
 											const heard = q.heard.includes(note.id) && !current
 											const veil = !expanded || current ? 0 : heard ? 0.7 : 0.45
 											const next = row[k + 1]
-											const nextIsCurrent =
-												next !== undefined &&
-												expanded &&
-												q.notes.indexOf(next) === q.index
 											// The notch the next face cuts into this one, in this
 											// face's own coordinates. No next face: nothing to cut.
 											const cutX =
 												next === undefined
 													? FACE * 4
 													: FACE + gapBefore(k + 1) + FACE / 2
-											const cutR =
-												FACE / 2 + CUT + (nextIsCurrent ? RING_ROOM : 0)
+											const cutR = FACE / 2 + CUT
 											return (
 												<motion.button
 													key={note.id}
@@ -292,11 +289,17 @@ export function Voice() {
 													<motion.span
 														className='relative block rounded-full'
 														initial={false}
-														animate={{ '--cut-x': cutX, '--cut-r': cutR }}
+														animate={{
+															'--cut-x': cutX,
+															'--cut-r': cutR,
+															'--hole': current ? BADGE_CUT : 0,
+														}}
 														transition={morph}
 														style={{
-															maskImage: NOTCH,
-															WebkitMaskImage: NOTCH,
+															maskImage: MASK,
+															WebkitMaskImage: MASK,
+															maskComposite: 'intersect',
+															WebkitMaskComposite: 'source-in',
 														}}
 													>
 														<Avatar note={note} size={FACE} />
@@ -308,24 +311,11 @@ export function Voice() {
 														/>
 													</motion.span>
 													{current && (
-														<motion.span
-															layoutId='ring'
-															aria-hidden='true'
-															initial={{
-																opacity: 0,
-																scale: reduceMotion ? 1 : RING_FROM,
-															}}
-															animate={{ opacity: 1, scale: 1 }}
-															transition={
-																reduceMotion
-																	? { layout: INSTANT, default: REDUCED }
-																	: RING
-															}
-															className='pointer-events-none absolute rounded-full border-[#f4f4f2]'
-															style={{
-																inset: -(RING_GAP + RING_WIDTH),
-																borderWidth: RING_WIDTH,
-															}}
+														<VoiceBadge
+															note={note}
+															position={q.position}
+															offset={offset}
+															playing={q.playing}
 														/>
 													)}
 												</motion.button>

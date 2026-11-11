@@ -47,7 +47,7 @@ import {
 } from './demos/hold/constants'
 import {
 	MORPH,
-	RING,
+	BADGE_SLIDE,
 	SEEK,
 	SIZE as VOICE_SIZE,
 	SWAP_IN,
@@ -239,7 +239,7 @@ export const items: LabItem[] = [
 		curves: [
 			{ label: 'Morph', transition: MORPH },
 			{ label: 'Swap', transition: SWAP_IN },
-			{ label: 'Ring', transition: RING },
+			{ label: 'Badge', transition: BADGE_SLIDE },
 			{ label: 'Seek', transition: SEEK },
 		],
 		specs: [
